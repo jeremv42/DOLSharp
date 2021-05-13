@@ -184,6 +184,8 @@ namespace DOL.Config
 							var isNotSingleTag = !reader.IsEmptyElement;
 							if (isNotSingleTag) current = newElement;
 						}
+						if (reader.IsEmptyElement)
+							current = current.Parent;
 					}
 					else if (reader.NodeType == XmlNodeType.Text)
 					{
@@ -197,6 +199,8 @@ namespace DOL.Config
 						}
 					}
 				}
+				if (!reader.EOF)
+					throw new Exception("Can't load the whole serverconfig.xml");
 			}
 
 			return root;
