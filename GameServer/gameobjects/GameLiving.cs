@@ -5499,7 +5499,7 @@ namespace DOL.GS
 			}
 		}
 
-		public virtual byte ManaPercent
+		public byte ManaPercent
 		{
 			get
 			{
@@ -5529,7 +5529,7 @@ namespace DOL.GS
 		/// </summary>
 		public virtual int MaxEndurance
 		{
-			get { return m_maxEndurance; }
+			get { return GetModified(eProperty.Fatigue); }
 			set
 			{
 				m_maxEndurance = value;
@@ -5540,7 +5540,7 @@ namespace DOL.GS
 		/// <summary>
 		/// Gets the endurance in percent of maximum
 		/// </summary>
-		public virtual byte EndurancePercent
+		public byte EndurancePercent
 		{
 			get
 			{
@@ -5553,7 +5553,7 @@ namespace DOL.GS
 		/// </summary>
 		public virtual int Concentration
 		{
-			get { return 0; }
+			get { return MaxConcentration - ConcentrationEffects.UsedConcentration; }
 		}
 
 		/// <summary>
@@ -5561,13 +5561,13 @@ namespace DOL.GS
 		/// </summary>
 		public virtual int MaxConcentration
 		{
-			get { return 0; }
+			get { return GetModified(eProperty.MaxConcentration); }
 		}
 
 		/// <summary>
 		/// Gets the concentration in percent of maximum
 		/// </summary>
-		public virtual byte ConcentrationPercent
+		public byte ConcentrationPercent
 		{
 			get
 			{
