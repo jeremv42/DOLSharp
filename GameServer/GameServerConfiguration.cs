@@ -239,6 +239,8 @@ namespace DOL.GS
 			{
 				m_udpOutEndpoint = new IPEndPoint(address, port);
 			}
+
+			PathingNodeIp = root["Server"]["PathingIp"].GetString("localhost");
 		}
 
 		/// <summary>
@@ -428,9 +430,11 @@ namespace DOL.GS
 			{
 				return new string[] { "System.dll", "System.Xml.dll" }
 					.Union(new DirectoryInfo(Path.Combine(RootDirectory, "lib"))
-					.EnumerateFiles("*.dll", SearchOption.TopDirectoryOnly)
-					.Select(f => f.Name).Where(f => !f.Equals(new FileInfo(ScriptCompilationTarget).Name, StringComparison.OrdinalIgnoreCase)))
-					.Union(AdditionalScriptAssemblies)
+						.EnumerateFiles("*.dll", SearchOption.TopDirectoryOnly)
+						.Select(f => f.Name)
+						.Where(f => !f.EndsWith(".x64.dll") && !f.EndsWith(".x86.dll")) // hack to bypass grpc native dll
+						.Where(f => !f.Equals(new FileInfo(ScriptCompilationTarget).Name, StringComparison.OrdinalIgnoreCase)))
+						.Union(AdditionalScriptAssemblies)
 					.ToArray();
 			}
 		}
@@ -590,5 +594,7 @@ namespace DOL.GS
 			get { return m_cpuUse; }
 			set { m_cpuUse = value; }
 		}
+
+		public string PathingNodeIp { get; set; }
 	}
 }

@@ -58,6 +58,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Net.Http" />
+    <PackageReference Include="CuttingEdge.Conditions" Version="1.2.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.17.2" />
+    <PackageReference Include="Grpc" Version="2.38.0" />
     <PackageReference Include="System.Resources.Extensions" Version="6.0.0" PrivateAssets="False" />
     <PackageReference Include="log4net" Version="2.0.13" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="2.0.226801" />
