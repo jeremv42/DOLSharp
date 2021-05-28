@@ -53,7 +53,7 @@ namespace DOL.AI.Brain
 		{
 			ushort TargetAngle = (ushort)((Body.GetHeading(target) + 2048) % 4096);
 
-            var fleePoint = Body.GetPointFromHeading(TargetAngle, 300);
+			var fleePoint = Body.GetPointFromHeading(TargetAngle, 300);
 			var point = await PathingMgr.Instance.GetClosestPointAsync(Body.CurrentZone, new Vector3(fleePoint, Body.Position.Z), 128, 128, 256);
 			Body.StopFollowing();
 			Body.StopAttack();

@@ -1252,6 +1252,11 @@ namespace DOL.GS
             return null;
         }
 
+        public Zone GetZone(System.Numerics.Vector3 pos)
+        {
+            return this.GetZone((int)pos.X, (int)pos.Y);
+        }
+
         /// <summary>
         /// Gets the X offset for the specified zone
         /// </summary>

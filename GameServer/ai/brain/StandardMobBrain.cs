@@ -134,14 +134,14 @@ namespace DOL.AI.Brain
 				if (Util.IsNearDistance(target, Body.Position, GameNPC.CONST_WALKTOTOLERANCE))
 				{
 					Body.TurnTo(target.X, target.Y);
-					}
-					else
-					{
-						Body.PathTo(target, 50);
-					}
-
-					Body.FireAmbientSentence(GameNPC.eAmbientTrigger.roaming);
 				}
+				else
+				{
+					Body.PathTo(target, 50);
+				}
+
+				Body.FireAmbientSentence(GameNPC.eAmbientTrigger.roaming);
+			}
 			//If the npc can move, and the npc is not casting, not moving, and not attacking or in combat
 			else if (Body.MaxSpeedBase > 0 && Body.CurrentSpellHandler == null && !Body.IsMoving && !Body.AttackState && !Body.InCombat && !Body.IsMovingOnPath)
 			{
