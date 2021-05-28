@@ -8,3 +8,5 @@
 /NetCore/Debug
 /NetCore/Release
 **/*.csproj.user
+
+/Pathing_native/Detour/out
