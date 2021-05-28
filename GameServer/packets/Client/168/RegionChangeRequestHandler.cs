@@ -73,7 +73,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 				ChatUtil.SendDebugMessage(client, $"Invalid Jump (ZonePoint table): [{jumpSpotId}]{((zonePoint == null) ? ". Entry missing!" : ". TargetRegion is 0!")}");
 				zonePoint = new ZonePoint();
 				zonePoint.Id = jumpSpotId;
-				string zonePointLocation = $"Region {player.CurrentRegionID} and coordinates ({player.X},{player.Y},{player.Z})";
+				string zonePointLocation = $"Region {player.CurrentRegionID} and coordinates ({player.Position})";
 				Log.Error($"ZonePoint {jumpSpotId} at {zonePointLocation} on client {client.Version} missing. Either ZonePoint missing or RegionChangeRequestHandler needs to be updated.");
 			}
 

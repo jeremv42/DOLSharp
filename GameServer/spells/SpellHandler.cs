@@ -33,6 +33,7 @@ using DOL.GS.Utils;
 using DOL.Language;
 
 using log4net;
+using System.Numerics;
 
 namespace DOL.GS.Spells
 {
@@ -749,7 +750,7 @@ namespace DOL.GS.Spells
 			}
 			if (targetType == "area")
 			{
-				if (!m_caster.IsWithinRadius(m_caster.GroundTarget, CalculateSpellRange()))
+				if (!m_caster.IsWithinRadius(m_caster.GroundTarget.Value, CalculateSpellRange()))
 				{
 					if (!quiet) MessageToCaster("Your area target is out of range.  Select a closer target.", eChatType.CT_SpellResisted);
 					return false;
@@ -1015,7 +1016,7 @@ namespace DOL.GS.Spells
 
 			if (m_spell.Target.ToLower() == "area")
 			{
-				if (!m_caster.IsWithinRadius(m_caster.GroundTarget, CalculateSpellRange()))
+				if (!m_caster.IsWithinRadius(m_caster.GroundTarget.Value, CalculateSpellRange()))
 				{
 					MessageToCaster("Your area target is out of range.  Select a closer target.", eChatType.CT_SpellResisted);
 					return false;
@@ -1185,7 +1186,7 @@ namespace DOL.GS.Spells
 
 			if (m_spell.Target.ToLower() == "area")
 			{
-				if (!m_caster.IsWithinRadius(m_caster.GroundTarget, CalculateSpellRange()))
+				if (!m_caster.IsWithinRadius(m_caster.GroundTarget.Value, CalculateSpellRange()))
 				{
 					if (!quiet) MessageToCaster("Your area target is out of range.  Select a closer target.", eChatType.CT_SpellResisted);
 					return false;
@@ -1390,7 +1391,7 @@ namespace DOL.GS.Spells
 
 			if (m_spell.Target.ToLower() == "area")
 			{
-				if (!m_caster.IsWithinRadius(m_caster.GroundTarget, CalculateSpellRange()))
+				if (!m_caster.IsWithinRadius(m_caster.GroundTarget.Value, CalculateSpellRange()))
 				{
 					if (!quiet) MessageToCaster("Your area target is out of range.  Select a closer target.", eChatType.CT_SpellResisted);
 					return false;
@@ -2049,7 +2050,7 @@ namespace DOL.GS.Spells
 					else
 						if (modifiedRadius > 0)
 					{
-						foreach (GamePlayer player in WorldMgr.GetPlayersCloseToSpot(Caster.CurrentRegionID, Caster.GroundTarget.X, Caster.GroundTarget.Y, Caster.GroundTarget.Z, modifiedRadius))
+						foreach (GamePlayer player in WorldMgr.GetPlayersCloseToSpot(Caster.CurrentRegionID, Caster.GroundTarget.Value, modifiedRadius))
 						{
 							if (GameServer.ServerRules.IsAllowedToAttack(Caster, player, true))
 							{
@@ -2067,7 +2068,7 @@ namespace DOL.GS.Spells
 								else list.Add(player);
 							}
 						}
-						foreach (GameNPC npc in WorldMgr.GetNPCsCloseToSpot(Caster.CurrentRegionID, Caster.GroundTarget.X, Caster.GroundTarget.Y, Caster.GroundTarget.Z, modifiedRadius))
+						foreach (GameNPC npc in WorldMgr.GetNPCsCloseToSpot(Caster.CurrentRegionID, Caster.GroundTarget.Value, modifiedRadius))
 						{
 							if (npc is GameStorm)
 								list.Add(npc);
@@ -2514,20 +2515,20 @@ namespace DOL.GS.Spells
 				}
 				else if (Spell.Target.ToLower() == "area")
 				{
-					int dist = t.GetDistanceTo(Caster.GroundTarget);
+					var dist = Vector3.Distance(t.Position, Caster.GroundTarget.Value);
 					if (dist >= 0)
 						ApplyEffectOnTarget(t, (effectiveness - CalculateAreaVariance(t, dist, Spell.Radius)));
 				}
 				else if (Spell.Target.ToLower() == "cone")
 				{
-					int dist = t.GetDistanceTo(Caster);
+					var dist = Vector3.Distance(t.Position, Caster.Position);
 					//Cone spells use the range for their variance!
 					if (dist >= 0)
 						ApplyEffectOnTarget(t, (effectiveness - CalculateAreaVariance(t, dist, Spell.Range)));
 				}
 				else
 				{
-					int dist = t.GetDistanceTo(target);
+					var dist = Vector3.Distance(t.Position, target.Position);
 					if (dist >= 0)
 						ApplyEffectOnTarget(t, (effectiveness - CalculateAreaVariance(t, dist, Spell.Radius)));
 				}
@@ -2550,7 +2551,7 @@ namespace DOL.GS.Spells
 		/// <param name="distance">The distance away from center of the spell</param>
 		/// <param name="radius">The radius of the spell</param>
 		/// <returns></returns>
-		protected virtual double CalculateAreaVariance(GameLiving target, int distance, int radius)
+		protected virtual double CalculateAreaVariance(GameLiving target, float distance, int radius)
 		{
 			return ((double)distance / (double)radius);
 		}

@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.IO;
+using System.Numerics;
 using System.Reflection;
 
 using DOL.Database;
@@ -183,9 +184,9 @@ namespace DOL.GS.PacketHandler
 				pak.WriteShort((ushort)npc.ObjectID);
 				pak.WriteShort((ushort)(speed));
 				pak.WriteShort(npc.Heading);
-				pak.WriteShort((ushort)npc.Z);
-				pak.WriteInt((uint)npc.X);
-				pak.WriteInt((uint)npc.Y);
+				pak.WriteShort((ushort)npc.Position.Z);
+				pak.WriteInt((uint)npc.Position.X);
+				pak.WriteInt((uint)npc.Position.Y);
 				pak.WriteShort(speedZ);
 				pak.WriteShort(npc.Model);
 				pak.WriteByte(npc.Size);
@@ -319,9 +320,9 @@ namespace DOL.GS.PacketHandler
 
 			using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.PlayerCreate172)))
 			{
-				pak.WriteFloatLowEndian(playerToCreate.X);
-				pak.WriteFloatLowEndian(playerToCreate.Y);
-				pak.WriteFloatLowEndian(playerToCreate.Z);
+				pak.WriteFloatLowEndian(playerToCreate.Position.X);
+				pak.WriteFloatLowEndian(playerToCreate.Position.Y);
+				pak.WriteFloatLowEndian(playerToCreate.Position.Z);
 				pak.WriteShort((ushort)playerToCreate.Client.SessionID);
 				pak.WriteShort((ushort)playerToCreate.ObjectID);
 				pak.WriteShort(playerToCreate.Heading);
@@ -401,9 +402,9 @@ namespace DOL.GS.PacketHandler
 
 			using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.PositionAndObjectID)))
 			{
-				pak.WriteFloatLowEndian(m_gameClient.Player.X);
-				pak.WriteFloatLowEndian(m_gameClient.Player.Y);
-				pak.WriteFloatLowEndian(m_gameClient.Player.Z);
+				pak.WriteFloatLowEndian(m_gameClient.Player.Position.X);
+				pak.WriteFloatLowEndian(m_gameClient.Player.Position.Y);
+				pak.WriteFloatLowEndian(m_gameClient.Player.Position.Z);
 				pak.WriteShort((ushort)m_gameClient.Player.ObjectID); //This is the player's objectid not Sessionid!!!
 				pak.WriteShort(m_gameClient.Player.Heading);
 
@@ -587,21 +588,10 @@ namespace DOL.GS.PacketHandler
 			using (var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.SiegeWeaponAnimation)))
 			{
 				pak.WriteInt((uint)siegeWeapon.ObjectID);
-				pak.WriteInt(
-					(uint)
-					(siegeWeapon.TargetObject == null
-					 ? (siegeWeapon.GroundTarget == null ? 0 : siegeWeapon.GroundTarget.X)
-					 : siegeWeapon.TargetObject.X));
-				pak.WriteInt(
-					(uint)
-					(siegeWeapon.TargetObject == null
-					 ? (siegeWeapon.GroundTarget == null ? 0 : siegeWeapon.GroundTarget.Y)
-					 : siegeWeapon.TargetObject.Y));
-				pak.WriteInt(
-					(uint)
-					(siegeWeapon.TargetObject == null
-					 ? (siegeWeapon.GroundTarget == null ? 0 : siegeWeapon.GroundTarget.Z)
-					 : siegeWeapon.TargetObject.Z));
+				var pos = siegeWeapon.GroundTarget ?? siegeWeapon.TargetObject?.Position ?? Vector3.Zero;
+				pak.WriteInt((uint)pos.X);
+				pak.WriteInt((uint)pos.Y);
+				pak.WriteInt((uint)pos.Z);
 				pak.WriteInt((uint)(siegeWeapon.TargetObject == null ? 0 : siegeWeapon.TargetObject.ObjectID));
 				pak.WriteShort(siegeWeapon.Effect);
 				pak.WriteShort((ushort)(siegeWeapon.SiegeWeaponTimer.TimeUntilElapsed));
@@ -793,8 +783,8 @@ namespace DOL.GS.PacketHandler
 				pak.WriteByte((byte)(0x40 | living.GroupIndex));
 				//Dinberg - ZoneSkinID for group members aswell.
 				pak.WriteShort(zone.ZoneSkinID);
-				pak.WriteShort((ushort)(living.X - zone.XOffset));
-				pak.WriteShort((ushort)(living.Y - zone.YOffset));
+				pak.WriteShort((ushort)(living.Position.X - zone.XOffset));
+				pak.WriteShort((ushort)(living.Position.Y - zone.YOffset));
 			}
 		}
 

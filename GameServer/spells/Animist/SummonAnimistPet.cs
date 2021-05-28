@@ -19,6 +19,7 @@
 using DOL.AI.Brain;
 using DOL.GS.PacketHandler;
 using DOL.Language;
+using System.Numerics;
 
 namespace DOL.GS.Spells
 {
@@ -43,7 +44,7 @@ namespace DOL.GS.Spells
                 return false;
 			}
 
-			if (!Caster.IsWithinRadius(Caster.GroundTarget, CalculateSpellRange()))
+			if (!Caster.IsWithinRadius(Caster.GroundTarget.Value, CalculateSpellRange()))
 			{
                 if (Caster is GamePlayer)
                     MessageToCaster(LanguageMgr.GetTranslation((Caster as GamePlayer).Client, "SummonAnimistPet.CheckBeginCast.GroundTargetNotInSpellRange"), eChatType.CT_SpellResisted);
@@ -75,7 +76,7 @@ namespace DOL.GS.Spells
 				return;
 			}
 
-			if (!Caster.IsWithinRadius(Caster.GroundTarget, CalculateSpellRange()))
+			if (!Caster.IsWithinRadius(Caster.GroundTarget.Value, CalculateSpellRange()))
 			{
                 if (Caster is GamePlayer)
                     MessageToCaster(LanguageMgr.GetTranslation((Caster as GamePlayer).Client, "SummonAnimistPet.CheckBeginCast.GroundTargetNotInSpellRange"), eChatType.CT_SpellResisted);
@@ -111,11 +112,9 @@ namespace DOL.GS.Spells
 			return new TurretBrain(owner);
 		}
 
-		protected override void GetPetLocation(out int x, out int y, out int z, out ushort heading, out Region region)
+		protected override void GetPetLocation(out Vector3 pos, out ushort heading, out Region region)
 		{
-			x = Caster.GroundTarget.X;
-			y = Caster.GroundTarget.Y;
-			z = Caster.GroundTarget.Z;
+			pos = Caster.GroundTarget.Value;
 			heading = Caster.Heading;
 			region = Caster.CurrentRegion;
 		}

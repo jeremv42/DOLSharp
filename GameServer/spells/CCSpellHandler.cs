@@ -190,7 +190,7 @@ namespace DOL.GS.Spells
 			base.OnEffectStart(effect);
 		}
 
-		protected override double CalculateAreaVariance(GameLiving target, int distance, int radius)
+		protected override double CalculateAreaVariance(GameLiving target, float distance, int radius)
 		{
 			if (target is GamePlayer || (target is GameNPC && (target as GameNPC).Brain is IControlledBrain))
 			{
@@ -414,7 +414,7 @@ namespace DOL.GS.Spells
 			else return new GameSpellAndImmunityEffect(this, CalculateEffectDuration(target, effectiveness), 0, effectiveness);
 		}
 
-		protected override double CalculateAreaVariance(GameLiving target, int distance, int radius)
+		protected override double CalculateAreaVariance(GameLiving target, float distance, int radius)
 		{
 			if (target is GamePlayer || (target is GameNPC && (target as GameNPC).Brain is IControlledBrain))
 			{
