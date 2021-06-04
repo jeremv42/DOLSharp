@@ -75,6 +75,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.13" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <ProjectReference Include="..\DOLBase\DOLBase.csproj" Name="DOLBase" Private="False" />
     <ProjectReference Include="..\DOLDatabase\DOLDatabase.csproj" Name="DOLDatabase" Private="False" />
     <ProjectReference Include="..\GameServer\GameServer.csproj" Name="GameServer" Private="False" />
