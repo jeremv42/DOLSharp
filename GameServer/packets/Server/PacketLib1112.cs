@@ -368,7 +368,7 @@ namespace DOL.GS.PacketHandler
 		}
 
 
-		protected override void WriteItemData(GSTCPPacketOut pak, InventoryItem item)
+		protected override void WriteItemData(GSTCPPacketOut pak, InventoryItem item, ushort itemId = 0)
 		{
 			if (item == null)
 			{

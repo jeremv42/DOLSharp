@@ -38,14 +38,14 @@ namespace DOL.GS.PacketHandler
 		/// <summary>
 		/// New item data packet for 1.119
 		/// </summary>		
-		protected override void WriteItemData(GSTCPPacketOut pak, InventoryItem item)
+		protected override void WriteItemData(GSTCPPacketOut pak, InventoryItem item, ushort itemId = 0)
 		{
 			if (item == null)
 			{
 				pak.Fill(0x00, 24); // +1 byte: item.Effect changed to short
 				return;
 			}
-			pak.WriteShort((ushort)0); // item uniqueID
+			pak.WriteShort(itemId); // item uniqueID
 			pak.WriteByte((byte)item.Level);
 
 			int value1; // some object types use this field to display count

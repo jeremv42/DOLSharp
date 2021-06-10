@@ -221,7 +221,7 @@ namespace DOL.GS.PacketHandler
 
 		protected static int MAX_NAME_LENGTH = 55;
 
-		protected virtual void WriteItemData(GSTCPPacketOut pak, InventoryItem item)
+		protected virtual void WriteItemData(GSTCPPacketOut pak, InventoryItem item, ushort itemId = 0)
 		{
 			if (item == null)
 			{

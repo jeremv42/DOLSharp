@@ -92,7 +92,7 @@ namespace DOL.GS.PacketHandler
 		/// </summary>
 		/// <param name="pak"></param>
 		/// <param name="item"></param>
-		protected override void WriteItemData(GSTCPPacketOut pak, InventoryItem item)
+		protected override void WriteItemData(GSTCPPacketOut pak, InventoryItem item, ushort itemId = 0)
 		{
 			if (item == null)
 			{
@@ -101,7 +101,7 @@ namespace DOL.GS.PacketHandler
 			}
 
 			// Unknown
-			pak.WriteShort((ushort)0);
+			pak.WriteShort(itemId);
 			base.WriteItemData(pak, item);
 		}
 		

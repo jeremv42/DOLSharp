@@ -480,6 +480,9 @@ namespace DOL.GS.PacketHandler
 					SendQuestPacket((quest.Step == 0 || quest == null) ? null : quest, questIndex++);
 				}
 			}
+
+			while (questIndex <= 25)
+				SendQuestPacket(null, questIndex++);
 		}
 
 		public override void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, DataQuest quest)
@@ -646,26 +649,30 @@ namespace DOL.GS.PacketHandler
 				pak.WriteInt((uint)(quest.FinalRewards.Money)); // unknown, new in 1.94
 				pak.WriteByte((byte)GamePlayerUtils.GetExperiencePercentForCurrentLevel(player, quest.FinalRewards.Experience));
 				pak.WriteByte((byte)quest.FinalRewards.BasicItems.Count);
+				var rewardIdx = 0;
 				foreach (ItemTemplate reward in quest.FinalRewards.BasicItems)
 				{
-					WriteItemData(pak, GameInventoryItem.Create(reward));
+					WriteItemData(pak, GameInventoryItem.Create(reward), (ushort)(quest.QuestId * 16 + rewardIdx));
+					rewardIdx += 1;
 				}
 				pak.WriteByte((byte)quest.FinalRewards.ChoiceOf);
 				pak.WriteByte((byte)quest.FinalRewards.OptionalItems.Count);
+				var rewardOptionalIdx = 8;
 				foreach (ItemTemplate reward in quest.FinalRewards.OptionalItems)
 				{
-					WriteItemData(pak, GameInventoryItem.Create(reward));
+					WriteItemData(pak, GameInventoryItem.Create(reward), (ushort)(quest.QuestId * 16 + rewardOptionalIdx));
+					rewardOptionalIdx += 1;
 				}
 				SendTCP(pak);
 			}
 		}
 		protected override void SendQuestPacket(AbstractQuest q, int index)
 		{
-			if (q == null)
+			using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.QuestEntry)))
 			{
-				using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.QuestEntry)))
+				pak.WriteByte((byte) index);
+				if (q == null)
 				{
-					pak.WriteByte((byte)index);
 					pak.WriteByte(0);
 					pak.WriteByte(0);
 					pak.WriteByte(0);
@@ -674,84 +681,59 @@ namespace DOL.GS.PacketHandler
 					SendTCP(pak);
 					return;
 				}
-			}
-			else if (q is IQuestData data)
-			{
-				using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.QuestEntry)))
+
+				var name = $"{q.Name} (Level {q.Level})";
+				if (name.Length > byte.MaxValue)
+					name = name.Substring(0, 256);
+
+				if (q is IQuestData data)
 				{
-					var name = $"{data.Name} (Level {data.Level})";
-					if (name.Length > byte.MaxValue)
-						name = name.Substring(0, 256);
-					pak.WriteByte((byte)index);
-					pak.WriteByte((byte)name.Length);
-					pak.WriteShort((ushort)data.Status);
-					pak.WriteByte((byte)data.VisibleGoals.Count);
-					pak.WriteByte((byte)data.Level);
+					pak.WriteByte((byte) name.Length);
+					pak.WriteShort((ushort) data.Status);
+					pak.WriteByte((byte) data.VisibleGoals.Count);
+					pak.WriteByte((byte) data.Level);
 					pak.WriteStringBytes(name);
 					pak.WritePascalString(data.Description);
 					for (var idx = 0; idx < data.VisibleGoals.Count; ++idx)
 					{
 						var goal = data.VisibleGoals[idx];
 						var desc = $"{goal.Description} ({goal.Progress} / {goal.ProgressTotal})\r";
-						pak.WriteShortLowEndian((ushort)desc.Length);
+						pak.WriteShortLowEndian((ushort) desc.Length);
 						pak.WriteStringBytes(desc);
 						pak.WriteShortLowEndian(goal.PointA.ZoneId);
 						pak.WriteShortLowEndian(goal.PointA.X);
 						pak.WriteShortLowEndian(goal.PointA.Y);
 						pak.WriteShortLowEndian(0x00); // unknown
-						pak.WriteShortLowEndian((ushort)goal.Type);
+						pak.WriteShortLowEndian((ushort) goal.Type);
 						pak.WriteShortLowEndian(0x00); // unknown
 						pak.WriteShortLowEndian(goal.PointB.ZoneId);
 						pak.WriteShortLowEndian(goal.PointB.X);
 						pak.WriteShortLowEndian(goal.PointB.Y);
-						pak.WriteByte((byte)goal.Status);
+						pak.WriteByte((byte) goal.Status);
 						if (goal.QuestItem == null)
 						{
 							pak.WriteByte(0x00);
 						}
 						else
 						{
-							pak.WriteByte((byte)idx);
+							pak.WriteByte((byte) idx);
 							WriteTemplateData(pak, goal.QuestItem, 1);
 						}
 					}
+
 					SendTCP(pak);
 					return;
 				}
-			}
-			else
-			{
-				using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.QuestEntry)))
-				{
-					pak.WriteByte((byte)index);
 
-					string name = string.Format("{0} (Level {1})", q.Name, q.Level);
-					string desc = string.Format("[Step #{0}]: {1}", q.Step, q.Description);
-					if (name.Length > byte.MaxValue)
-					{
-						if (log.IsWarnEnabled)
-						{
-							log.Warn(q.GetType().ToString() + ": name is too long for 1.68+ clients (" + name.Length + ") '" + name + "'");
-						}
-						name = name.Substring(0, byte.MaxValue);
-					}
-					if (desc.Length > byte.MaxValue)
-					{
-						if (log.IsWarnEnabled)
-						{
-							log.Warn(q.GetType().ToString() + ": description is too long for 1.68+ clients (" + desc.Length + ") '" + desc + "'");
-						}
-						desc = desc.Substring(0, byte.MaxValue);
-					}
-					pak.WriteByte((byte)name.Length);
-					pak.WriteShortLowEndian((ushort)desc.Length);
-					pak.WriteByte(0); // Quest Zone ID ?
-					pak.WriteByte(0);
-					pak.WriteStringBytes(name); //Write Quest Name without trailing 0
-					pak.WriteStringBytes(desc); //Write Quest Description without trailing 0                   
+				var baseDesc = string.Format("[Step #{0}]: {1}", q.Step, q.Description);
+				pak.WriteByte((byte) name.Length);
+				pak.WriteShortLowEndian((ushort) baseDesc.Length);
+				pak.WriteByte(0); // Quest Zone ID ?
+				pak.WriteByte(0);
+				pak.WriteStringBytes(name); //Write Quest Name without trailing 0
+				pak.WriteStringBytes(baseDesc); //Write Quest Description without trailing 0
 
-					SendTCP(pak);
-				}
+				SendTCP(pak);
 			}
 		}
 
@@ -990,14 +972,17 @@ namespace DOL.GS.PacketHandler
 			}
 		}
 
-		protected override void WriteItemData(GSTCPPacketOut pak, InventoryItem item)
+		/// <summary>
+		/// New item data packet for 1.119
+		/// </summary>		
+		protected override void WriteItemData(GSTCPPacketOut pak, InventoryItem item, ushort itemId = 0)
 		{
 			if (item == null)
 			{
 				pak.Fill(0x00, 24); // +1 item.Effect changed to short
 				return;
 			}
-			pak.WriteShort((ushort)0); // item uniqueID
+			pak.WriteShort(itemId); // item uniqueID
 			pak.WriteByte((byte)item.Level);
 
 			int value1; // some object types use this field to display count
@@ -1142,193 +1127,6 @@ namespace DOL.GS.PacketHandler
 				pak.WritePascalString(spell_name2);
 			}
 			pak.WriteShort((ushort)item.Effect); // item effect changed to short
-			string name = item.Name;
-			if (item.Count > 1)
-				name = item.Count + " " + name;
-			if (item.SellPrice > 0)
-			{
-				if (ServerProperties.Properties.CONSIGNMENT_USE_BP)
-					name += "[" + item.SellPrice.ToString() + " BP]";
-				else
-					name += "[" + Money.GetString(item.SellPrice) + "]";
-			}
-			if (name == null) name = "";
-			if (name.Length > 55)
-				name = name.Substring(0, 55);
-			pak.WritePascalString(name);
-		}
-
-		/// <summary>
-		/// patch 0020
-		/// </summary>       
-		protected virtual void WriteItemData(GSTCPPacketOut pak, InventoryItem item, int questID)
-		{
-			if (item == null)
-			{
-				pak.Fill(0x00, 24); //item.Effect changed to short 1.119
-				return;
-			}
-
-			pak.WriteShort((ushort)questID); // need to send an objectID for reward quest delve to work 1.115+
-			pak.WriteByte((byte)item.Level);
-
-			int value1; // some object types use this field to display count
-			int value2; // some object types use this field to display count
-			switch (item.Object_Type)
-			{
-				case (int)eObjectType.GenericItem:
-					value1 = item.Count & 0xFF;
-					value2 = (item.Count >> 8) & 0xFF;
-					break;
-				case (int)eObjectType.Arrow:
-				case (int)eObjectType.Bolt:
-				case (int)eObjectType.Poison:
-					value1 = item.Count;
-					value2 = item.SPD_ABS;
-					break;
-				case (int)eObjectType.Thrown:
-					value1 = item.DPS_AF;
-					value2 = item.Count;
-					break;
-				case (int)eObjectType.Instrument:
-					value1 = (item.DPS_AF == 2 ? 0 : item.DPS_AF);
-					value2 = 0;
-					break; // unused
-				case (int)eObjectType.Shield:
-					value1 = item.Type_Damage;
-					value2 = item.DPS_AF;
-					break;
-				case (int)eObjectType.AlchemyTincture:
-				case (int)eObjectType.SpellcraftGem:
-					value1 = 0;
-					value2 = 0;
-					/*
-					must contain the quality of gem for spell craft and think same for tincture
-					*/
-					break;
-				case (int)eObjectType.HouseWallObject:
-				case (int)eObjectType.HouseFloorObject:
-				case (int)eObjectType.GardenObject:
-					value1 = 0;
-					value2 = item.SPD_ABS;
-					/*
-					Value2 byte sets the width, only lower 4 bits 'seem' to be used (so 1-15 only)
-
-					The byte used for "Hand" (IE: Mini-delve showing a weapon as Left-Hand
-					usabe/TwoHanded), the lower 4 bits store the height (1-15 only)
-					*/
-					break;
-
-				default:
-					value1 = item.DPS_AF;
-					value2 = item.SPD_ABS;
-					break;
-			}
-			pak.WriteByte((byte)value1);
-			pak.WriteByte((byte)value2);
-
-			if (item.Object_Type == (int)eObjectType.GardenObject)
-				pak.WriteByte((byte)(item.DPS_AF));
-			else
-				pak.WriteByte((byte)(item.Hand << 6));
-
-			pak.WriteByte((byte)((item.Type_Damage > 3 ? 0 : item.Type_Damage << 6) | item.Object_Type));
-			pak.WriteByte(0x00); //unk 1.112
-			pak.WriteShort((ushort)item.Weight);
-			pak.WriteByte(item.ConditionPercent); // % of con
-			pak.WriteByte(item.DurabilityPercent); // % of dur
-			pak.WriteByte((byte)item.Quality); // % of qua
-			pak.WriteByte((byte)item.Bonus); // % bonus
-			pak.WriteByte((byte)item.BonusLevel); // 1.109
-			pak.WriteShort((ushort)item.Model);
-			pak.WriteByte((byte)item.Extension);
-			int flag = 0;
-			int emblem = item.Emblem;
-			int color = item.Color;
-			if (emblem != 0)
-			{
-				pak.WriteShort((ushort)emblem);
-				flag |= (emblem & 0x010000) >> 16; // = 1 for newGuildEmblem
-			}
-			else
-			{
-				pak.WriteShort((ushort)color);
-			}
-			//flag |= 0x01; // newGuildEmblem
-			flag |= 0x02; // enable salvage button
-
-			// Enable craft button if the item can be modified and the player has alchemy or spellcrafting
-			eCraftingSkill skill = CraftingMgr.GetCraftingSkill(item);
-			switch (skill)
-			{
-				case eCraftingSkill.ArmorCrafting:
-				case eCraftingSkill.Fletching:
-				case eCraftingSkill.Tailoring:
-				case eCraftingSkill.WeaponCrafting:
-					if (m_gameClient.Player.CraftingSkills.ContainsKey(eCraftingSkill.Alchemy)
-						|| m_gameClient.Player.CraftingSkills.ContainsKey(eCraftingSkill.SpellCrafting))
-						flag |= 0x04; // enable craft button
-					break;
-
-				default:
-					break;
-			}
-
-			ushort icon1 = 0;
-			ushort icon2 = 0;
-			string spell_name1 = "";
-			string spell_name2 = "";
-			if (item.Object_Type != (int)eObjectType.AlchemyTincture)
-			{
-				if (item.SpellID > 0/* && item.Charges > 0*/)
-				{
-					SpellLine chargeEffectsLine = SkillBase.GetSpellLine(GlobalSpellsLines.Item_Effects);
-					if (chargeEffectsLine != null)
-					{
-						List<Spell> spells = SkillBase.GetSpellList(chargeEffectsLine.KeyName);
-						foreach (Spell spl in spells)
-						{
-							if (spl.ID == item.SpellID)
-							{
-								flag |= 0x08;
-								icon1 = spl.Icon;
-								spell_name1 = spl.Name; // or best spl.Name ?
-								break;
-							}
-						}
-					}
-				}
-				if (item.SpellID1 > 0/* && item.Charges > 0*/)
-				{
-					SpellLine chargeEffectsLine = SkillBase.GetSpellLine(GlobalSpellsLines.Item_Effects);
-					if (chargeEffectsLine != null)
-					{
-						List<Spell> spells = SkillBase.GetSpellList(chargeEffectsLine.KeyName);
-						foreach (Spell spl in spells)
-						{
-							if (spl.ID == item.SpellID1)
-							{
-								flag |= 0x10;
-								icon2 = spl.Icon;
-								spell_name2 = spl.Name; // or best spl.Name ?
-								break;
-							}
-						}
-					}
-				}
-			}
-			pak.WriteByte((byte)flag);
-			if ((flag & 0x08) == 0x08)
-			{
-				pak.WriteShort((ushort)icon1);
-				pak.WritePascalString(spell_name1);
-			}
-			if ((flag & 0x10) == 0x10)
-			{
-				pak.WriteShort((ushort)icon2);
-				pak.WritePascalString(spell_name2);
-			}
-			pak.WriteShort((ushort)item.Effect); // changed to short 1.119
 			string name = item.Name;
 			if (item.Count > 1)
 				name = item.Count + " " + name;
