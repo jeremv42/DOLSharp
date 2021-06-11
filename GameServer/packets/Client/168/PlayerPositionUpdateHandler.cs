@@ -882,7 +882,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 			client.Player.LastPositionUpdateTick = Environment.TickCount;
 			client.Player.LastPositionUpdatePoint = new Vector3(newPlayerX, newPlayerY, newPlayerZ);
-			client.Player.Position = new Vector3(newPlayerX, newPlayerY, newPlayerZ);
+			client.Player.Position = client.Player.LastPositionUpdatePoint;
 
 			int tolerance = ServerProperties.Properties.CPS_TOLERANCE;
 
