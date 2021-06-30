@@ -255,9 +255,9 @@ namespace DOL.Network
 					baseClient.OnConnect();
 					baseClient.BeginReceive();
 				}
-				catch (SocketException)
+				catch (SocketException ex)
 				{
-					Log.Error("BaseServer SocketException");
+					Log.Error($"BaseServer SocketException {ex}");
 					if (baseClient != null)
 						Disconnect(baseClient);
 				}
@@ -269,9 +269,9 @@ namespace DOL.Network
 						Disconnect(baseClient);
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
-				Log.Error("AcceptCallback: Catch");
+				Log.Error($"AcceptCallback: Catch {ex.Message}");
 
 				if (sock != null) // don't leave the socket open on exception
 				{
