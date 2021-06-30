@@ -121,14 +121,9 @@ namespace DOL.GS
 		protected byte[] m_udpBuf;
 
 		/// <summary>
-		/// Socket that listens for UDP packets
+		/// Socket for UDP packets
 		/// </summary>
-		protected Socket m_udpListen;
-
-		/// <summary>
-		/// Socket that sends UDP packets
-		/// </summary>
-		protected Socket m_udpOutSocket;
+		protected Socket m_udpSocket;
 
 		/// <summary>
 		/// A general logger for the server
@@ -273,7 +268,7 @@ namespace DOL.GS
 		/// </summary>
 		protected Socket UDPSocket
 		{
-			get { return m_udpListen; }
+			get { return m_udpSocket; }
 		}
 
 		/// <summary>
@@ -294,17 +289,10 @@ namespace DOL.GS
 			try
 			{
 				// Open our udp socket
-				m_udpListen = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-				m_udpListen.Bind(new IPEndPoint(Configuration.UDPIP, Configuration.UDPPort));
+				m_udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+				m_udpSocket.Bind(new IPEndPoint(Configuration.UDPIP, Configuration.UDPPort));
 
-				// Bind out UDP socket
-				m_udpOutSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-				if (Configuration.UDPOutEndpoint != null)
-				{
-					m_udpOutSocket.Bind(Configuration.UDPOutEndpoint);
-				}
-
-				ret = BeginReceiveUDP(m_udpListen, this);
+				ret = BeginReceiveUDP(m_udpSocket, this);
 			}
 			catch (Exception e)
 			{
@@ -473,11 +461,12 @@ namespace DOL.GS
 		{
 			int start = Environment.TickCount;
 
-			m_udpOutSocket.BeginSendTo(bytes, 0, count, SocketFlags.None, clientEndpoint, callback, m_udpOutSocket);
+			log.Warn($"send UDP packet to {clientEndpoint}");
+			m_udpSocket.BeginSendTo(bytes, 0, count, SocketFlags.None, clientEndpoint, callback, m_udpSocket);
 
 			int took = Environment.TickCount - start;
 			if (took > 100 && log.IsWarnEnabled)
-				log.WarnFormat("m_udpListen.BeginSendTo took {0}ms! (UDP to {1})", took, clientEndpoint.ToString());
+				log.WarnFormat("m_udpSocket.BeginSendTo took {0}ms! (UDP to {1})", took, clientEndpoint.ToString());
 		}
 
 		/// <summary>
@@ -1165,15 +1154,10 @@ namespace DOL.GS
 			base.Stop();
 
 			//Close the UDP connection
-			if (m_udpListen != null)
+			if (m_udpSocket != null)
 			{
-				m_udpListen.Close();
-				m_udpListen = null;
-			}
-			if (m_udpOutSocket != null)
-			{
-				m_udpOutSocket.Close();
-				m_udpOutSocket = null;
+				m_udpSocket.Close();
+				m_udpSocket = null;
 			}
 
 			//Stop all mobMgrs
