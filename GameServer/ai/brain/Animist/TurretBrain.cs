@@ -59,12 +59,6 @@ namespace DOL.AI.Brain
 				return;
 			_thinkCounter = 0;
 
-		  GamePlayer playerowner = GetPlayerOwner();
-			if (playerowner != null && (GameTimer.GetTickCount() - playerowner.Client.GameObjectUpdateArray[new Tuple<ushort, ushort>(Body.CurrentRegionID, (ushort)Body.ObjectID)]) > ThinkInterval)
-		  {
-			playerowner.Out.SendObjectUpdate(Body);
-		  }
-
 		  if(!CheckSpells(eCheckSpellType.Defensive))
 		  {
 		  	AttackMostWanted();
