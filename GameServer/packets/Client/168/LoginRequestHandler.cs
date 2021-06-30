@@ -419,7 +419,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 							}
 							uniqueId = uniqueId ?? ipAddress;
 							var count = WorldMgr.GetAllClients().Count(c => c.UniqueID == uniqueId);
-							if (count >= 2)
+							if (uniqueId != "127.0.0.1" && count >= 2)
 							{
 								Log.Info($"Refuse client {playerAccount.Name} ({client.TcpEndpoint}), too many ({count}) account connected (UUID: {uniqueId})");
 								var acclist = string.Join(", ", WorldMgr.GetAllClients().Where(c => c.UniqueID == uniqueId).Select(c => c.Account.Name));
