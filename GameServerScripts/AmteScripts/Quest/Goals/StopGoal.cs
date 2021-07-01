@@ -39,20 +39,8 @@ namespace DOL.GS.Quests
 			new RegionTimer(questData.QuestPlayer, _timer =>
 			{
 				foreach (var stopId in m_stopGoals)
-				{
-					var goalState = questData.GoalStates.Find(gs => gs.GoalId == stopId);
-					if (goalState == null)
-					{
-						questData.GoalStates.Add(new PlayerGoalState
-						{
-							GoalId = stopId,
-							Progress = 0,
-							State = eQuestGoalStatus.Aborted,
-						});
-					}
-					else if (!goalState.IsFinished)
-						goalState.State = eQuestGoalStatus.Aborted;
-				}
+					if (Quest.Goals.TryGetValue(stopId, out var stopGoal))
+						stopGoal.AbortGoal(questData);
 				EndGoal(questData, state);
 				return 0;
 			}).Start(1);

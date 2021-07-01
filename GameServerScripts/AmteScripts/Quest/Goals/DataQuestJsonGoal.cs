@@ -3,6 +3,7 @@ using DOL.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DOL.GS.Behaviour;
 
 namespace DOL.GS.Quests
 {
@@ -20,6 +21,11 @@ namespace DOL.GS.Quests
 		public virtual bool Visible => true;
 		public ItemTemplate GiveItemTemplate { get; set; }
 
+		public string MessageStarted { get; set; }
+		public string MessageAborted { get; set; }
+		public string MessageDone { get; set; }
+		public string MessageCompleted { get; set; }
+
 		public List<int> StartGoalsDone { get; set; } = new List<int>();
 		public List<int> EndWhenGoalsDone { get; set; } = new List<int>();
 
@@ -28,6 +34,10 @@ namespace DOL.GS.Quests
 			Quest = quest;
 			GoalId = goalId;
 			Description = db.Description;
+			MessageStarted = db.MessageStarted ?? "";
+			MessageAborted = db.MessageAborted ?? "";
+			MessageDone = db.MessageDone ?? "";
+			MessageCompleted = db.MessageCompleted ?? "";
 			string item = db.GiveItem ?? "";
 			if (!string.IsNullOrWhiteSpace(item))
 				GiveItemTemplate = GameServer.Database.FindObjectByKey<ItemTemplate>(item);
@@ -65,17 +75,20 @@ namespace DOL.GS.Quests
 				return false;
 			return StartGoalsDone.All(gId => questData.GoalStates.Any(gs => gs.GoalId == gId && gs.IsDone));
 		}
+
 		public virtual bool CanComplete(PlayerQuest questData)
 		{
 			var gs = questData.GoalStates.Find(s => s.GoalId == GoalId);
 			return gs?.State == eQuestGoalStatus.DoneAndActive && EndWhenGoalsDone.All(id => questData.GoalStates.Any(s => s.GoalId == id && s.IsDone));
 		}
+
 		public PlayerGoalState StartGoal(PlayerQuest questData)
 		{
 			if (CanStart(questData))
 				return ForceStartGoal(questData);
 			return null;
 		}
+
 		public virtual PlayerGoalState ForceStartGoal(PlayerQuest questData)
 		{
 			var goalData = new PlayerGoalState
@@ -84,13 +97,17 @@ namespace DOL.GS.Quests
 				State = eQuestGoalStatus.Active,
 			};
 			questData.GoalStates.Add(goalData);
+			var player = questData.QuestPlayer;
 			if (Visible)
 			{
-				questData.QuestPlayer.Out.SendQuestUpdate(questData);
-				ChatUtil.SendScreenCenter(questData.QuestPlayer, $"{Description} - {goalData.Progress}/{ProgressTotal}");
+				player.Out.SendQuestUpdate(questData);
+				ChatUtil.SendScreenCenter(player, $"{Description} - {goalData.Progress}/{ProgressTotal}");
 			}
+			if (!string.IsNullOrWhiteSpace(MessageStarted))
+				ChatUtil.SendImportant(player, $"[Quest {Quest.Name}] " + BehaviourUtils.GetPersonalizedMessage(MessageStarted, player));
 			return goalData;
 		}
+
 		public virtual void AdvanceGoal(PlayerQuest questData, PlayerGoalState goalData)
 		{
 			goalData.Progress += 1;
@@ -107,6 +124,27 @@ namespace DOL.GS.Quests
 			}
 		}
 
+		public void AbortGoal(PlayerQuest questData)
+		{
+			var goalState = questData.GoalStates.Find(gs => gs.GoalId == GoalId);
+			if (goalState == null)
+			{
+				goalState = new PlayerGoalState
+				{
+					GoalId = GoalId,
+					Progress = 0,
+					State = eQuestGoalStatus.Aborted,
+				};
+				questData.GoalStates.Add(goalState);
+			}
+			else if (!goalState.IsFinished)
+				goalState.State = eQuestGoalStatus.Aborted;
+
+			var player = questData.QuestPlayer;
+			if (goalState.State == eQuestGoalStatus.Aborted && !string.IsNullOrWhiteSpace(MessageAborted))
+				ChatUtil.SendImportant(player, $"[Quest {Quest.Name}] " + BehaviourUtils.GetPersonalizedMessage(MessageAborted, player));
+		}
+
 		public void EndGoal(PlayerQuest questData, PlayerGoalState goalData)
 		{
 			EndGoal(questData, goalData, null);
@@ -120,8 +158,11 @@ namespace DOL.GS.Quests
 			goalData.Progress = ProgressTotal;
 			goalData.State = eQuestGoalStatus.DoneAndActive;
 
+			var player = questData.QuestPlayer;
 			if (Visible)
-				ChatUtil.SendScreenCenter(questData.QuestPlayer, $"{Description} - {goalData.Progress}/{ProgressTotal}");
+				ChatUtil.SendScreenCenter(player, $"{Description} - {goalData.Progress}/{ProgressTotal}");
+			if (!string.IsNullOrWhiteSpace(MessageDone))
+				ChatUtil.SendImportant(player, $"[Quest {Quest.Name}] " + BehaviourUtils.GetPersonalizedMessage(MessageDone, player));
 			EndOtherGoals(questData, except ?? new List<DataQuestJsonGoal>());
 
 			CompleteGoal(questData, goalData);
@@ -141,12 +182,15 @@ namespace DOL.GS.Quests
 			foreach (var goal in Quest.Goals.Values)
 				goal.StartGoal(questData);
 
-			if (CanComplete(questData))
-			{
-				if (GiveItemTemplate != null)
-					GiveItem(questData.QuestPlayer, GiveItemTemplate);
-				goalData.State = eQuestGoalStatus.Completed;
-			}
+			if (!CanComplete(questData))
+				return;
+
+			var player = questData.QuestPlayer;
+			if (GiveItemTemplate != null)
+				GiveItem(player, GiveItemTemplate);
+			goalData.State = eQuestGoalStatus.Completed;
+			if (!string.IsNullOrWhiteSpace(MessageCompleted))
+				ChatUtil.SendImportant(player, $"[Quest {Quest.Name}] " + BehaviourUtils.GetPersonalizedMessage(MessageCompleted, player));
 		}
 
 		public virtual IQuestGoal ToQuestGoal(PlayerQuest questData, PlayerGoalState goalData)
@@ -162,6 +206,10 @@ namespace DOL.GS.Quests
 			{
 				{ "Description", Description },
 				{ "GiveItem", GiveItemTemplate?.Id_nb },
+				{ "MessageStarted", MessageStarted },
+				{ "MessageAborted", MessageAborted },
+				{ "MessageDone", MessageDone },
+				{ "MessageCompleted", MessageCompleted },
 				{ "StartGoalsDone", StartGoalsDone.Count > 0 ? StartGoalsDone : null },
 				{ "EndWhenGoalsDone", EndWhenGoalsDone.Count > 0 ? EndWhenGoalsDone : null },
 			};

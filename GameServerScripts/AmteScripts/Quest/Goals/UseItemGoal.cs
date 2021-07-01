@@ -30,7 +30,7 @@ namespace DOL.GS.Quests
 		public override void NotifyActive(PlayerQuest questData, PlayerGoalState goalData, DOLEvent e, object sender, EventArgs args)
 		{
 			var player = questData.QuestPlayer;
-			if (e == GamePlayerEvent.UseSlot && args is UseSlotEventArgs useSlot && useSlot.Type == 0)
+			if (e == GamePlayerEvent.UseSlot && args is UseSlotEventArgs useSlot)
 			{
 				var usedItem = player.Inventory.GetItem((eInventorySlot)useSlot.Slot);
 				if (usedItem.Id_nb == QuestItem.Id_nb)
