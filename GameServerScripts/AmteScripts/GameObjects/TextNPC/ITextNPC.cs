@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using DOL.Database;
+using DOL.Events;
 using DOL.GS.PacketHandler;
 using log4net;
 
@@ -104,7 +105,11 @@ namespace DOL.GS.Scripts
 
         public bool ReceiveItem(GameLiving source, InventoryItem item)
         {
-            if (!(source is GamePlayer) || item == null || !EchangeurDB.ContainsKey(item.Id_nb))
+            if (source == null || item == null)
+                return false;
+            _body.Notify(GameObjectEvent.ReceiveItem, _body, new ReceiveItemEventArgs(source, _body, item));
+
+            if (!(source is GamePlayer) || !EchangeurDB.ContainsKey(item.Id_nb))
                 return false;
 
             GamePlayer player = source as GamePlayer;

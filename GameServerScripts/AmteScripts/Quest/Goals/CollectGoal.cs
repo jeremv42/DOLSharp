@@ -22,7 +22,7 @@ namespace DOL.GS.Quests
 		public CollectGoal(DataQuestJson quest, int goalId, dynamic db) : base(quest, goalId, (object)db)
 		{
 			m_target = WorldMgr.GetNPCsByNameFromRegion((string)db.TargetName ??  "", (ushort)db.TargetRegion, eRealm.None).FirstOrDefault();
-			m_target = m_target ?? quest.Npc;
+			m_target ??= quest.Npc;
 			m_text = db.Text;
 			m_item = GameServer.Database.FindObjectByKey<ItemTemplate>((string)db.Item);
 			m_itemCount = db.ItemCount;
@@ -49,6 +49,8 @@ namespace DOL.GS.Quests
 			if (e != GameObjectEvent.ReceiveItem || !(args is ReceiveItemEventArgs interact))
 				return;
 			if (!(interact.Source is GamePlayer player) || interact.Target != m_target)
+				return;
+			if (interact.Item.Id_nb != m_item.Id_nb)
 				return;
 			var (quest, goal) = DataQuestJsonMgr.FindQuestAndGoalFromPlayer(player, Quest.Id, GoalId);
 
