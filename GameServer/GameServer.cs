@@ -369,7 +369,6 @@ namespace DOL.GS
 							receiving = true;
 
 							client = WorldMgr.GetClientFromID(pakin.SessionID);
-
 							if (client != null)
 							{
 								//If this is the first message from the client, we
