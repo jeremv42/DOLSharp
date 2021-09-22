@@ -461,7 +461,6 @@ namespace DOL.GS
 		{
 			int start = Environment.TickCount;
 
-			log.Warn($"send UDP packet to {clientEndpoint}");
 			m_udpSocket.BeginSendTo(bytes, 0, count, SocketFlags.None, clientEndpoint, callback, m_udpSocket);
 
 			int took = Environment.TickCount - start;
