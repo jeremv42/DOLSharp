@@ -37,9 +37,13 @@
     <RegisterForComInterop>False</RegisterForComInterop>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="CuttingEdge.Conditions" Version="1.2.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.18.0" />
+    <PackageReference Include="Grpc" Version="2.40.0" />
     <PackageReference Include="log4net" Version="2.0.13" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
     <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="2.0.226801" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0" />
     <ProjectReference Include="..\DOLBase\DOLBase.csproj" Name="DOLBase" />
     <ProjectReference Include="..\DOLDatabase\DOLDatabase.csproj" Name="DOLDatabase" />

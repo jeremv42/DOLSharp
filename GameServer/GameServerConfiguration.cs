@@ -350,7 +350,7 @@ namespace DOL.GS
 			m_logConfigFile = Path.Combine(Path.Combine(".", "config"), "logconfig.xml");
 
 			m_scriptCompilationTarget = Path.Combine(Path.Combine(".", "lib"), "GameServerScripts.dll");
-			m_scriptAssemblies = " ";
+			m_scriptAssemblies = "System.Text.RegularExpressions.dll,Microsoft.CSharp.dll"; // Regex + dynamic
 			m_enableCompilation = true;
 			m_autoAccountCreation = true;
 			m_serverType = eGameServerType.GST_Normal;

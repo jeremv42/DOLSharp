@@ -84,7 +84,7 @@ namespace DOL.GS
         public Assembly Compile(FileInfo outputFile, IEnumerable<FileInfo> sourceFiles)
         {
             var syntaxTrees = sourceFiles.Where(file => file.Name != "AssemblyInfo.cs")
-                .Select(file => CSharpSyntaxTree.ParseText(File.ReadAllText(file.FullName)));
+                .Select(file => CSharpSyntaxTree.ParseText(File.ReadAllText(file.FullName), null, file.FullName));
 
             Compile(outputFile, syntaxTrees);
 

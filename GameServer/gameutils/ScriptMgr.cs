@@ -31,6 +31,7 @@ using DOL.GS.Spells;
 using DOL.GS.Commands;
 using DOL.Events;
 using log4net;
+using System.Runtime.InteropServices;
 
 namespace DOL.GS
 {
