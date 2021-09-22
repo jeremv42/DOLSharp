@@ -24,8 +24,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Microsoft.CSharp;
-using Microsoft.VisualBasic;
+using Microsoft.CodeDom.Providers.DotNetCompilerPlatform;
 using log4net;
 using DOL.Language;
 using DOL.GS.PacketHandler;
@@ -44,10 +43,16 @@ namespace DOL.GS
         static DOLScriptCompiler()
         {
             var libDirectory = new DirectoryInfo(Path.Combine(GameServer.Instance.Configuration.RootDirectory, "lib"));
-            referencedAssemblies.AddRange(libDirectory.GetFiles("*.dll", SearchOption.TopDirectoryOnly).Select(f => f.Name));
+            referencedAssemblies.AddRange(libDirectory.GetFiles("*.dll", SearchOption.TopDirectoryOnly)
+                .Select(f => f.Name)
+                .Where(n => !n.EndsWith(".x64.dll") && !n.EndsWith(".x86.dll"))
+                .Where(n => n != "dol_detour.dll")
+            );
             referencedAssemblies.Add("System.dll");
             referencedAssemblies.Add("System.Xml.dll");
             referencedAssemblies.Add("System.Core.dll");
+            referencedAssemblies.Add("System.Numerics.dll");
+            referencedAssemblies.Add("Microsoft.CSharp.dll");
             referencedAssemblies.Add("System.Net.Http.dll");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -60,12 +65,12 @@ namespace DOL.GS
 
         public DOLScriptCompiler()
         {
-            compiler = new CSharpCodeProvider(new Dictionary<string, string> { { "CompilerVersion", "v4.0" } });
+            compiler = new CSharpCodeProvider(new ProviderOptions(GameServer.Instance.Configuration.RootDirectory + "/lib/roslyn/csc.exe", 0));
         }
 
         public void SetToVisualBasicNet()
         {
-            compiler = new VBCodeProvider();
+            compiler = new VBCodeProvider(new ProviderOptions(GameServer.Instance.Configuration.RootDirectory + "/lib/roslyn/vbc.exe", 0));
         }
 
         public Assembly Compile(FileInfo outputFile, IEnumerable<FileInfo> sourceFiles)

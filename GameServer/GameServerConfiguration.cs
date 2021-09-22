@@ -345,7 +345,7 @@ namespace DOL.GS
 			if (Assembly.GetEntryAssembly() != null)
 				m_rootDirectory = new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName;
 			else
-				m_rootDirectory = new FileInfo(Assembly.GetAssembly(typeof(GameServer)).Location).DirectoryName;
+				m_rootDirectory = Path.Combine(new FileInfo(Assembly.GetAssembly(typeof(GameServer)).Location).DirectoryName, ".."); // GameServer is in ./lib/
 
 			m_logConfigFile = Path.Combine(Path.Combine(".", "config"), "logconfig.xml");
 
