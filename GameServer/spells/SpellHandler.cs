@@ -31,7 +31,6 @@ using DOL.GS.RealmAbilities;
 using DOL.GS.SkillHandler;
 using DOL.GS.Utils;
 using DOL.Language;
-using DOL.GS.Utils;
 
 using log4net;
 using System.Numerics;
