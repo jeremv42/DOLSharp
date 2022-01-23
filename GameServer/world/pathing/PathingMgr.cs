@@ -34,7 +34,7 @@ namespace DOL.GS
 			else if (LocalPathingMgr.Init())
 				SetPathingMgr(LocalPathingMgr);
 			else
-				throw new Exception("can't initialize any pathing manager");
+				SetPathingMgr(NullPathingMgr);
 			return true;
 		}
 

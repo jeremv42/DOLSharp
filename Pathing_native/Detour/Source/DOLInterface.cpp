@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstring>
 #include <exception>
 #include <functional>
 #include <iostream>
@@ -110,7 +111,7 @@ DLLEXPORT bool LoadNavMesh(char const* file, dtNavMesh** const mesh, dtNavMeshQu
 				void* data;
 				if (tileHeader.ref == 0 || tileHeader.size == 0 || (data = dtAlloc(tileHeader.size, DT_ALLOC_PERM)) == 0)
 					break;
-				std::memset(data, 0, tileHeader.size);
+				memset(data, 0, tileHeader.size);
 				fread(data, tileHeader.size, 1, fp);
 				(*mesh)->addTile((unsigned char*)data, tileHeader.size, 1, tileHeader.ref, nullptr);
 				tileIdx += 1;
