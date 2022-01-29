@@ -85,7 +85,7 @@ namespace DOL.DOLServer.Actions
 			{
 				// enable VT100 emulation
 				var handle = GetStdHandle(-11); // STD_OUTPUT_HANDLE
-				if (handle != null)
+				if (handle != IntPtr.Zero)
 				{
 					uint mode;
 					if (GetConsoleMode(handle, out mode) != 0)

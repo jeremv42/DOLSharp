@@ -141,33 +141,39 @@ DLLEXPORT bool FreeNavMesh(dtNavMesh* meshPtr, dtNavMeshQuery* queryPtr)
 	return true;
 }
 
-void PathOptimize(int* pointCount, float* pointBuffer, dtPolyRef* refs)
+void PathOptimize(dtNavMeshQuery* query, int* pointCount, float* pointBuffer, dtPolyRef* refs)
 {
 	for (int i = 0; i < *pointCount - 2; ++i)
 	{
-		// we take 3 points: first --- mid --- last and check if mid is on the line, in this case, we remove mid
-		float d[3] = { // last - first
-			pointBuffer[(i + 2) * 3 + 0] - pointBuffer[i * 3 + 0],
-			pointBuffer[(i + 2) * 3 + 1] - pointBuffer[i * 3 + 1],
-			pointBuffer[(i + 2) * 3 + 2] - pointBuffer[i * 3 + 2],
-		};
-		float e[3] = { // mid - first
-			pointBuffer[(i + 1) * 3 + 0] - pointBuffer[i * 3 + 0],
-			pointBuffer[(i + 1) * 3 + 1] - pointBuffer[i * 3 + 1],
-			pointBuffer[(i + 1) * 3 + 2] - pointBuffer[i * 3 + 2],
-		};
+		unsigned short flags[2];
+		query->getAttachedNavMesh()->getPolyFlags(refs[i], flags + 0);
+		query->getAttachedNavMesh()->getPolyFlags(refs[i + 1], flags + 1);
+		if (flags[0] != flags[1]) // we can't merge 2 different points
+			continue;
 
-		if ((e[0] != 0 || e[1] != 0 || e[2] != 0) && refs[i] == refs[i + 1])
+		// we take 3 points: first --- mid --- last and check if mid is on the line, in this case, we remove mid
+		float const* A = &(pointBuffer[i * 3 + 0]);
+		float const* B = &(pointBuffer[(i + 1) * 3 + 0]); // mid, point to remove
+		float const* C = &(pointBuffer[(i + 2) * 3 + 0]);
+
+		float vectAC[3];
+		dtVsub(vectAC, A, C);
+		float len = dtVlen(vectAC);
+		dtVnormalize(vectAC);
+		float vectAB[3];
+		dtVsub(vectAB, B, A);
+		float distPt = dtClamp(dtVdot(vectAB, vectAC), 0.0f, len);
+		float pt[3];
+		dtVscale(pt, vectAC, distPt);
+		dtVadd(pt, A, pt);
+		float distAC = dtVdist(pt, B);
+
+		if (distAC < 4.0f)
 		{
-			float dot = dtVdot(d, e);
-			float res = (dot * dot) / dtVdot(d, d) / dtVdot(e, e);
-			if (res >= 0.9999)
-			{
-				std::copy(pointBuffer + (i + 2) * 3, pointBuffer + (*pointCount) * 3, pointBuffer + (i + 1) * 3);
-				std::copy(refs + i + 2, refs + *pointCount, refs + i + 1);
-				*pointCount -= 1;
-				--i; // we redo this loop
-			}
+			std::copy(pointBuffer + (i + 2) * 3, pointBuffer + (*pointCount) * 3, pointBuffer + (i + 1) * 3);
+			std::copy(refs + i + 2, refs + *pointCount, refs + i + 1);
+			*pointCount -= 1;
+			--i; // we redo this loop
 		}
 	}
 }
@@ -200,7 +206,7 @@ DLLEXPORT dtStatus PathStraight(dtNavMeshQuery* query, float start[], float end[
 				auto straightPathRefs = &straightPathPolys[0];
 				if (dtStatusSucceed(status = query->findStraightPath(start, epos, polys, npolys, pointBuffer, straightPathFlags, straightPathRefs, pointCount, 256, pathOptions)) && (0 < *pointCount))
 				{
-					PathOptimize(pointCount, pointBuffer, straightPathRefs);
+					PathOptimize(query, pointCount, pointBuffer, straightPathRefs);
 					int pointIdx = 0;
 					while (*pointCount != pointIdx && pointIdx <= *pointCount)
 					{

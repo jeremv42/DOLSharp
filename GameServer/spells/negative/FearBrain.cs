@@ -57,7 +57,7 @@ namespace DOL.AI.Brain
 			var point = await PathingMgr.Instance.GetClosestPointAsync(Body.CurrentZone, new Vector3(fleePoint, Body.Position.Z), 128, 128, 256);
 			Body.StopFollowing();
 			Body.StopAttack();
-			await Body.PathTo(point.HasValue ? point.Value : new Vector3(fleePoint, Body.Position.Z), Body.MaxSpeed);
+			Body.PathTo(point.HasValue ? point.Value : new Vector3(fleePoint, Body.Position.Z), Body.MaxSpeed);
 		}
 	}
 } 

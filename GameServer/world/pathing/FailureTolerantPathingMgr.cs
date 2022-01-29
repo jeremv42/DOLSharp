@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Numerics;
 using System.Threading.Tasks;
-using CuttingEdge.Conditions;
 using DOL.Core;
 
 namespace DOL.GS
@@ -18,7 +17,7 @@ namespace DOL.GS
 
 		public FailureTolerantPathingMgr(IPathingMgr pathingMgr)
 		{
-			this.pathingMgr = Condition.Requires(pathingMgr).IsNotNull().Value;
+			this.pathingMgr = pathingMgr ?? throw new Exception("");
 		}
 
 		public bool Init()

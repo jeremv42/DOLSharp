@@ -138,78 +138,96 @@ namespace DOL.GS
 		/// <summary>
 		/// Semaphore to prevent multiple replots
 		/// </summary>
-		private int isReplottingPath = IDLE;
-		const int IDLE = 0, REPLOTTING = 1;
+		private int calculatorState = (int)CalcState.IDLE;
+
+		enum CalcState : int
+		{
+			IDLE = 0,
+			REPLOTTING = 1,
+		}
 
 		private async Task ReplotPathAsync(Vector3 target)
 		{
+			lock (_pathNodes)
+				_lastTarget = target;
 			// Try acquiring a pathing lock
-			if (Interlocked.CompareExchange(ref isReplottingPath, REPLOTTING, IDLE) != IDLE)
+			if (Interlocked.CompareExchange(ref calculatorState, (int)CalcState.REPLOTTING, (int)CalcState.IDLE) != (int)CalcState.IDLE)
 			{
 				// Computation is already in progress. ReplotPathAsync will be called again automatically by .PathTo every few ms
 				return;
 			}
 
-			// we make a blocking call here because we are already in a worker thread and inside a lock
 			try
 			{
-				var currentZone = Owner.CurrentZone;
-				var currrentPos = Owner.Position;
-				var pathingResult = await PathingMgr.Instance.GetPathStraightAsync(currentZone, currrentPos, target).ConfigureAwait(false);
-
-				lock (_pathNodes)
-				{
-					_pathNodes.Clear();
-					if (pathingResult.Error != PathingError.NoPathFound && pathingResult.Error != PathingError.NavmeshUnavailable &&
-						pathingResult.Points != null)
-					{
-						DidFindPath = true;
-						var to = pathingResult.Points.Length - 1; /* remove target node only if no partial path */
-						if (pathingResult.Error == PathingError.PartialPathFound)
-						{
-							to = pathingResult.Points.Length;
-						}
-						for (int i = 1; i < to; i++) /* remove first node */
-						{
-							var pt = pathingResult.Points[i];
-							if (pt.Position.X < -500000)
-							{
-								log.Error("PathCalculator.ReplotPath returned weird node: " + pt + " (result=" + pathingResult.Error +
-										  "); this=" + this);
-							}
-							_pathNodes.Enqueue(pt);
-						}
-
-						Owner.DebugSend("Found path to target with {0} nodes for {1} (VisualizePath={2})", pathingResult.Points.Length, Owner.Name, VisualizePath);
-
-						// Visualize the path?
-						if (VisualizePath)
-						{
-							DoVisualizePath(pathingResult);
-						}
-						else if (_visualizationPath != null)
-						{
-							_visualizationPath.Hide();
-							_visualizationPath = null;
-						}
-					}
-					else
-					{
-						//noPathFoundMetric.Mark();
-						DidFindPath = false;
-						Owner.DebugSend("No path to destination found for {0}", Owner.Name);
-					}
-					_lastTarget = target;
-					ForceReplot = false;
-				}
+				while (!await CalculatePathAsync(target))
+					target = _lastTarget;
 			}
 			finally
 			{
-				if (Interlocked.Exchange(ref isReplottingPath, IDLE) != REPLOTTING)
-				{
+				if (Interlocked.Exchange(ref calculatorState, (int)CalcState.IDLE) != (int)CalcState.REPLOTTING)
 					log.Warn("PathCalc semaphore was in IDLE state even though we were replotting. This should never happen");
-				}
 			}
+		}
+
+		private async Task<bool> CalculatePathAsync(Vector3 target)
+		{
+			var currentZone = Owner.CurrentZone;
+			var currentPos = Owner.Position;
+			// we make a blocking call here because we are already in a worker thread and inside a lock
+			var pathingResult = await PathingMgr.Instance.GetPathStraightAsync(currentZone, currentPos, target).ConfigureAwait(false);
+
+			lock (_pathNodes)
+			{
+				if (_lastTarget != target)
+				{
+					Owner.DebugSend("target changed from {0} to {1}", target, _lastTarget);
+					return false;
+				}
+
+				_pathNodes.Clear();
+				if (pathingResult.Error != PathingError.NoPathFound && pathingResult.Error != PathingError.NavmeshUnavailable &&
+				    pathingResult.Points != null)
+				{
+					DidFindPath = true;
+					var to = pathingResult.Points.Length;
+					if (pathingResult.Error == PathingError.PartialPathFound)
+					{
+						to = pathingResult.Points.Length;
+					}
+					for (int i = 1; i < to; i++) /* remove first node */
+					{
+						var pt = pathingResult.Points[i];
+						if (pt.Position.X < -500000)
+						{
+							log.Error("PathCalculator.ReplotPath returned weird node: " + pt + " (result=" + pathingResult.Error +
+							          "); this=" + this);
+						}
+						_pathNodes.Enqueue(pt);
+					}
+
+					Owner.DebugSend("Found path to target with {0} nodes for {1} (VisualizePath={2})", pathingResult.Points.Length, Owner.Name, VisualizePath);
+
+					// Visualize the path?
+					if (VisualizePath)
+					{
+						DoVisualizePath(pathingResult);
+					}
+					else if (_visualizationPath != null)
+					{
+						_visualizationPath.Hide();
+						_visualizationPath = null;
+					}
+				}
+				else
+				{
+					//noPathFoundMetric.Mark();
+					DidFindPath = false;
+					Owner.DebugSend("No path to destination found for {0}", Owner.Name);
+				}
+				ForceReplot = false;
+			}
+
+			return true;
 		}
 
 		private void DoVisualizePath(WrappedPathingResult pathingResult)

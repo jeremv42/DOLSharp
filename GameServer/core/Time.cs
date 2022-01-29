@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using CuttingEdge.Conditions;
 
 namespace DOL.Numbers
 {
@@ -20,7 +19,6 @@ namespace DOL.Numbers
 			foreach (var arg in str.Split(' '))
 			{
 				var match = TimeUnitRegex.Match(arg);
-				Condition.Requires(match.Success, arg).IsTrue("Could not parse time unit");
 				double value = int.Parse(match.Groups["value"].Value);
 				seconds += value * GetMultiplier(match.Groups["unit"].Value);
 			}

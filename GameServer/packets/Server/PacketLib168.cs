@@ -3094,9 +3094,9 @@ namespace DOL.GS.PacketHandler
 		{
 			using (var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.ChangeGroundTarget)))
 			{
-				pak.WriteInt((uint) (newTarget == null ? 0 : newTarget.X));
-				pak.WriteInt((uint) (newTarget == null ? 0 : newTarget.Y));
-				pak.WriteInt((uint) (newTarget == null ? 0 : newTarget.Z));
+				pak.WriteInt((uint)newTarget.X);
+				pak.WriteInt((uint)newTarget.Y);
+				pak.WriteInt((uint)newTarget.Z);
 				SendTCP(pak);
 			}
 		}

@@ -1470,7 +1470,7 @@ namespace DOL.GS
 		/// <summary>
 		/// Walk to the spawn point with specified speed
 		/// </summary>
-		public virtual Task<bool> WalkToSpawn(short speed)
+		public virtual void WalkToSpawn(short speed)
 		{
 			StopAttack();
 			StopFollowing();
@@ -1486,7 +1486,7 @@ namespace DOL.GS
 
 			IsReturningHome = true;
 			IsReturningToSpawnPoint = true;
-			return PathTo(SpawnPoint, speed);
+			PathTo(SpawnPoint, speed);
 		}
 
 		/// <summary>
@@ -1516,14 +1516,13 @@ namespace DOL.GS
 		/// </summary>
 		public PathCalculator PathCalculator { get; protected set; } // Only visible for debugging
 
-
 		/// <summary>
 		/// Finds a valid path to the destination (or picks the direct path otherwise). Uses WalkTo for each of the pathing nodes.
 		/// </summary>
 		/// <returns>true if a path was found</returns>
-		public async Task<bool> PathTo(float destX, float destY, float destZ, short? speed = null, Action<GameNPC> onLastNodeReached = null)
+		public void PathTo(float destX, float destY, float destZ, short? speed = null)
 		{
-			return await PathTo(new Vector3(destX, destY, destZ), speed, onLastNodeReached).ConfigureAwait(false);
+			PathTo(new Vector3(destX, destY, destZ), speed);
 		}
 		/// <summary>
 		/// Finds a valid path to the destination (or picks the direct path otherwise). Uses WalkTo for each of the pathing nodes.
@@ -1531,57 +1530,54 @@ namespace DOL.GS
 		/// <param name="dest"></param>
 		/// <param name="speed"></param>
 		/// <returns>true if a path was found</returns>
-		public async Task<bool> PathTo(Vector3 dest, short? speed = null, Action<GameNPC> onLastNodeReached = null)
+		public void PathTo(Vector3 dest, short? speed = null)
 		{
 			if (dest == Position)
-				return true;
+				return;
 			if (IsTurningDisabled)
-				return false;
+				return;
 
 			short walkSpeed = speed ?? MaxSpeed;
 			if (walkSpeed > MaxSpeed)
 				walkSpeed = MaxSpeed;
 			if (walkSpeed <= 0)
-				return false;
+				return;
 
-			DebugSend("PathTo({0}, {1})", dest, walkSpeed);
-
-			Interlocked.Increment(ref Statistics.PathToCalls);
-
-			// Initialize pathing if possible and required
-			if (PathCalculator == null && PathCalculator.IsSupported(this))
+			if (PathCalculator == null)
 			{
+				if (!PathCalculator.IsSupported(this))
+				{
+					WalkTo(dest, walkSpeed);
+					return;
+				}
+
 				// TODO: Only make this check once on spawn since it internally calls .CurrentZone + hashtable lookup?
 				PathCalculator = new PathCalculator(this);
 				PathCalculator.VisualizePath = DebugMode;
 			}
 
+			DebugSend("PathTo({0}, {1})", dest, walkSpeed);
+
+			Interlocked.Increment(ref Statistics.PathToCalls);
+
 			// Pick the next pathing node, and walk towards it
-			Vector3? nextNode = null;
-			bool didFindPath = false;
-			bool shouldUseAirPath = true;
-			if (PathCalculator != null)
+			PathCalculator.CalculateNextTargetAsync(dest).ContinueWith(res =>
 			{
-				var (nextPoint, result) = await PathCalculator.CalculateNextTargetAsync(dest).ConfigureAwait(false);
-				nextNode = nextPoint;
-				shouldUseAirPath = result == NoPathReason.RECAST_FOUND_NO_PATH;
-				didFindPath = PathCalculator.DidFindPath;
-			}
+				var nextNode = res.Result.Item1;
+				var shouldUseAirPath = res.Result.Item2 == NoPathReason.RECAST_FOUND_NO_PATH;
 
-			if (!nextNode.HasValue)
-			{
-				// Directly walk towards the target (or call the customly provided action)
-				if (onLastNodeReached != null)
-					onLastNodeReached(this); // custom action, e.g. used to start the follow timer
-				else
-					WalkTo(dest, walkSpeed);
-				return false;
-			}
+				if (!nextNode.HasValue)
+				{
+					// Directly walk towards the target (or call the customly provided action)
+					if (shouldUseAirPath)
+						WalkTo(dest, walkSpeed);
+					return;
+				}
 
-			Notify(GameNPCEvent.WalkTo, this, new WalkToEventArgs(dest, walkSpeed));
-			// Do the actual pathing bit: Walk towards the next pathing node
-			WalkToPathNode(nextNode.Value, walkSpeed, npc => npc.PathTo(dest, speed, onLastNodeReached));
-			return true;
+				Notify(GameNPCEvent.WalkTo, this, new WalkToEventArgs(dest, walkSpeed));
+				// Do the actual pathing bit: Walk towards the next pathing node
+				WalkToPathNode(nextNode.Value, walkSpeed, npc => npc.PathTo(dest, speed));
+			});
 		}
 
 		private void WalkToPathNode(Vector3 node, short speed, Action<GameNPC> goToNextNodeCallback)
@@ -1595,7 +1591,8 @@ namespace DOL.GS
 			if (speed <= 0)
 				return;
 
-			TargetPosition = node; // this also saves the current position
+			SavePosition(Position); // update current pos
+			m_targetPosition = node;
 
 			if (IsWithinRadius(TargetPosition, 5))
 			{
@@ -1609,7 +1606,7 @@ namespace DOL.GS
 			m_currentSpeed = speed;
 
 			UpdateTickSpeed();
-			StartArriveAtTargetAction(GetTicksToArriveAt(TargetPosition, speed), goToNextNodeCallback);
+			StartArriveAtTargetAction(Math.Max(1, GetTicksToArriveAt(TargetPosition, speed) - 200), goToNextNodeCallback);
 			BroadcastUpdate();
 		}
 
@@ -5963,9 +5960,6 @@ namespace DOL.GS
 			m_maxdistance = 0;
 			m_roamingRange = 0; // default to non roaming - tolakram
 			m_ownerID = "";
-
-			if (m_spawnPoint == null)
-				m_spawnPoint = new Vector3();
 
 			//m_factionName = "";
 			LinkedFactions = new ArrayList(1);

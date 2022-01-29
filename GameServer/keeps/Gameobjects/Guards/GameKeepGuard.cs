@@ -1024,7 +1024,7 @@ namespace DOL.GS.Keeps
 			base.WalkTo(target - new Vector3(offX, offY, 0), speed);
 		}
 
-		public override async Task<bool> WalkToSpawn(short speed)
+		public override void WalkToSpawn(short speed)
 		{
 			if (PatrolGroup != null)
 			{
@@ -1038,9 +1038,9 @@ namespace DOL.GS.Keeps
 				}
 
 				PatrolGroup.StartPatrol();
-				return false;
+				return;
 			}
-			return await base.WalkToSpawn(speed);
+			base.WalkToSpawn(speed);
 		}
 
 		public void RefreshTemplate()
