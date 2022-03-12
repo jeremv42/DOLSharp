@@ -146,7 +146,17 @@ namespace DOL.GS.Quests
 					log.Error("Could not find quest: "+dbQuest.Name+"!");
 				return null;
 			}
-			return (AbstractQuest)Activator.CreateInstance(questType, new object[] { targetPlayer, dbQuest });
+
+			try
+			{
+				return (AbstractQuest)Activator.CreateInstance(questType, new object[] { targetPlayer, dbQuest });
+			}
+			catch (Exception ex)
+			{
+				if (log.IsErrorEnabled)
+					log.ErrorFormat($"Can't instanciate quest {dbQuest.Name}", ex);
+				return null;
+			}
 		}
 
 		/// <summary>
