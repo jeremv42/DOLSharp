@@ -7,23 +7,33 @@ using DOL.GS.RealmAbilities;
 
 namespace DOL.AI.Brain
 {
-    public class AmteMobBrain : StandardMobBrain
-    {
-    	public int AggroLink { get; set; }
+	public class AmteMobBrain : StandardMobBrain
+	{
+		public int AggroLink { get; set; }
 
-        public AmteMobBrain()
-        {
-        	AggroLink = -1;
-        }
+		public override int ThinkInterval
+		{
+			get
+			{
+				var interval = base.ThinkInterval;
+				return Math.Max(5000, Math.Min(interval, 1000 + (100 - base.AggroLevel) * 100));
+			}
+			set => base.ThinkInterval = value;
+		}
 
-        public AmteMobBrain(ABrain brain)
-        {
-            if (!(brain is IOldAggressiveBrain))
-                return;
-            var old = (IOldAggressiveBrain)brain;
-            m_aggroLevel = old.AggroLevel;
-            m_aggroMaxRange = old.AggroRange;
-        }
+		public AmteMobBrain()
+		{
+			AggroLink = -1;
+		}
+
+		public AmteMobBrain(ABrain brain)
+		{
+			if (!(brain is IOldAggressiveBrain))
+				return;
+			var old = (IOldAggressiveBrain)brain;
+			m_aggroLevel = old.AggroLevel;
+			m_aggroMaxRange = old.AggroRange;
+		}
 
 		public override int CalculateAggroLevelToTarget(GameLiving target)
 		{
@@ -39,7 +49,7 @@ namespace DOL.AI.Brain
 			}
 
 			if (target.IsObjectGreyCon(Body))
-				return 0;   // only attack if green+ to target
+				return 0; // only attack if green+ to target
 
 			int aggro = AggroLevel;
 			if (target is GamePlayer player)
@@ -49,6 +59,7 @@ namespace DOL.AI.Brain
 				if (aggro > 1 && player.Client.IsDoubleAccount)
 					aggro += 20;
 			}
+
 			if (aggro >= 100)
 				return 100;
 			return aggro;
@@ -64,19 +75,20 @@ namespace DOL.AI.Brain
 					switch (ab.KeyName)
 					{
 						case Abilities.ChargeAbility:
+						{
+							if (Body.TargetObject is GameLiving
+							    && !Body.IsWithinRadius(Body.TargetObject, 500)
+							    && GameServer.ServerRules.IsAllowedToAttack(Body, Body.TargetObject as GameLiving, true))
 							{
-								if (Body.TargetObject is GameLiving
-									&& !Body.IsWithinRadius(Body.TargetObject, 500)
-									&& GameServer.ServerRules.IsAllowedToAttack(Body, Body.TargetObject as GameLiving, true))
+								ChargeAbility charge = Body.GetAbility<ChargeAbility>();
+								if (charge != null && Body.GetSkillDisabledDuration(charge) <= 0)
 								{
-									ChargeAbility charge = Body.GetAbility<ChargeAbility>();
-									if (charge != null && Body.GetSkillDisabledDuration(charge) <= 0)
-									{
-										charge.Execute(Body);
-									}
+									charge.Execute(Body);
 								}
-								break;
 							}
+
+							break;
+						}
 					}
 				}
 			}
