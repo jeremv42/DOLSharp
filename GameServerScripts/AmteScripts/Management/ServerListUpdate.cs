@@ -147,7 +147,7 @@ namespace DOL.GS.GameEvents
 		{
 			try
 			{
-				string result = httpClient.GetStringAsync(updateurl).Result.ToLower();
+				string result = new HttpClient().GetStringAsync(updateurl).Result.ToLower();
 				if (result.IndexOf("success") != -1)
 				{
 					return true;
