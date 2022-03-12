@@ -61,7 +61,7 @@ namespace DOL.GS
 		/// </summary>
 		public GameDoor NextDoor { get; private set; }
 
-		private readonly Queue<WrappedPathPoint> _pathNodes = new Queue<WrappedPathPoint>();
+		private readonly Queue<WrappedPathPoint> _pathNodes = new();
 		private Vector3 _lastTarget = Vector3.Zero;
 		private GamePath _visualizationPath;
 
@@ -252,10 +252,12 @@ namespace DOL.GS
 		/// <summary>
 		/// Calculates the next point this NPC should walk to to reach the target
 		/// </summary>
-		/// <param name="target"></param>
+		/// <param name="destination"></param>
 		/// <returns>Next path node, or null if target reached. Throws a NoPathToTargetException if path is blocked/returns>
-		public async Task<Tuple<Vector3?, NoPathReason>> CalculateNextTargetAsync(Vector3 target)
+		public async Task<Tuple<Vector3?, NoPathReason>> CalculateNextTargetAsync(Vector3? destination = null)
 		{
+			var target = destination ?? _lastTarget;
+
 			if (!ShouldPath(target))
 			{
 				Owner.DebugSend("Skipping pathing for target {0}", target);

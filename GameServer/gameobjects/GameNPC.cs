@@ -913,15 +913,19 @@ namespace DOL.GS
 					return basePos;
 				if (TargetPosition != Vector3.Zero)
 				{
-					var expectedDistance = Vector3.Distance(basePos, TargetPosition);
+					var expectedDistance = (int)Vector3.Distance(basePos, TargetPosition);
 					if (expectedDistance == 0)
 						return TargetPosition;
 
-					var actualDistance = MovementElapsedTicks * new Vector3(TickSpeedX, TickSpeedY, TickSpeedZ);
-					if (expectedDistance - actualDistance.Length() < 0)
+					var actualDistance = (int)(MovementElapsedTicks * new Vector3(TickSpeedX, TickSpeedY, TickSpeedZ)).Length();
+					if (expectedDistance - actualDistance < 0)
 						return TargetPosition;
 				}
 				return basePos;
+			}
+			set
+			{
+				base.Position = value;
 			}
 		}
 
@@ -1109,6 +1113,7 @@ namespace DOL.GS
 		/// </summary>
 		protected override void UpdateTickSpeed()
 		{
+			MovementStartTick = Environment.TickCount;
 			if (!IsMoving)
 			{
 				SetTickSpeed(0, 0, 0);
@@ -1320,15 +1325,12 @@ namespace DOL.GS
 		/// </summary>
 		protected class ArriveAtTargetAction : RegionAction
 		{
-			private Action<GameNPC> m_goToNodeCallback;
-
 			/// <summary>
 			/// Constructs a new ArriveAtTargetAction
 			/// </summary>
 			/// <param name="actionSource">The action source</param>
-			public ArriveAtTargetAction(GameNPC actionSource, Action<GameNPC> goToNodeCallback = null) : base(actionSource)
+			public ArriveAtTargetAction(GameNPC actionSource) : base(actionSource)
 			{
-				m_goToNodeCallback = goToNodeCallback;
 			}
 
 			/// <summary>
@@ -1339,24 +1341,27 @@ namespace DOL.GS
 			protected override void OnTick()
 			{
 				GameNPC npc = (GameNPC)m_actionSource;
-				if (m_goToNodeCallback != null)
-				{
-					m_goToNodeCallback(npc);
-					return;
-				}
-
-				bool arriveAtSpawnPoint = npc.IsReturningToSpawnPoint;
-
-				npc.StopMoving();
-				npc.Notify(GameNPCEvent.ArriveAtTarget, npc);
-
-				if (arriveAtSpawnPoint)
-					npc.Notify(GameNPCEvent.ArriveAtSpawnPoint, npc);
+				npc._OnArrivedAtTarget();
 			}
+		}
+
+		protected void _OnArrivedAtTarget()
+		{
+			var arriveAtSpawnPoint = IsReturningToSpawnPoint;
+			StopMoving();
+
+			Notify(GameNPCEvent.ArriveAtTarget, this);
+			if (arriveAtSpawnPoint)
+				Notify(GameNPCEvent.ArriveAtSpawnPoint, this);
 		}
 
 		public virtual void CancelWalkToTimer()
 		{
+			if (_arriveAtPathNodeAction != null)
+			{
+				_arriveAtPathNodeAction.Stop();
+				_arriveAtPathNodeAction = null;
+			}
 			if (m_arriveAtTargetAction != null)
 			{
 				m_arriveAtTargetAction.Stop();
@@ -1389,7 +1394,7 @@ namespace DOL.GS
 		private void SavePosition(Vector3 target)
 		{
 			Position = target;
-			MovementStartTick = Environment.TickCount;
+			UpdateTickSpeed();
 		}
 
 		/// <summary>
@@ -1439,13 +1444,13 @@ namespace DOL.GS
 			UpdateTickSpeed();
 			Notify(GameNPCEvent.WalkTo, this, new WalkToEventArgs(TargetPosition, speed));
 
-			StartArriveAtTargetAction(GetTicksToArriveAt(TargetPosition, speed), null);
+			StartArriveAtTargetAction(GetTicksToArriveAt(TargetPosition, speed));
 			BroadcastUpdate();
 		}
 
-		private void StartArriveAtTargetAction(int requiredTicks, Action<GameNPC> goToNextNodeCallback)
+		private void StartArriveAtTargetAction(int requiredTicks)
 		{
-			m_arriveAtTargetAction = new ArriveAtTargetAction(this, goToNextNodeCallback);
+			m_arriveAtTargetAction = new ArriveAtTargetAction(this);
 			m_arriveAtTargetAction.Start((requiredTicks > 1) ? requiredTicks : 1);
 		}
 
@@ -1506,7 +1511,6 @@ namespace DOL.GS
 
 			m_currentSpeed = speed;
 
-			MovementStartTick = Environment.TickCount;
 			UpdateTickSpeed();
 			BroadcastUpdate();
 		}
@@ -1542,6 +1546,11 @@ namespace DOL.GS
 				walkSpeed = MaxSpeed;
 			if (walkSpeed <= 0)
 				return;
+			if (!PathCalculator.ShouldPath(this, dest))
+			{
+				WalkTo(dest, walkSpeed);
+				return;
+			}
 
 			if (PathCalculator == null)
 			{
@@ -1576,11 +1585,11 @@ namespace DOL.GS
 
 				Notify(GameNPCEvent.WalkTo, this, new WalkToEventArgs(dest, walkSpeed));
 				// Do the actual pathing bit: Walk towards the next pathing node
-				WalkToPathNode(nextNode.Value, walkSpeed, npc => npc.PathTo(dest, speed));
+				_WalkToPathNode(nextNode.Value, walkSpeed);
 			});
 		}
 
-		private void WalkToPathNode(Vector3 node, short speed, Action<GameNPC> goToNextNodeCallback)
+		private void _WalkToPathNode(Vector3 node, short speed)
 		{
 			if (IsTurningDisabled)
 				return;
@@ -1594,20 +1603,55 @@ namespace DOL.GS
 			SavePosition(Position); // update current pos
 			m_targetPosition = node;
 
-			if (IsWithinRadius(TargetPosition, 5))
+			if (IsWithinRadius(node, 5))
 			{
-				goToNextNodeCallback(this);
+				// goToNextNodeCallback(this);
+				BroadcastUpdate();
 				return;
 			}
 
 			CancelWalkToTimer();
 
-			m_Heading = GetHeading(TargetPosition);
+			m_Heading = GetHeading(node);
 			m_currentSpeed = speed;
 
 			UpdateTickSpeed();
-			StartArriveAtTargetAction(Math.Max(1, GetTicksToArriveAt(TargetPosition, speed) - 200), goToNextNodeCallback);
+			_StartArriveAtPathNodeAction(Math.Max(1, GetTicksToArriveAt(node, speed) - 150));
+		}
+
+		private ArriveAtPathNodeAction _arriveAtPathNodeAction;
+		private void _StartArriveAtPathNodeAction(int requiredTicks)
+		{
+			CancelWalkToTimer();
+
 			BroadcastUpdate();
+			_arriveAtPathNodeAction = new ArriveAtPathNodeAction(this);
+			_arriveAtPathNodeAction.Start(requiredTicks);
+		}
+		private class ArriveAtPathNodeAction : RegionAction
+		{
+			public ArriveAtPathNodeAction(GameObject actionSource) : base(actionSource)
+			{
+			}
+			protected override void OnTick()
+			{
+				var npc = (GameNPC)m_actionSource;
+				// Pick the next pathing node, and walk towards it
+				npc.PathCalculator.CalculateNextTargetAsync().ContinueWith(res =>
+				{
+					var nextNode = res.Result.Item1;
+					if (!nextNode.HasValue)
+					{
+						// Directly walk towards the target (or call the customly provided action)
+						npc.WalkTo(npc.TargetPosition, npc.CurrentSpeed);
+						return;
+					}
+
+					npc.DebugSend("Next target for {0} is {1}", npc.TargetPosition, nextNode.Value);
+					// Do the actual pathing bit: Walk towards the next pathing node
+					npc._WalkToPathNode(nextNode.Value, npc.CurrentSpeed);
+				});
+			}
 		}
 
 		/// <summary>
@@ -1932,7 +1976,7 @@ namespace DOL.GS
 
 			if (CurrentWayPoint != null)
 			{
-				GameEventMgr.AddHandler(this, GameNPCEvent.ArriveAtTarget, new DOLEventHandler(OnArriveAtWaypoint));
+				GameEventMgr.AddHandler(this, GameNPCEvent.ArriveAtTarget, OnArriveAtWaypoint);
 				PathTo(CurrentWayPoint.Position, Math.Min(speed, (short)CurrentWayPoint.MaxSpeed));
 				m_IsMovingOnPath = true;
 				Notify(GameNPCEvent.PathMoveStarts, this);
@@ -1951,7 +1995,7 @@ namespace DOL.GS
 			if (!IsMovingOnPath)
 				return;
 
-			GameEventMgr.RemoveHandler(this, GameNPCEvent.ArriveAtTarget, new DOLEventHandler(OnArriveAtWaypoint));
+			GameEventMgr.RemoveHandler(this, GameNPCEvent.ArriveAtTarget, OnArriveAtWaypoint);
 			Notify(GameNPCEvent.PathMoveEnds, this);
 			m_IsMovingOnPath = false;
 		}
@@ -5953,7 +5997,7 @@ namespace DOL.GS
 			m_followTarget = new WeakRef(null);
 
 			m_size = 50; //Default size
-			TargetPosition = new Vector3();
+			TargetPosition = Vector3.Zero;
 			m_followMinDist = 100;
 			m_followMaxDist = 3000;
 			m_flags = 0;

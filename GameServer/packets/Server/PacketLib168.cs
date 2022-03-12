@@ -798,7 +798,7 @@ namespace DOL.GS.PacketHandler
 					speed = npc.CurrentSpeed;
 					if (npc.TargetPosition.X != 0 || npc.TargetPosition.Y != 0 || npc.TargetPosition.Z != 0)
 					{
-						Zone tz = npc.CurrentRegion.GetZone(npc.TargetPosition.X, npc.TargetPosition.Y);
+						Zone tz = npc.CurrentRegion.GetZone(npc.TargetPosition);
 						if (tz != null)
 						{
 							xOffsetInTargetZone = (ushort) (npc.TargetPosition.X - tz.XOffset);
