@@ -331,18 +331,16 @@ namespace DOL.GS.Commands
 					{
 						try
 						{
-							GameObject.FillDataQuestCache();
-							client.Player.TargetObject.LoadDataQuests();
 
-							if (client.Player.TargetObject is GameNPC)
+							if (client.Player.TargetObject is GameNPC npc)
 							{
 								foreach (GamePlayer player in client.Player.TargetObject.GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))
 								{
-									player.Out.SendNPCsQuestEffect(client.Player.TargetObject as GameNPC, (client.Player.TargetObject as GameNPC).GetQuestIndicator(player));
+									player.Out.SendNPCsQuestEffect(npc, npc.GetQuestIndicator(player));
 								}
-							}
 
-							client.Out.SendMessage(targetObject.DataQuestList.Count + " Data Quests loaded for this object.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+								client.Out.SendMessage(npc.QuestListToGive.Count + " Quests loaded for this npc.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+							}
 						}
 						catch (Exception)
 						{

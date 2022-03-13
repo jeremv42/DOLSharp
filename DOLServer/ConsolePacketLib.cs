@@ -125,10 +125,8 @@ namespace DOLGameServerConsole
 		public void SendGuildLeaveCommand(GamePlayer invitingPlayer, string inviteMessage) { }
 		public void SendGuildInviteCommand(GamePlayer invitingPlayer, string inviteMessage) { }
 		public void SendQuestSubscribeCommand(GameNPC invitingNPC, ushort questid, string inviteMessage) { }
-		public void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, IQuestData quest) { }
-		public void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, IQuestData quest) { }
-		public void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, DataQuest quest) { }
-		public void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, DataQuest quest) { }
+		public void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest) { }
+		public void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest) { }
 		public void SendQuestAbortCommand(GameNPC abortingNPC, ushort questid, string abortMessage) { }
 		public void SendGroupWindowUpdate() { }
 		public void SendGroupMemberUpdate(bool updateIcons, bool updateMap, GameLiving living) { }
@@ -174,7 +172,7 @@ namespace DOLGameServerConsole
 		public void SendObjectRemove(GameObject obj) { }
 		public void SendObjectCreate(GameObject obj) { }
 		public void SendQuestListUpdate() { }
-		public void SendQuestUpdate(AbstractQuest quest) { }
+		public void SendQuestUpdate(IQuestPlayerData quest) { }
 		public void SendConcentrationList() { }
 		public void SendUpdateCraftingSkills() { }
 		public void SendChangeTarget(GameObject newTarget) { }

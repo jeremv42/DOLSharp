@@ -24,7 +24,7 @@ namespace DOL.GS.Commands
 {
 	[CmdAttribute(
 		"&quest",
-		new string[] {"&quests"},
+		new[] {"&quests"},
 		ePrivLevel.Player,
 		"Display the players completed quests", "/quest")]
 	public class QuestCommandHandler : AbstractCommandHandler, ICommandHandler
@@ -40,10 +40,10 @@ namespace DOL.GS.Commands
 			else
 			{
 				message += "You are currently working on the following quests:\n";
-				foreach (AbstractQuest quest in client.Player.QuestList)
+				foreach (var quest in client.Player.QuestList)
 				{
-					message += String.Format("On step {0} of quest '{1}'\n", quest.Step, quest.Name);
-					message += String.Format("What to do: {0}", quest.Description);
+					message += $"[{quest.Quest.Name}]\n";
+					message += $"Description: {quest.Quest.Description}";
 				}
 			}
 			if (client.Player.QuestListFinished.Count == 0)
@@ -54,9 +54,9 @@ namespace DOL.GS.Commands
 
 				// Need to protect from too long a list.  
 				// We'll do an easy sloppy chop at 1500 characters (packet limit is 2048)
-				foreach (AbstractQuest quest in client.Player.QuestListFinished)
+				foreach (var quest in client.Player.QuestListFinished)
 				{
-					message += quest.Name + ", completed.\n";
+					message += quest.Quest.Name + ", completed.\n";
 
 					if (message.Length > 1500)
 					{

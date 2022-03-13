@@ -691,10 +691,8 @@ namespace DOL.GS.PacketHandler
 		void SendCheckLOS(GameObject source, GameObject target, CheckLOSMgrResponse callback);
 		void SendGuildLeaveCommand(GamePlayer invitingPlayer, string inviteMessage);
 		void SendGuildInviteCommand(GamePlayer invitingPlayer, string inviteMessage);
-		void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, IQuestData quest);
-		void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, IQuestData quest);
-		void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, DataQuest quest);
-		void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, DataQuest quest);
+		void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest);
+		void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest);
 		void SendQuestSubscribeCommand(GameNPC invitingNPC, ushort questid, string inviteMessage);
 		void SendQuestAbortCommand(GameNPC abortingNPC, ushort questid, string abortMessage);
 		void SendGroupWindowUpdate();
@@ -739,7 +737,7 @@ namespace DOL.GS.PacketHandler
 		void SendObjectDelete(ushort oid);
 		void SendObjectUpdate(GameObject obj);
 		void SendQuestListUpdate();
-		void SendQuestUpdate(AbstractQuest quest);
+		void SendQuestUpdate(IQuestPlayerData quest);
 		void SendConcentrationList();
 		void SendUpdateCraftingSkills();
 		void SendChangeTarget(GameObject newTarget);

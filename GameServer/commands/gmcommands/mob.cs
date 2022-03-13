@@ -1622,22 +1622,15 @@ namespace DOL.GS.Commands
 
 		private void questinfo(GameClient client, GameNPC targetMob, string[] args)
 		{
-			if (targetMob.QuestListToGive.Count == 0 && targetMob.DataQuestList.Count == 0)
+			if (targetMob.QuestListToGive.Count == 0)
 			{
 				client.Out.SendMessage("Mob does not have any quests.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 			}
 			else
 			{
-				client.Out.SendMessage("Scripted Quests: ------------------------", eChatType.CT_System, eChatLoc.CL_PopupWindow);
-
-				foreach (AbstractQuest quest in targetMob.QuestListToGive)
-					client.Out.SendMessage("Quest Name: [" + quest.Name + "]", eChatType.CT_System, eChatLoc.CL_PopupWindow);
-
-				client.Out.SendMessage("Data Quests: ----------------------------", eChatType.CT_System, eChatLoc.CL_PopupWindow);
-
-				foreach (DataQuest dq in targetMob.DataQuestList)
-					client.Out.SendMessage("Quest Name: [" + dq.Name + "] : " + (DataQuest.eStartType)dq.DBDataQuest.StartType, eChatType.CT_System, eChatLoc.CL_PopupWindow);
-
+				client.Out.SendMessage("Quests: ------------------------", eChatType.CT_System, eChatLoc.CL_PopupWindow);
+				foreach (var quest in targetMob.QuestListToGive)
+					client.Out.SendMessage($"[{quest.Id}. {quest.Name}]", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 			}
 		}
 
@@ -1645,13 +1638,11 @@ namespace DOL.GS.Commands
 		{
 			try
 			{
-				GameObject.FillDataQuestCache();
-				targetMob.LoadDataQuests(client.Player);
 				foreach (GamePlayer player in targetMob.GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))
 				{
 					player.Out.SendNPCsQuestEffect(targetMob, targetMob.GetQuestIndicator(player));
 				}
-				client.Out.SendMessage(targetMob.DataQuestList.Count + " Data Quests loaded for this mob.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+				client.Out.SendMessage(targetMob.QuestListToGive.Count + " Quests loaded for this mob.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 			}
 			catch (Exception ex)
 			{

@@ -4517,11 +4517,6 @@ namespace DOL.GS
 				}
 			}
 
-			foreach (DOL.GS.Quests.DataQuest q in DataQuestList)
-			{
-				q.Notify(GamePlayerEvent.Dying, this, new DyingEventArgs(killer, playerAttackers));
-			}
-
 			m_attackers.Clear();
 
 			// cancel all concentration effects
@@ -6077,11 +6072,6 @@ namespace DOL.GS
 				}
 				
 				player.TempProperties.setProperty("WHISPERDELAY", CurrentRegion.Time);
-
-				foreach (DOL.GS.Quests.DataQuest q in DataQuestList)
-				{
-					q.Notify(GamePlayerEvent.WhisperReceive, this, new WhisperReceiveEventArgs(player, this, str));
-				}
 			}
 
 			Notify(GameLivingEvent.WhisperReceive, this, new WhisperReceiveEventArgs(source, this, str));

@@ -604,10 +604,6 @@ namespace DOL.GS
 					return false;
 
 				//---------------------------------------------------------------
-				//Load artifact manager
-				InitComponent(ArtifactMgr.Init(), "Artifact Manager");
-
-				//---------------------------------------------------------------
 				//Load all calculators
 				if (!InitComponent(GameLiving.LoadCalculators(), "GameLiving.LoadCalculators()"))
 					return false;
@@ -701,17 +697,6 @@ namespace DOL.GS
 				//Load behaviour manager
 				if (!InitComponent(BehaviourMgr.Init(), "Behaviour Manager"))
 					return false;
-
-				//Load the quest managers if enabled
-				if (Properties.LOAD_QUESTS)
-				{
-					if (!InitComponent(QuestMgr.Init(), "Quest Manager"))
-						return false;
-				}
-				else
-				{
-					log.InfoFormat("Not Loading Quest Manager : Obeying Server Property <load_quests> - {0}", Properties.LOAD_QUESTS);
-				}
 
 				//---------------------------------------------------------------
 				//Notify our scripts that everything went fine!

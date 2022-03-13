@@ -321,13 +321,13 @@ namespace DOL.GS.PacketHandler
 			}
 		}
 
-		protected override void SendQuestPacket(AbstractQuest quest, int index)
+		protected override void SendQuestPacket(IQuestPlayerData quest, int index)
 		{
 			using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.QuestEntry)))
 			{
 
 				pak.WriteByte((byte)index);
-				if (quest.Step <= 0)
+				if (quest.Status != eQuestStatus.InProgress)
 				{
 					pak.WriteByte(0);
 					pak.WriteByte(0);
@@ -335,16 +335,16 @@ namespace DOL.GS.PacketHandler
 				}
 				else
 				{
-					string name = quest.Name;
-					string desc = quest.Description;
+					string name = quest.Quest.Name;
+					string desc = quest.Quest.Description;
 					if (name.Length > byte.MaxValue)
 					{
-						if (log.IsWarnEnabled) log.Warn(quest.GetType().ToString() + ": name is too long for 1.71 clients (" + name.Length + ") '" + name + "'");
+						if (log.IsWarnEnabled) log.Warn("quest name is too long for 1.71 clients (" + name.Length + ") '" + name + "'");
 						name = name.Substring(0, byte.MaxValue);
 					}
 					if (desc.Length > ushort.MaxValue)
 					{
-						if (log.IsWarnEnabled) log.Warn(quest.GetType().ToString() + ": description is too long for 1.71 clients (" + desc.Length + ") '" + desc + "'");
+						if (log.IsWarnEnabled) log.Warn("quest description is too long for 1.71 clients (" + desc.Length + ") '" + desc + "'");
 						desc = desc.Substring(0, ushort.MaxValue);
 					}
 					if (name.Length + desc.Length > 2048 - 10)

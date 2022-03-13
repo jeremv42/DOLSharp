@@ -1,4 +1,4 @@
-/*
+﻿/*
  * DAWN OF LIGHT - The first free open source DAoC server emulator
  * 
  * This program is free software; you can redistribute it and/or
@@ -32,12 +32,7 @@ namespace DOL.GS.Behaviour
         public BehaviourBuilder()
         {            
             //this.addActionMethod = questType.GetMethod("AddBehaviour", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);            
-        }                
-
-        public void AddBehaviour(QuestBehaviour questPart)
-        {            
-            //addActionMethod.Invoke(null, new object[] { questPart });
-        }        
+        }
 
         public BaseBehaviour CreateBehaviour(GameNPC npc)
         {

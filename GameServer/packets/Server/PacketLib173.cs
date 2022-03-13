@@ -558,7 +558,7 @@ namespace DOL.GS.PacketHandler
 			}
 		}
 
-		public override void SendQuestUpdate(AbstractQuest quest)
+		public override void SendQuestUpdate(IQuestPlayerData quest)
 		{
 			int questIndex = 1;
 			// add check for null due to LD
@@ -566,7 +566,7 @@ namespace DOL.GS.PacketHandler
 			{
 				lock (m_gameClient.Player.QuestList)
 				{
-					foreach (AbstractQuest q in m_gameClient.Player.QuestList)
+					foreach (var q in m_gameClient.Player.QuestList)
 					{
 						if (q == quest)
 						{
@@ -574,7 +574,7 @@ namespace DOL.GS.PacketHandler
 							break;
 						}
 
-						if (q.Step != -1)
+						if (q.Status != eQuestStatus.Done)
 							questIndex++;
 					}
 				}
@@ -590,13 +590,10 @@ namespace DOL.GS.PacketHandler
 			int questIndex = 1;
 			lock (m_gameClient.Player.QuestList)
 			{
-				foreach (AbstractQuest quest in m_gameClient.Player.QuestList)
+				foreach (var quest in m_gameClient.Player.QuestList)
 				{
-					if (quest.Step != -1)
-					{
-						SendQuestPacket(quest, questIndex);
-						questIndex++;
-					}
+					SendQuestPacket(quest, questIndex);
+					questIndex++;
 				}
 			}
 		}
@@ -618,13 +615,13 @@ namespace DOL.GS.PacketHandler
 			}
 		}
 
-		protected override void SendQuestPacket(AbstractQuest quest, int index)
+		protected override void SendQuestPacket(IQuestPlayerData q, int index)
 		{
 			using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.QuestEntry)))
 			{
 
 				pak.WriteByte((byte)index);
-				if (quest.Step <= 0)
+				if (q.Status == eQuestStatus.NotDoing)
 				{
 					pak.WriteByte(0);
 					pak.WriteByte(0);
@@ -632,21 +629,24 @@ namespace DOL.GS.PacketHandler
 				}
 				else
 				{
-					string name = quest.Name;
-					string desc = quest.Description;
+					string name = q.Quest.Name;
+					string desc = q.Quest.Description;
 					if (name.Length > byte.MaxValue)
 					{
-						if (log.IsWarnEnabled) log.Warn(quest.GetType().ToString() + ": name is too long for 1.71 clients (" + name.Length + ") '" + name + "'");
+						if (log.IsWarnEnabled)
+							log.Warn($"quest name is too long for 1.71 clients ({name.Length}) '{name}'");
 						name = name.Substring(0, byte.MaxValue);
 					}
 					if (desc.Length > ushort.MaxValue)
 					{
-						if (log.IsWarnEnabled) log.Warn(quest.GetType().ToString() + ": description is too long for 1.71 clients (" + desc.Length + ") '" + desc + "'");
+						if (log.IsWarnEnabled)
+							log.Warn($"quest description is too long for 1.71 clients ({desc.Length}) '{desc}'");
 						desc = desc.Substring(0, ushort.MaxValue);
 					}
 					if (name.Length + desc.Length > 2048 - 10)
 					{
-						if (log.IsWarnEnabled) log.Warn(quest.GetType().ToString() + ": name + description length is too long and would have crashed the client.\nName (" + name.Length + "): '" + name + "'\nDesc (" + desc.Length + "): '" + desc + "'");
+						if (log.IsWarnEnabled)
+							log.Warn($"quest name + description length is too long and would have crashed the client.\nName ({name.Length}): '{name}'\nDesc ({desc.Length}): '{desc}'");
 						name = name.Substring(0, 32);
 						desc = desc.Substring(0, 2048 - 10 - name.Length); // all that's left
 					}

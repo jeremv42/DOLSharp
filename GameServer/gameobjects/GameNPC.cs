@@ -2655,90 +2655,49 @@ namespace DOL.GS
 		/// <summary>
 		/// Holds all the quests this npc can give to players
 		/// </summary>
-		protected readonly ArrayList m_questListToGive = new ArrayList();
+		protected readonly List<DataQuestJson> m_questListToGive = new();
 
 		/// <summary>
 		/// Gets the questlist of this player
 		/// </summary>
-		public IList QuestListToGive
-		{
-			get { return m_questListToGive; }
-		}
+		public IReadOnlyList<DataQuestJson> QuestListToGive => m_questListToGive;
 
 		/// <summary>
 		/// Adds a scripted quest type to the npc questlist
 		/// </summary>
-		/// <param name="questType">The quest type to add</param>
+		/// <param name="quest">The quest type to add</param>
 		/// <returns>true if added, false if the npc has already the quest!</returns>
-		public void AddQuestToGive(Type questType)
+		public void AddQuestToGive(DataQuestJson quest)
 		{
-			lock (m_questListToGive.SyncRoot)
-			{
-				if (HasQuest(questType) == null)
-				{
-					AbstractQuest newQuest = (AbstractQuest)Activator.CreateInstance(questType);
-					if (newQuest != null) m_questListToGive.Add(newQuest);
-				}
-			}
+			lock (m_questListToGive)
+				if (!HasQuest(quest))
+					m_questListToGive.Add(quest);
 		}
 
 		/// <summary>
 		/// removes a scripted quest from this npc
 		/// </summary>
-		/// <param name="questType">The questType to remove</param>
+		/// <param name="quest">The questType to remove</param>
 		/// <returns>true if added, false if the npc has already the quest!</returns>
-		public bool RemoveQuestToGive(Type questType)
+		public bool RemoveQuestToGive(DataQuestJson quest)
 		{
-			lock (m_questListToGive.SyncRoot)
-			{
-				foreach (AbstractQuest q in m_questListToGive)
-				{
-					if (q.GetType().Equals(questType))
-					{
-						m_questListToGive.Remove(q);
-						return true;
-					}
-				}
-			}
-			return false;
+			lock (m_questListToGive)
+				return m_questListToGive.Remove(quest);
 		}
 
 		/// <summary>
 		/// Check if the npc can give the specified quest to a player
 		/// Used for scripted quests
 		/// </summary>
-		/// <param name="questType">The type of the quest</param>
+		/// <param name="quest">The type of the quest</param>
 		/// <param name="player">The player who search a quest</param>
-		/// <returns>the number of time the quest can be done again</returns>
-		public int CanGiveQuest(Type questType, GamePlayer player)
+		public bool CanGiveQuest(DataQuestJson quest, GamePlayer player)
 		{
-			lock (m_questListToGive.SyncRoot)
-			{
-				foreach (AbstractQuest q in m_questListToGive)
-				{
-					if (q.GetType().Equals(questType) && q.CheckQuestQualification(player) && player.HasFinishedQuest(questType) < q.MaxQuestCount)
-					{
-						return q.MaxQuestCount - player.HasFinishedQuest(questType);
-					}
-				}
-			}
-			return 0;
-		}
-
-		/// <summary>
-		/// Return the proper indicator for quest
-		/// TODO: check when finish indicator is set
-		/// * when you have done the NPC quest
-		/// * when you are at the last step
-		/// </summary>
-		/// <param name="questType">Type of quest</param>
-		/// <param name="player">player requesting the quest</param>
-		/// <returns></returns>
-		public eQuestIndicator SetQuestIndicator(Type questType, GamePlayer player)
-		{
-			if (CanShowOneQuest(player)) return eQuestIndicator.Available;
-			if (player.HasFinishedQuest(questType) > 0) return eQuestIndicator.Finish;
-			return eQuestIndicator.None;
+			if (!quest.CheckQuestQualification(player))
+				return false;
+			if (player.HasFinishedQuest(quest) >= quest.MaxCount)
+				return false;
+			return true;
 		}
 
 		protected GameNPC m_teleporterIndicator = null;
@@ -2779,119 +2738,30 @@ namespace DOL.GS
 		public bool CanShowOneQuest(GamePlayer player)
 		{
 			// Scripted quests
-			lock (m_questListToGive.SyncRoot)
+			lock (QuestListToGive)
 			{
-				foreach (AbstractQuest q in m_questListToGive)
+				foreach (var quest in QuestListToGive)
 				{
-					Type questType = q.GetType();
-					int doingQuest = (player.IsDoingQuest(questType) != null ? 1 : 0);
-					if (q.CheckQuestQualification(player) && player.HasFinishedQuest(questType) + doingQuest < q.MaxQuestCount)
+					int doingQuest = (player.IsDoingQuest(quest) != null ? 1 : 0);
+					if (quest.CheckQuestQualification(player) && player.HasFinishedQuest(quest) + doingQuest < quest.MaxCount)
 						return true;
 				}
 			}
-
-			// Data driven quests
-			lock (m_dataQuests)
-			{
-				foreach (DataQuest quest in DataQuestList)
-				{
-					if (quest.ShowIndicator &&
-						quest.CheckQuestQualification(player))
-					{
-						return true;
-					}
-				}
-			}
-
 			return false;
 		}
 
-		/// <summary>
-		/// Check if the npc can finish one of DataQuest/RewardQuest Player is doing
-		/// This can't be check with AbstractQuest as they don't implement anyway of knowing who is the last target or last step !
-		/// </summary>
-		/// <param name="player">The player to check</param>
-		/// <returns>true if this npc is the last step of one quest, false otherwise</returns>
 		public bool CanFinishOneQuest(GamePlayer player)
 		{
-			// browse Quests.
-			List<AbstractQuest> dqs;
-			lock (((ICollection)player.QuestList).SyncRoot)
+			lock (QuestListToGive)
 			{
-				dqs = new List<AbstractQuest>(player.QuestList);
-			}
-
-			foreach (AbstractQuest q in dqs)
-			{
-				// Handle Data Quest here.
-
-				DataQuest quest = null;
-				if (q is DataQuest)
+				foreach (var quest in QuestListToGive)
 				{
-					quest = (DataQuest)q;
-				}
-
-				if (quest != null && (quest.TargetName == Name && (quest.TargetRegion == 0 || quest.TargetRegion == CurrentRegionID)))
-				{
-					switch (quest.StepType)
-					{
-						case DataQuest.eStepType.DeliverFinish:
-						case DataQuest.eStepType.InteractFinish:
-						case DataQuest.eStepType.KillFinish:
-						case DataQuest.eStepType.WhisperFinish:
-						case DataQuest.eStepType.CollectFinish:
-							return true;
-					}
-				}
-
-				// Handle Reward Quest here.
-
-				RewardQuest rwQuest = null;
-
-				if (q is RewardQuest)
-				{
-					rwQuest = (RewardQuest)q;
-				}
-
-				if (rwQuest != null && rwQuest.QuestGiver == this)
-				{
-					bool done = true;
-					foreach (RewardQuest.QuestGoal goal in rwQuest.Goals)
-					{
-						done &= goal.IsAchieved;
-					}
-
-					if (done)
-					{
+					var pq = player.IsDoingQuest(quest);
+					if (pq != null && pq.CanFinish())
 						return true;
-					}
 				}
 			}
 
-			return false;
-		}
-
-
-		/// <summary>
-		/// Give a quest a to specific player
-		/// used for scripted quests
-		/// </summary>
-		/// <param name="questType">The quest type</param>
-		/// <param name="player">The player that gets the quest</param>
-		/// <param name="startStep">The starting quest step</param>
-		/// <returns>true if added, false if the player do already the quest!</returns>
-		public bool GiveQuest(Type questType, GamePlayer player, int startStep)
-		{
-			AbstractQuest quest = HasQuest(questType);
-			if (quest != null)
-			{
-				AbstractQuest newQuest = (AbstractQuest)Activator.CreateInstance(questType, new object[] { player, startStep });
-				if (newQuest != null && player.AddQuest(newQuest))
-				{
-					player.Out.SendNPCsQuestEffect(this, GetQuestIndicator(player));
-					return true;
-				}
-			}
 			return false;
 		}
 
@@ -2901,17 +2771,10 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="questType">The quest type</param>
 		/// <returns>the quest if the npc have the quest or null if not</returns>
-		protected AbstractQuest HasQuest(Type questType)
+		protected bool HasQuest(DataQuestJson quest)
 		{
-			lock (m_questListToGive.SyncRoot)
-			{
-				foreach (AbstractQuest q in m_questListToGive)
-				{
-					if (q.GetType().Equals(questType))
-						return q;
-				}
-			}
-			return null;
+			lock (m_questListToGive)
+				return m_questListToGive.Contains(quest);
 		}
 
 		#endregion
@@ -4774,31 +4637,6 @@ namespace DOL.GS
 						loot = new GameMoney(value, this);
 						loot.Name = lootTemplate.Name;
 						loot.Model = (ushort)lootTemplate.Model;
-					}
-					else if (lootTemplate.Name.StartsWith("scroll|"))
-					{
-						String[] scrollData = lootTemplate.Name.Split('|');
-
-						if (scrollData.Length >= 3)
-						{
-							String artifactID = scrollData[1];
-							int pageNumber = UInt16.Parse(scrollData[2]);
-							loot = ArtifactMgr.CreateScroll(artifactID, pageNumber);
-						}
-
-						if (loot == null)
-						{
-							log.Error($"Artifact scroll could not be created for data string [{lootTemplate.Name}]");
-							continue;
-						}
-						else
-						{
-							loot.Position = Position;
-							loot.Heading = Heading;
-							loot.CurrentRegion = CurrentRegion;
-							(loot as WorldInventoryItem).Item.IsCrafted = false;
-							(loot as WorldInventoryItem).Item.Creator = Name;
-						}
 					}
 					else
 					{

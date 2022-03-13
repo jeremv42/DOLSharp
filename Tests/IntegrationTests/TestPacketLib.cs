@@ -369,25 +369,15 @@ namespace DOL.Tests
 		{
 			if (SendGuildInviteCommandMethod != null) SendGuildInviteCommandMethod(this, invitingPlayer, inviteMessage);
 		}
-		public Action<TestPacketLib, GameNPC, GamePlayer, IQuestData> SendQuestOfferWindowMethod { get; set; }
-		public void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, IQuestData quest)
+		public Action<TestPacketLib, GameNPC, GamePlayer, IQuestPlayerData> SendQuestOfferWindowMethod { get; set; }
+		public void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest)
 		{
 			if (SendQuestOfferWindowMethod != null) SendQuestOfferWindowMethod(this, questNPC, player, quest);
 		}
-		public Action<TestPacketLib, GameNPC, GamePlayer, IQuestData> SendQuestRewardWindowMethod { get; set; }
-		public void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, IQuestData quest)
+		public Action<TestPacketLib, GameNPC, GamePlayer, IQuestPlayerData> SendQuestRewardWindowMethod { get; set; }
+		public void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest)
 		{
 			if (SendQuestRewardWindowMethod != null) SendQuestRewardWindowMethod(this, questNPC, player, quest);
-		}
-		public Action<TestPacketLib, GameNPC, GamePlayer, DataQuest> SendQuestOfferWindowDataMethod { get; set; }
-		public void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, DataQuest quest)
-		{
-			if (SendQuestOfferWindowDataMethod != null) SendQuestOfferWindowDataMethod(this, questNPC, player, quest);
-		}
-		public Action<TestPacketLib, GameNPC, GamePlayer, DataQuest> SendQuestRewardWindowDataMethod { get; set; }
-		public void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, DataQuest quest)
-		{
-			if (SendQuestRewardWindowDataMethod != null) SendQuestRewardWindowDataMethod(this, questNPC, player, quest);
 		}
 		public Action<TestPacketLib, GameNPC, ushort, string> SendQuestSubscribeCommandMethod { get; set; }
 		public void SendQuestSubscribeCommand(GameNPC invitingNPC, ushort questid, string inviteMessage)
@@ -609,8 +599,8 @@ namespace DOL.Tests
 		{
 			if (SendQuestListUpdateMethod != null) SendQuestListUpdateMethod(this);
 		}
-		public Action<TestPacketLib, AbstractQuest> SendQuestUpdateMethod { get; set; }
-		public void SendQuestUpdate(AbstractQuest quest)
+		public Action<TestPacketLib, IQuestPlayerData> SendQuestUpdateMethod { get; set; }
+		public void SendQuestUpdate(IQuestPlayerData quest)
 		{
 			if (SendQuestUpdateMethod != null) SendQuestUpdateMethod(this, quest);
 		}

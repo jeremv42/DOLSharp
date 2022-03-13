@@ -1420,27 +1420,15 @@ namespace DOL.GS.PacketHandler
 			}
 		}
 
-		public virtual void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, IQuestData quest)
+		public virtual void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest)
 		{
 		}
 
-		public virtual void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, IQuestData quest)
+		public virtual void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest)
 		{
 		}
 
-		public virtual void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, DataQuest quest)
-		{
-		}
-
-		public virtual void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, DataQuest quest)
-		{
-		}
-
-		protected virtual void SendQuestWindow(GameNPC questNPC, GamePlayer player, IQuestData quest, bool offer)
-		{
-		}
-
-		protected virtual void SendQuestWindow(GameNPC questNPC, GamePlayer player, DataQuest quest, bool offer)
+		protected virtual void SendQuestWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest, bool offer)
 		{
 		}
 
@@ -1590,13 +1578,13 @@ namespace DOL.GS.PacketHandler
 			}
 		}
 		
-		public virtual void SendQuestUpdate(AbstractQuest quest)
+		public virtual void SendQuestUpdate(IQuestPlayerData quest)
 		{
 			int questIndex = 0;
 
 			lock (m_gameClient.Player.QuestList)
 			{
-				foreach (AbstractQuest q in m_gameClient.Player.QuestList)
+				foreach (var q in m_gameClient.Player.QuestList)
 				{
 					if (q == quest)
 					{
@@ -1604,7 +1592,7 @@ namespace DOL.GS.PacketHandler
 						break;
 					}
 
-					if (q.Step != -1)
+					if (q.Status != eQuestStatus.Done)
 						questIndex++;
 				}
 			}
@@ -1615,9 +1603,9 @@ namespace DOL.GS.PacketHandler
 			int questIndex = 0;
 			lock (m_gameClient.Player.QuestList)
 			{
-				foreach (AbstractQuest quest in m_gameClient.Player.QuestList)
+				foreach (var quest in m_gameClient.Player.QuestList)
 				{
-					if (quest.Step != -1)
+					if (quest.Status != eQuestStatus.Done)
 					{
 						SendQuestPacket(quest, questIndex);
 						questIndex++;
@@ -3960,13 +3948,13 @@ namespace DOL.GS.PacketHandler
 			return 0; // ??
 		}
 
-		protected virtual void SendQuestPacket(AbstractQuest quest, int index)
+		protected virtual void SendQuestPacket(IQuestPlayerData quest, int index)
 		{
 			using (var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.QuestEntry)))
 			{
 				pak.WriteByte((byte) index);
 
-				if (quest.Step <= 0)
+				if (quest.Status != eQuestStatus.InProgress)
 				{
 					pak.WriteByte(0);
 					pak.WriteByte(0);
@@ -3974,18 +3962,18 @@ namespace DOL.GS.PacketHandler
 				}
 				else
 				{
-					string name = quest.Name;
-					string desc = quest.Description;
+					string name = quest.Quest.Name;
+					string desc = quest.Quest.Description;
 					if (name.Length > byte.MaxValue)
 					{
 						if (log.IsWarnEnabled)
-							log.Warn(quest.GetType() + ": name is too long for 1.68+ clients (" + name.Length + ") '" + name + "'");
+							log.Warn($"quest name is too long for 1.68+ clients ({name.Length}) '{name}'");
 						name = name.Substring(0, byte.MaxValue);
 					}
 					if (desc.Length > byte.MaxValue)
 					{
 						if (log.IsWarnEnabled)
-							log.Warn(quest.GetType() + ": description is too long for 1.68+ clients (" + desc.Length + ") '" + desc + "'");
+							log.Warn($"quest description is too long for 1.68+ clients ({desc.Length}) '{desc}'");
 						desc = desc.Substring(0, byte.MaxValue);
 					}
 					pak.WriteByte((byte) name.Length);

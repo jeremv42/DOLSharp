@@ -46,12 +46,12 @@ namespace DOL.Database
 		/// </summary>
 		/// <param name="name">The quest name</param>
 		/// <param name="step">The step number</param>
-		/// <param name="charname">The character name</param>
-		public DBQuest(string name, int step, string charname)
+		/// <param name="charId">The character id</param>
+		public DBQuest(string name, int step, string charId)
 		{
 			m_name = name;
 			m_step = step;
-			m_characterid = charname;
+			m_characterid = charId;
 		}
 		/// <summary>
 		/// Quest Name

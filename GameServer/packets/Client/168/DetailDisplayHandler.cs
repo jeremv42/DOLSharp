@@ -143,12 +143,6 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 						#region Old Delve
 
-						if (invItem is InventoryArtifact artifact)
-						{
-							artifact.Delve(objectInfo, client.Player);
-							break;
-						}
-
 						//**********************************
 						//show crafter name
 						//**********************************
@@ -346,89 +340,27 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 							item = merchant.TradeItems.GetItem(pagenumber, (eMerchantWindowSlot)slotnumber);
 						}
-						else if (objectType == 19)
+						else
 						{
-							ushort questID = (ushort)((extraId << 12) | (ushort)(objectId >> 4));
+							ushort questId = (ushort)((extraId << 12) | (ushort)(objectId >> 4));
 							int index = objectId & 0x0F;
 
-							GameLiving questGiver = client.Player.TargetObject as GameLiving;
+							ChatUtil.SendDebugMessage(client, $"Quest ID: {questId}");
 
-							ChatUtil.SendDebugMessage(client, $"Quest ID: {questID}");
-
-							if (questID == 0)
+							if (questId == 0)
 								return; // questID == 0, wrong ID ?
-							
-							if (questID <= DataQuest.DATAQUEST_CLIENTOFFSET)
+
+							DataQuestJsonMgr.Quests.TryGetValue(questId, out var quest);
+							if (quest == null)
 							{
-								AbstractQuest q = client.Player.IsDoingQuest(QuestMgr.GetQuestTypeForID(questID));
-
-								if (q == null)
-								{
-									// player not doing quest, most likely on offer screen
-									if (questGiver != null)
-									{
-										try
-										{
-											q = (AbstractQuest)Activator.CreateInstance(QuestMgr.GetQuestTypeForID(questID), client.Player, 1);
-										}
-										catch
-										{
-											// we tried!
-										}
-									}
-
-									if (q == null)
-									{
-										ChatUtil.SendDebugMessage(client, "Can't find or create quest!");
-										return;
-									}
-								}
-
-								if (!(q is RewardQuest))
-									return; // this is not new quest
-
-								List<ItemTemplate> rewards = null;
-								if (index < 8)
-									rewards = (q as RewardQuest).Rewards.BasicItems;
-								else
-								{
-									rewards = (q as RewardQuest).Rewards.OptionalItems;
-									index -= 8;
-								}
-								if (rewards != null && index >= 0 && index < rewards.Count)
-								{
-									item = rewards[index];
-								}
-							}
-							else // Data quest support, check for RewardQuest type
-							{
-								DataQuest dq = null;
-
-								foreach (DBDataQuest d in GameObject.DataQuestCache)
-								{
-									if (d.ID == questID - DataQuest.DATAQUEST_CLIENTOFFSET)
-									{
-										dq = new DataQuest(d);
-										break;
-									}
-								}
-
-								if (dq != null && dq.StartType == DataQuest.eStartType.RewardQuest)
-								{
-									List<ItemTemplate> rewards = null;
-									if (index < 8)
-										rewards = dq.FinalRewards;
-									else
-									{
-										rewards = dq.OptionalRewards;
-										index -= 8;
-									}
-
-									if (rewards != null && index >= 0 && index < rewards.Count)
-										item = rewards[index];
-								}
+								ChatUtil.SendDebugMessage(client, "Can't find this quest!");
+								return;
 							}
 
+							if (index < 8 && quest.FinalRewardItemTemplates.Count > index)
+								item = quest.FinalRewardItemTemplates[index];
+							else if (index >= 8 && quest.OptionalRewardItemTemplates.Count > index - 8)
+								item = quest.OptionalRewardItemTemplates[index - 8];
 						}
 
 
@@ -500,42 +432,24 @@ namespace DOL.GS.PacketHandler.Client.v168
 				// reward quest delve 1.115+	
 				case 29: // patch 0020 delve items in quest window 1.115+
 					{
-						if (objectType == 29)
+						var index = objectId & 0x0F;
+						var questId = (ushort)(objectId >> 4);
+
+						ChatUtil.SendDebugMessage(client, $"Quest ID: {questId}");
+
+						if (questId == 0)
+							return;
+						DataQuestJsonMgr.Quests.TryGetValue(questId, out var quest);
+						if (quest == null)
 						{
-							var index = objectId & 0x0F;
-							var questId = (ushort)(objectId >> 4);
-
-							ChatUtil.SendDebugMessage(client, $"Quest ID: {questId}");
-
-							if (questId == 0)
-								return;
-							var aQuest = QuestMgr.GetQuestFromId(questId);
-							if (aQuest == null)
-								return;
-
-							if (aQuest is DataQuest dq && dq.StartType == DataQuest.eStartType.RewardQuest)
-							{
-								List<ItemTemplate> rewards = null;
-								if (index < 8)
-									rewards = dq.FinalRewards;
-								else
-								{
-									rewards = dq.OptionalRewards;
-									index -= 8;
-								}
-								if (rewards != null && index >= 0 && index < rewards.Count)
-								{
-									item = rewards[index];
-								}
-							}
-							else if (aQuest is IQuestData quest)
-							{
-								if (index < 8 && quest.FinalRewards.BasicItems.Count > index)
-									item = quest.FinalRewards.BasicItems[index];
-								else if (index >= 8 && quest.FinalRewards.OptionalItems.Count > index - 8)
-									item = quest.FinalRewards.OptionalItems[index - 8];
-							}
+							ChatUtil.SendDebugMessage(client, "Can't find this quest!");
+							return;
 						}
+
+						if (index < 8 && quest.FinalRewardItemTemplates.Count > index)
+							item = quest.FinalRewardItemTemplates[index];
+						else if (index >= 8 && quest.OptionalRewardItemTemplates.Count > index - 8)
+							item = quest.OptionalRewardItemTemplates[index - 8];
 
 						if (item == null)
 							return;

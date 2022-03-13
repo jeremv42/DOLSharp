@@ -8944,8 +8944,8 @@ namespace DOL.GS
 
 					// Artifacts don't require charges.
 
-					if ((type < 2 && useItem.SpellID > 0 && useItem.Charges < 1 && useItem.MaxCharges > -1 && !(useItem is InventoryArtifact)) ||
-					    (type == 2 && useItem.SpellID1 > 0 && useItem.Charges1 < 1 && useItem.MaxCharges1 > -1 && !(useItem is InventoryArtifact)) ||
+					if ((type < 2 && useItem.SpellID > 0 && useItem.Charges < 1 && useItem.MaxCharges > -1) ||
+					    (type == 2 && useItem.SpellID1 > 0 && useItem.Charges1 < 1 && useItem.MaxCharges1 > -1) ||
 					    (useItem.PoisonSpellID > 0 && useItem.PoisonCharges < 1))
 					{
 						Out.SendMessage("The " + useItem.Name + " is out of charges.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
@@ -12652,7 +12652,7 @@ namespace DOL.GS
 			}
 
 			// Load ML steps of player ...
-			var mlsteps = DOLDB<DBCharacterXMasterLevel>.SelectObjects(DB.Column(nameof(DBCharacterXMasterLevel.Character_ID)).IsEqualTo(QuestPlayerID));
+			var mlsteps = DOLDB<DBCharacterXMasterLevel>.SelectObjects(DB.Column(nameof(DBCharacterXMasterLevel.Character_ID)).IsEqualTo(InternalID));
 			if (mlsteps.Count > 0)
 			{
 				foreach (DBCharacterXMasterLevel mlstep in mlsteps)
@@ -12725,6 +12725,14 @@ namespace DOL.GS
 				}
 				GameServer.Database.SaveObject(DBCharacter);
 				Inventory.SaveIntoDatabase(InternalID);
+				var questsToSave = new List<PlayerQuest>();
+				lock (QuestList)
+				{
+					questsToSave.AddRange(QuestList);
+					questsToSave.AddRange(QuestListFinished);
+				}
+				foreach (var quest in questsToSave)
+						quest.SaveIntoDatabase();
 
 				DOLCharacters cachedCharacter = null;
 
@@ -13339,15 +13347,6 @@ namespace DOL.GS
 		#endregion
 
 		#region Quest
-
-		/// <summary>
-		/// Get the player ID used for quests.  Usually InternalID, provided for customization
-		/// </summary>
-		public virtual string QuestPlayerID
-		{
-			get { return InternalID; }
-		}
-
 		/// <summary>
 		/// Load all the ongoing or completed quests for this player
 		/// </summary>
@@ -13357,36 +13356,17 @@ namespace DOL.GS
 			m_questListFinished.Clear();
 
 			// Scripted quests
-			var quests = DOLDB<DBQuest>.SelectObjects(DB.Column(nameof(DBQuest.Character_ID)).IsEqualTo(QuestPlayerID));
+			var quests = DOLDB<DBQuest>.SelectObjects(DB.Column(nameof(DBQuest.Character_ID)).IsEqualTo(InternalID));
 			foreach (DBQuest dbquest in quests)
 			{
-				AbstractQuest quest = AbstractQuest.LoadFromDatabase(this, dbquest);
-				if (quest != null)
+				var quest = new PlayerQuest(this, dbquest);
+				if (quest.Quest?.Name != "ERROR")
 				{
-					if (quest.Step == -1)
-						m_questListFinished.Add(quest);
-					else
-						m_questList.Add(quest);
-				}
-			}
-
-			// Data driven quests for this player
-			var dataQuests = DOLDB<CharacterXDataQuest>.SelectObjects(DB.Column(nameof(CharacterXDataQuest.Character_ID)).IsEqualTo(QuestPlayerID));
-			foreach (CharacterXDataQuest quest in dataQuests)
-			{
-				DBDataQuest dbDataQuest = GameServer.Database.FindObjectByKey<DBDataQuest>(quest.DataQuestID);
-				if (dbDataQuest != null && dbDataQuest.StartType != (byte)DataQuest.eStartType.Collection)
-				{
-					DataQuest dataQuest = new DataQuest(this, dbDataQuest, quest);
-
-					if (quest.Step > 0)
-					{
-						m_questList.Add((AbstractQuest)dataQuest);
-					}
-					else if (quest.Count > 0)
-					{
-						m_questListFinished.Add((AbstractQuest)dataQuest);
-					}
+					lock(m_questList)
+						if (quest.Status == eQuestStatus.Done)
+							m_questListFinished.Add(quest);
+						else
+							m_questList.Add(quest);
 				}
 			}
 		}
@@ -13394,12 +13374,12 @@ namespace DOL.GS
 		/// <summary>
 		/// Holds all the quests currently active on this player
 		/// </summary>
-		protected List<AbstractQuest> m_questList = new List<AbstractQuest>();
+		protected readonly List<PlayerQuest> m_questList = new();
 
 		/// <summary>
 		/// Holds all already finished quests off this player
 		/// </summary>
-		protected List<AbstractQuest> m_questListFinished = new List<AbstractQuest>();
+		protected readonly List<PlayerQuest> m_questListFinished = new();
 
 		protected RegionTimer m_questActionTimer = null;
 
@@ -13412,7 +13392,7 @@ namespace DOL.GS
 		/// <summary>
 		/// Gets the questlist of this player
 		/// </summary>
-		public virtual List<AbstractQuest> QuestList
+		public virtual List<PlayerQuest> QuestList
 		{
 			get { return m_questList; }
 		}
@@ -13420,7 +13400,7 @@ namespace DOL.GS
 		/// <summary>
 		/// Gets the finished quests of this player
 		/// </summary>
-		public virtual List<AbstractQuest> QuestListFinished
+		public virtual List<PlayerQuest> QuestListFinished
 		{
 			get { return m_questListFinished; }
 		}
@@ -13429,7 +13409,7 @@ namespace DOL.GS
 		/// Add a quest to the players finished list
 		/// </summary>
 		/// <param name="quest"></param>
-		public void AddFinishedQuest(AbstractQuest quest)
+		public void AddFinishedQuest(PlayerQuest quest)
 		{
 			lock (m_questListFinished)
 			{
@@ -13443,72 +13423,30 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="quest">The quest to add</param>
 		/// <returns>true if added, false if player is already doing the quest!</returns>
-		public bool AddQuest(AbstractQuest quest)
+		public bool AddQuest(PlayerQuest quest)
 		{
 			lock (QuestList)
 			{
-				if (IsDoingQuest(quest) != null)
+				if (IsDoingQuest(quest.Quest) != null)
 					return false;
 
 				m_questList.Add(quest);
-				quest.OnQuestAssigned(this);
+				quest.Quest.OnQuestAssigned(this);
 			}
 			Out.SendQuestUpdate(quest);
 			return true;
 		}
 
 		/// <summary>
-		/// Remove credit for this type of encounter.
-		/// Used for scripted quests
-		/// </summary>
-		/// <param name="questType"></param>
-		/// <returns></returns>
-		public bool RemoveEncounterCredit(Type questType)
-		{
-			if (questType == null)
-				return false;
-
-			lock (QuestListFinished)
-			{
-				foreach (AbstractQuest q in m_questListFinished)
-				{
-					if (q is DataQuest == false)
-					{
-						if (q.GetType().Equals(questType) && q.Step == -1)
-						{
-							m_questListFinished.Remove(q);
-							q.DeleteFromDatabase();
-							return true;
-						}
-					}
-				}
-			}
-
-			return false;
-		}
-
-
-		/// <summary>
 		/// Checks if a player has done a specific quest type
 		/// This is used for scripted quests
 		/// </summary>
-		/// <param name="questType">The quest type</param>
+		/// <param name="quest">The quest type</param>
 		/// <returns>the number of times the player did this quest</returns>
-		public int HasFinishedQuest(Type questType)
+		public int HasFinishedQuest(DataQuestJson quest)
 		{
-			int counter = 0;
 			lock (QuestListFinished)
-			{
-				foreach (AbstractQuest q in m_questListFinished)
-				{
-					if (q is DataQuest == false)
-					{
-						if (q.GetType().Equals(questType))
-							counter++;
-					}
-				}
-			}
-			return counter;
+				return QuestListFinished.Count(q => q.Quest == quest);
 		}
 
 		/// <summary>
@@ -13517,42 +13455,11 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="questType">The quest type</param>
 		/// <returns>the quest if player is doing the quest or null if not</returns>
-		public AbstractQuest IsDoingQuest(AbstractQuest quest)
+		public PlayerQuest IsDoingQuest(DataQuestJson quest)
 		{
 			lock (QuestList)
-			{
-				foreach (AbstractQuest q in m_questList)
-				{
-					if (q.GetType().Equals(quest.GetType()) && q.IsDoingQuest(quest))
-						return q;
-				}
-			}
-			return null;
+				return m_questList.Find(q => q.Quest == quest);
 		}
-
-
-		/// <summary>
-		/// Checks if this player is currently doing the specified quest type
-		/// This is used for scripted quests
-		/// </summary>
-		/// <param name="questType">The quest type</param>
-		/// <returns>the quest if player is doing the quest or null if not</returns>
-		public AbstractQuest IsDoingQuest(Type questType)
-		{
-			lock (QuestList)
-			{
-				foreach (AbstractQuest q in m_questList)
-				{
-					if (q is DataQuest == false)
-					{
-						if (q.GetType().Equals(questType))
-							return q;
-					}
-				}
-			}
-			return null;
-		}
-
 		#endregion
 
 		#region Notify
@@ -13564,8 +13471,7 @@ namespace DOL.GS
 			// events will only fire for currently active quests.
 			lock (QuestList)
 			{
-				List<AbstractQuest> cloneList = new List<AbstractQuest>(m_questList);
-				foreach (AbstractQuest q in cloneList)
+				foreach (var q in m_questList)
 				{
 					// player forwards every single notify message to all active quests
 					q.Notify(e, sender, args);
@@ -15553,7 +15459,7 @@ namespace DOL.GS
 			{
 				// Register new step
 				DBCharacterXMasterLevel newStep = new DBCharacterXMasterLevel();
-				newStep.Character_ID = QuestPlayerID;
+				newStep.Character_ID = InternalID;
 				newStep.MLLevel = mlLevel;
 				newStep.MLStep = step;
 				newStep.StepCompleted = true;
@@ -15635,25 +15541,6 @@ namespace DOL.GS
 			get { return m_minoRelic; }
 			set { m_minoRelic = value; }
 		}
-		#endregion
-
-		#region Artifacts
-
-		/// <summary>
-		/// Checks if the player's class has at least one version of the artifact specified available to them.
-		/// </summary>
-		/// <param name="artifactID"></param>
-		/// <returns>True when at least one version exists, false when no versions are available.</returns>
-		public bool CanReceiveArtifact(string artifactID)
-		{
-			Dictionary<String, ItemTemplate> possibleVersions = ArtifactMgr.GetArtifactVersions(artifactID, (eCharacterClass)CharacterClass.ID, Realm);
-
-			if (possibleVersions.Count == 0)
-				return false;
-
-			return true;
-		}
-
 		#endregion
 
 		#region Constructors

@@ -196,7 +196,7 @@ namespace DOL.GS
 							{
 								if (drop.MinLevel <= player.Level)
 								{
-									var hasDrop = DOLDB<CharacterXOneTimeDrop>.SelectObject(DB.Column(nameof(CharacterXOneTimeDrop.CharacterID)).IsEqualTo(player.QuestPlayerID).And(DB.Column(nameof(CharacterXOneTimeDrop.ItemTemplateID)).IsEqualTo(drop.ItemTemplateID)));
+									var hasDrop = DOLDB<CharacterXOneTimeDrop>.SelectObject(DB.Column(nameof(CharacterXOneTimeDrop.CharacterID)).IsEqualTo(player.InternalID).And(DB.Column(nameof(CharacterXOneTimeDrop.ItemTemplateID)).IsEqualTo(drop.ItemTemplateID)));
 
 									if (hasDrop == null)
 									{
@@ -207,7 +207,7 @@ namespace DOL.GS
 											if (player.Inventory.AddItem(eInventorySlot.FirstEmptyBackpack, GameInventoryItem.Create(item)))
 											{
 												CharacterXOneTimeDrop charXDrop = new CharacterXOneTimeDrop();
-												charXDrop.CharacterID = player.QuestPlayerID;
+												charXDrop.CharacterID = player.InternalID;
 												charXDrop.ItemTemplateID = drop.ItemTemplateID;
 												GameServer.Database.AddObject(charXDrop);
 

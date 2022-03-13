@@ -65,8 +65,7 @@ namespace DOL.GS.Commands
 		"/player startml - Start this players Master Level training.",
 		"/player setml <level> - Set this players current Master Level.",
 		"/player setmlstep <level> <step> [false] - Sets a step for an ML level to finished. 0 to set as unfinished.",
-		"/player articredit <artifact>",
-        "/player allchars <PlayerName>", 
+        "/player allchars <PlayerName>",
         "/player class <list|classID> - view a list of classes, or change the targets class.",
         "/player areas - list all the areas the player is currently inside of ",
         "/player quest [remove <quest name>] - Manage the player's quests"
@@ -85,26 +84,6 @@ namespace DOL.GS.Commands
 
             switch (args[1])
             {
-                #region articredit
-
-                case "articredit":
-                    {
-                        if (args.Length != 3)
-                        {
-                            DisplaySyntax(client);
-                            return;
-                        }
-
-                        var player = client.Player.TargetObject as GamePlayer;
-                        if (player == null)
-                            player = client.Player;
-
-                        ArtifactMgr.GrantArtifactCredit(player, args[2]);
-                        break;
-                    }
-
-                #endregion
-
                 #region name
 
                 case "name":
@@ -2201,24 +2180,6 @@ namespace DOL.GS.Commands
                         foreach (AbstractArea area in targetPlayer.CurrentAreas)
                         {
                             string areaInfo = area.GetType().Name + ", ID:" + area.ID;
-                            if (area is QuestSearchArea)
-                            {
-                                QuestSearchArea questArea = area as QuestSearchArea;
-
-                                if (questArea.DataQuest != null)
-                                {
-                                    areaInfo += " : DataQuest ID: " + questArea.DataQuest.ID;
-
-                                    if (questArea.Step > 0)
-                                    {
-                                        areaInfo += ", Area Quest Step = " + questArea.Step;
-                                    }
-                                    else
-                                    {
-                                        areaInfo += ", Eligible = " + questArea.DataQuest.CheckQuestQualification(targetPlayer);
-                                    }
-                                }
-                            }
                             areaList.Add(areaInfo);
                         }
 
@@ -2238,21 +2199,21 @@ namespace DOL.GS.Commands
                             var questName = string.Join(" ", args.Skip(3)).ToLower();
                             lock (targetPlayer.QuestList)
                             {
-                                var found = targetPlayer.QuestList.FirstOrDefault(q => q.Name.ToLower() == questName);
+                                var found = targetPlayer.QuestList.FirstOrDefault(q => q.Quest.Id.ToString() == questName || q.Quest.Name.ToLower() == questName);
                                 if (found != null)
                                 {
                                     found.AbortQuest();
-                                    DisplayMessage(client, $"Quest {found.Name} removed from player {targetPlayer.Name}");
+                                    DisplayMessage(client, $"Quest {found.Quest.Name} removed from player {targetPlayer.Name}");
                                 }
                             }
                             lock (targetPlayer.QuestListFinished)
                             {
-                                var found = targetPlayer.QuestListFinished.FirstOrDefault(q => q.Name.ToLower() == questName);
+                                var found = targetPlayer.QuestListFinished.FirstOrDefault(q => q.Quest.Id.ToString() == questName || q.Quest.Name.ToLower() == questName);
                                 if (found != null)
                                 {
                                     targetPlayer.QuestListFinished.Remove(found);
                                     found.AbortQuest();
-                                    DisplayMessage(client, $"Quest {found.Name} removed from player {targetPlayer.Name}");
+                                    DisplayMessage(client, $"Quest {found.Quest.Name} removed from player {targetPlayer.Name}");
                                 }
                             }
                         }
@@ -2265,17 +2226,10 @@ namespace DOL.GS.Commands
                         var questList = new List<string>();
                         lock (targetPlayer.QuestList)
                         {
-                            if (targetPlayer.QuestList.Any(q => q.Step != -1))
-                                questList.Add("[Quests in progress]");
-                            foreach (var quest in targetPlayer.QuestList.Where(q => q.Step != -1))
-                                questList.Add($"[Step {quest.Step}] {quest.Name} (level {quest.Level})");
-                        }
-                        lock (targetPlayer.QuestListFinished)
-                        {
-                            if (targetPlayer.QuestListFinished.Count > 0)
-                                questList.Add("[Quests finished]");
+                            foreach (var quest in targetPlayer.QuestList.Where(q => q.Status != eQuestStatus.Done))
+                                questList.Add($"[In progress] {quest.Quest.Id}. {quest.Quest.Name} (level {quest.Quest.MinLevel})");
                             foreach (var quest in targetPlayer.QuestListFinished)
-                                questList.Add($"[Complete] {quest.Name} (level {quest.Level})");
+                                questList.Add($"[Complete] {quest.Quest.Name} (level {quest.Quest.MinLevel})");
                         }
                         client.Player.Out.SendCustomTextWindow($"[{targetPlayer.Name}'s quests]", questList);
                         return;

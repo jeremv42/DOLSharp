@@ -94,10 +94,6 @@ namespace DOL.GS.Behaviour
                     result = (eEmote)Enum.Parse(typeof(eEmote), Convert.ToString(obj), true);
                 }
             }
-            else if (destinationType == typeof(GameLiving))
-            {
-                result = QuestMgr.ResolveLiving(obj);
-            }
             else if (destinationType == typeof(ItemTemplate))
             {
                 if (obj is ItemTemplate)

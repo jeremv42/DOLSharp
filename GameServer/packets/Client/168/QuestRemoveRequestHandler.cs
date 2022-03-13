@@ -33,15 +33,15 @@ namespace DOL.GS.PacketHandler.Client.v168
 			ushort unk2 = packet.ReadShort();
 			ushort unk3 = packet.ReadShort();
 
-			AbstractQuest quest = null;
+			PlayerQuest quest = null;
 
 			int index = 0;
 			lock (client.Player.QuestList)
 			{
-				foreach (AbstractQuest q in client.Player.QuestList)
+				foreach (var q in client.Player.QuestList)
 				{
 					// ignore completed quests
-					if (q.Step == -1)
+					if (q.Status == eQuestStatus.Done)
 						continue;
 
 					if (index == questIndex)
@@ -50,7 +50,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 						break;
 					}
 
-				index++;
+					index++;
 				}
 			}
 

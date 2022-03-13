@@ -772,13 +772,6 @@ namespace DOL.GS
 
 			m_spawnTick = CurrentRegion.Time;
 
-			if (m_isDataQuestsLoaded == false)
-			{
-				// for optimization just load these once
-				LoadDataQuests();
-				m_isDataQuestsLoaded = true;
-			}
-
 			return true;
 		}
 
@@ -863,122 +856,6 @@ namespace DOL.GS
 
 		#endregion
 
-		#region Quests
-
-		/// <summary>
-		/// A cache of every DBDataQuest object
-		/// </summary>
-		protected static ILookup<ushort, DBDataQuest> m_dataQuestCache = null;
-
-		/// <summary>
-		/// List of DataQuests available for this object
-		/// </summary>
-		protected List<DataQuest> m_dataQuests = new List<DataQuest>();
-
-		/// <summary>
-		/// Flag to prevent loading quests on every respawn
-		/// </summary>
-		protected bool m_isDataQuestsLoaded = false;
-
-		/// <summary>
-		/// Fill the data quest cache with all DBDataQuest objects
-		/// </summary>
-		public static void FillDataQuestCache()
-		{
-			if (m_dataQuestCache != null)
-			{
-				m_dataQuestCache = null;
-			}
-
-			m_dataQuestCache = GameServer.Database.SelectAllObjects<DBDataQuest>()
-				.ToLookup(k => k.StartRegionID);
-		}
-
-		/// <summary>
-		/// Get a preloaded list of all data quests
-		/// </summary>
-		public static IList<DBDataQuest> DataQuestCache
-		{
-			get { return m_dataQuestCache.SelectMany(k => k).ToList(); }
-		}
-
-		/// <summary>
-		/// Load any data driven quests for this object
-		/// </summary>
-		public void LoadDataQuests(GamePlayer player = null)
-		{
-			if (m_dataQuestCache == null)
-			{
-				FillDataQuestCache();
-			}
-
-			m_dataQuests.Clear();
-			
-			try
-			{
-				foreach (DBDataQuest quest in m_dataQuestCache[CurrentRegionID])
-				{
-					if (quest.StartName == Name)
-					{
-						DataQuest dq = new DataQuest(quest, this);
-						AddDataQuest(dq);
-	
-	                    // if a player forced the reload report any errors
-	                    if (player != null && dq.LastErrorText != "")
-	                    {
-	                        ChatUtil.SendErrorMessage(player, dq.LastErrorText);
-	                    }
-					}
-				}
-			}
-			catch
-			{
-			}
-
-			try
-			{
-				foreach (DBDataQuest quest in m_dataQuestCache[0])
-				{
-					if (quest.StartName == Name)
-					{
-						DataQuest dq = new DataQuest(quest, this);
-						AddDataQuest(dq);
-	
-	                    // if a player forced the reload report any errors
-	                    if (player != null && dq.LastErrorText != "")
-	                    {
-	                        ChatUtil.SendErrorMessage(player, dq.LastErrorText);
-	                    }
-					}
-				}
-			}
-			catch
-			{
-			}
-		}
-
-		public void AddDataQuest(DataQuest quest)
-		{
-			if (m_dataQuests.Contains(quest) == false)
-				m_dataQuests.Add(quest);
-		}
-
-		public void RemoveDataQuest(DataQuest quest)
-		{
-			if (m_dataQuests.Contains(quest))
-				m_dataQuests.Remove(quest);
-		}
-
-		/// <summary>
-		/// All the data driven quests for this object
-		/// </summary>
-		public List<DataQuest> DataQuestList
-		{
-			get { return m_dataQuests; }
-		}
-
-		#endregion Quests
-
 		#region Interact
 
         /// <summary>
@@ -1005,13 +882,6 @@ namespace DOL.GS
 
 			Notify(GameObjectEvent.Interact, this, new InteractEventArgs(player));
 			player.Notify(GameObjectEvent.InteractWith, player, new InteractWithEventArgs(this));
-
-			foreach (DataQuest q in DataQuestList)
-			{
-				// Notify all our potential quests of the interaction so we can check for quest offers
-				q.Notify(GameObjectEvent.Interact, this, new InteractEventArgs(player));
-			}
-
 			return true;
 		}
 
@@ -1348,11 +1218,6 @@ namespace DOL.GS
 		/// <returns>true if the item was successfully received</returns>
 		public virtual bool ReceiveItem(GameLiving source, InventoryItem item)
 		{
-			foreach (AbstractQuest quest in DataQuestList)
-			{
-				quest.Notify(GameObjectEvent.ReceiveItem, this, new ReceiveItemEventArgs(source, this, item));
-			}
-
 			if (item == null || item.OwnerID == null)
 			{
 				// item was taken

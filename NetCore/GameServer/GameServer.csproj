@@ -52,6 +52,66 @@
     <Compile Remove="..\..\GameServer\gameutils\DOLScriptCompiler.cs" />
     <EmbeddedResource Include="..\..\GameServer\config\*" />
     <TranslationFiles Include="..\..\GameServer\language\**\*.txt" />
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\AbortQuestGoal.cs">
+      <Link>quests\JsonQuests\Goals\AbortQuestGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\CollectGoal.cs">
+      <Link>quests\JsonQuests\Goals\CollectGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\DataQuestJsonGoal.cs">
+      <Link>quests\JsonQuests\Goals\DataQuestJsonGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\DummyGoal.cs">
+      <Link>quests\JsonQuests\Goals\DummyGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\EndGoal.cs">
+      <Link>quests\JsonQuests\Goals\EndGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\EnterAreaGoal.cs">
+      <Link>quests\JsonQuests\Goals\EnterAreaGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\InteractGoal.cs">
+      <Link>quests\JsonQuests\Goals\InteractGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\KilledGoal.cs">
+      <Link>quests\JsonQuests\Goals\KilledGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\KillGoal.cs">
+      <Link>quests\JsonQuests\Goals\KillGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\StopGoal.cs">
+      <Link>quests\JsonQuests\Goals\StopGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\TimerGoal.cs">
+      <Link>quests\JsonQuests\Goals\TimerGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\UseItemGoal.cs">
+      <Link>quests\JsonQuests\Goals\UseItemGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\Goals\WhisperGoal.cs">
+      <Link>quests\JsonQuests\Goals\WhisperGoal.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\DataQuestJson.cs">
+      <Link>quests\JsonQuests\DataQuestJson.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\DataQuestJsonMgr.cs">
+      <Link>quests\JsonQuests\DataQuestJsonMgr.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\DBDataQuestJson.cs">
+      <Link>quests\JsonQuests\DBDataQuestJson.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\GMQuestCommand.cs">
+      <Link>quests\JsonQuests\GMQuestCommand.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\PlayerQuest.cs">
+      <Link>quests\JsonQuests\PlayerQuest.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\core\IEnumerableExts.cs">
+      <Link>core\CollectionExts.cs</Link>
+    </Compile>
+    <Compile Update="..\..\GameServer\quests\JsonQuests\IQuest.cs">
+      <Link>quests\JsonQuests\IQuest.cs</Link>
+    </Compile>
   </ItemGroup>
   <Target Name="CopyFiles" AfterTargets="AfterBuild">
     <Copy SourceFiles="@(TranslationFiles)" DestinationFiles="@(TranslationFiles->'$(MSBuildProjectDirectory)\..\$(Configuration)\languages\%(RecursiveDir)%(Filename)%(Extension)')" />

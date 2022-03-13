@@ -507,8 +507,6 @@ namespace DOL.GS.Keeps
 
 			list.Add(text);
 
-			ChatUtil.SendDebugMessage(player, "Health = " + Health);
-
 			if (IsAttackableDoor)
 			{
 				// Attempt to fix issue where some players see door as closed when it should be broken open

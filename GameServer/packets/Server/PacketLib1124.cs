@@ -441,15 +441,15 @@ namespace DOL.GS.PacketHandler
 			}
 		}
 
-		public override void SendQuestUpdate(AbstractQuest quest)
+		public override void SendQuestUpdate(IQuestPlayerData quest)
 		{
 			int questIndex = 1;
 			// add check for null due to LD
-			if (m_gameClient != null && m_gameClient.Player != null && m_gameClient.Player.QuestList != null)
+			if (m_gameClient?.Player?.QuestList != null)
 			{
 				lock (m_gameClient.Player.QuestList)
 				{
-					foreach (AbstractQuest q in m_gameClient.Player.QuestList)
+					foreach (var q in m_gameClient.Player.QuestList)
 					{
 						if (q == quest)
 						{
@@ -457,7 +457,7 @@ namespace DOL.GS.PacketHandler
 							break;
 						}
 
-						if (q.Step != -1)
+						if (q.Status != eQuestStatus.Done)
 							questIndex++;
 					}
 				}
@@ -475,9 +475,9 @@ namespace DOL.GS.PacketHandler
 			int questIndex = 1;
 			lock (m_gameClient.Player.QuestList)
 			{
-				foreach (AbstractQuest quest in m_gameClient.Player.QuestList)
+				foreach (var quest in m_gameClient.Player.QuestList)
 				{
-					SendQuestPacket((quest.Step == 0 || quest == null) ? null : quest, questIndex++);
+					SendQuestPacket(quest, questIndex++);
 				}
 			}
 
@@ -485,32 +485,22 @@ namespace DOL.GS.PacketHandler
 				SendQuestPacket(null, questIndex++);
 		}
 
-		public override void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, DataQuest quest)
+		public override void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest)
 		{
 			SendQuestWindow(questNPC, player, quest, true);
 		}
 
-		public override void SendQuestOfferWindow(GameNPC questNPC, GamePlayer player, IQuestData quest)
-		{
-			SendQuestWindow(questNPC, player, quest, true);
-		}
-		public override void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, DataQuest quest)
+		public override void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest)
 		{
 			SendQuestWindow(questNPC, player, quest, false);
 		}
 
-		public override void SendQuestRewardWindow(GameNPC questNPC, GamePlayer player, IQuestData quest)
-		{
-			SendQuestWindow(questNPC, player, quest, false);
-		}
-
-		protected override void SendQuestWindow(GameNPC questNPC, GamePlayer player, DataQuest quest, bool offer)
+		protected override void SendQuestWindow(GameNPC questNPC, GamePlayer player, IQuestPlayerData quest, bool offer)
 		{
 			using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.Dialog)))
 			{
-				ushort QuestID = quest.ClientQuestID;
 				pak.WriteShort((offer) ? (byte)0x22 : (byte)0x21); // Dialog
-				pak.WriteShort(QuestID);
+				pak.WriteShort(quest.Quest.Id);
 				pak.WriteShort((ushort)questNPC.ObjectID);
 				pak.WriteByte(0x00); // unknown
 				pak.WriteByte(0x00); // unknown
@@ -518,94 +508,9 @@ namespace DOL.GS.PacketHandler
 				pak.WriteByte(0x00); // unknown
 				pak.WriteByte((offer) ? (byte)0x02 : (byte)0x01); // Accept/Decline or Finish/Not Yet
 				pak.WriteByte(0x01); // Wrap
-				pak.WritePascalString(quest.Name);
+				pak.WritePascalString(quest.Quest.Name);
 
-				String personalizedSummary = BehaviourUtils.GetPersonalizedMessage(quest.Description, player);
-				if (personalizedSummary.Length > 255)
-				{
-					pak.WritePascalString(personalizedSummary.Substring(0, 255)); // Summary is max 255 bytes or client will crash !
-				}
-				else
-				{
-					pak.WritePascalString(personalizedSummary);
-				}
-
-				if (offer)
-				{
-					String personalizedStory = BehaviourUtils.GetPersonalizedMessage(quest.Story, player);
-
-					if (personalizedStory.Length > MAX_STORY_LENGTH)
-					{
-						pak.WriteShort(MAX_STORY_LENGTH);
-						pak.WriteStringBytes(personalizedStory.Substring(0, MAX_STORY_LENGTH));
-					}
-					else
-					{
-						pak.WriteShort((ushort)personalizedStory.Length);
-						pak.WriteStringBytes(personalizedStory);
-					}
-				}
-				else
-				{
-					if (quest.FinishText.Length > MAX_STORY_LENGTH)
-					{
-						pak.WriteShort(MAX_STORY_LENGTH);
-						pak.WriteStringBytes(quest.FinishText.Substring(0, MAX_STORY_LENGTH));
-					}
-					else
-					{
-						pak.WriteShort((ushort)quest.FinishText.Length);
-						pak.WriteStringBytes(quest.FinishText);
-					}
-				}
-
-				pak.WriteShort(QuestID);
-				pak.WriteByte((byte)quest.StepTexts.Count); // #goals count
-				foreach (string text in quest.StepTexts)
-				{
-					string t = text;
-
-					// Need to protect for any text length > 255.  It does not crash client but corrupts RewardQuest display -Tolakram
-					if (text.Length > 253)
-					{
-						t = text.Substring(0, 253);
-					}
-
-					pak.WritePascalString(String.Format("{0}\r", t));
-				}
-				pak.WriteInt((uint)(quest.MoneyReward())); // patch 0016
-				pak.WriteByte((byte)quest.ExperiencePercent(player)); // patch 0016
-				pak.WriteByte((byte)quest.FinalRewards.Count);
-				foreach (ItemTemplate reward in quest.FinalRewards)
-				{
-					WriteItemData(pak, GameInventoryItem.Create(reward));
-				}
-				pak.WriteByte((byte)quest.NumOptionalRewardsChoice);
-				pak.WriteByte((byte)quest.OptionalRewards.Count);
-				foreach (ItemTemplate reward in quest.OptionalRewards)
-				{
-					WriteItemData(pak, GameInventoryItem.Create(reward));
-				}
-				SendTCP(pak);
-			}
-		}
-
-		protected override void SendQuestWindow(GameNPC questNPC, GamePlayer player, IQuestData quest, bool offer)
-		{
-			using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.Dialog)))
-			{
-				pak.WriteShort((offer) ? (byte)0x22 : (byte)0x21); // Dialog
-				pak.WriteShort(quest.QuestId);
-				pak.WriteShort((ushort)questNPC.ObjectID);
-				pak.WriteByte(0x00); // unknown
-				pak.WriteByte(0x00); // unknown
-				pak.WriteByte(0x00); // unknown
-				pak.WriteByte(0x00); // unknown
-				pak.WriteByte((offer) ? (byte)0x02 : (byte)0x01); // Accept/Decline or Finish/Not Yet
-				pak.WriteByte(0x01); // Wrap
-				pak.WritePascalString(quest.Name);
-
-				string personalizedSummary = BehaviourUtils.GetPersonalizedMessage(quest.Summary, player);
+				string personalizedSummary = BehaviourUtils.GetPersonalizedMessage(quest.Quest.Summary, player);
 				if (personalizedSummary.Length > 255)
 					pak.WritePascalString(personalizedSummary.Substring(0, 255)); // Summary is max 255 bytes !
 				else
@@ -613,7 +518,7 @@ namespace DOL.GS.PacketHandler
 
 				if (offer)
 				{
-					string personalizedStory = BehaviourUtils.GetPersonalizedMessage(quest.Story, player);
+					string personalizedStory = BehaviourUtils.GetPersonalizedMessage(quest.Quest.Story, player);
 
 					if (personalizedStory.Length > ServerProperties.Properties.MAX_REWARDQUEST_DESCRIPTION_LENGTH)
 					{
@@ -628,19 +533,19 @@ namespace DOL.GS.PacketHandler
 				}
 				else
 				{
-					if (quest.Conclusion.Length > (ushort)ServerProperties.Properties.MAX_REWARDQUEST_DESCRIPTION_LENGTH)
+					if (quest.Quest.Conclusion.Length > (ushort)ServerProperties.Properties.MAX_REWARDQUEST_DESCRIPTION_LENGTH)
 					{
 						pak.WriteShort((ushort)ServerProperties.Properties.MAX_REWARDQUEST_DESCRIPTION_LENGTH);
-						pak.WriteStringBytes(quest.Conclusion.Substring(0, (ushort)ServerProperties.Properties.MAX_REWARDQUEST_DESCRIPTION_LENGTH));
+						pak.WriteStringBytes(quest.Quest.Conclusion.Substring(0, (ushort)ServerProperties.Properties.MAX_REWARDQUEST_DESCRIPTION_LENGTH));
 					}
 					else
 					{
-						pak.WriteShort((ushort)quest.Conclusion.Length);
-						pak.WriteStringBytes(quest.Conclusion);
+						pak.WriteShort((ushort)quest.Quest.Conclusion.Length);
+						pak.WriteStringBytes(quest.Quest.Conclusion);
 					}
 				}
 
-				pak.WriteShort(quest.QuestId);
+				pak.WriteShort(quest.Quest.Id);
 				pak.WriteByte((byte)quest.Goals.Count); // #goals count
 				foreach (var goal in quest.Goals)
 				{
@@ -652,7 +557,7 @@ namespace DOL.GS.PacketHandler
 				var rewardIdx = 0;
 				foreach (ItemTemplate reward in quest.FinalRewards.BasicItems)
 				{
-					WriteItemData(pak, GameInventoryItem.Create(reward), (ushort)(quest.QuestId * 16 + rewardIdx));
+					WriteItemData(pak, GameInventoryItem.Create(reward), (ushort)(quest.Quest.Id * 16 + rewardIdx));
 					rewardIdx += 1;
 				}
 				pak.WriteByte((byte)quest.FinalRewards.ChoiceOf);
@@ -660,83 +565,69 @@ namespace DOL.GS.PacketHandler
 				var rewardOptionalIdx = 8;
 				foreach (ItemTemplate reward in quest.FinalRewards.OptionalItems)
 				{
-					WriteItemData(pak, GameInventoryItem.Create(reward), (ushort)(quest.QuestId * 16 + rewardOptionalIdx));
+					WriteItemData(pak, GameInventoryItem.Create(reward), (ushort)(quest.Quest.Id * 16 + rewardOptionalIdx));
 					rewardOptionalIdx += 1;
 				}
 				SendTCP(pak);
 			}
 		}
-		protected override void SendQuestPacket(AbstractQuest q, int index)
+		protected override void SendQuestPacket(IQuestPlayerData q, int index)
 		{
 			using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.QuestEntry)))
 			{
 				pak.WriteByte((byte) index);
-				if (q == null)
+				if (q == null || q.Status == eQuestStatus.NotDoing)
 				{
-					pak.WriteByte(0);
-					pak.WriteByte(0);
-					pak.WriteByte(0);
-					pak.WriteByte(0);
-					pak.WriteByte(0);
+					pak.WriteByte(0); // name length
+					pak.WriteShort(0); // status
+					pak.WriteByte(0); // goal count
+					pak.WriteByte(0); // level
 					SendTCP(pak);
 					return;
 				}
 
-				var name = $"{q.Name} (Level {q.Level})";
+				var name = $"{q.Quest.Name} (Level {q.Quest.MinLevel})";
 				if (name.Length > byte.MaxValue)
 					name = name.Substring(0, 256);
 
-				if (q is IQuestData data)
+				pak.WriteByte((byte) name.Length);
+				pak.WriteShort((ushort)(q.Status == eQuestStatus.InProgress ? 0 : 1));
+				pak.WriteByte((byte) (q.Status == eQuestStatus.Done ? 0 : q.VisibleGoals.Count));
+				pak.WriteByte(q.Quest.MinLevel);
+				pak.WriteStringBytes(name);
+				pak.WritePascalString(q.Quest.Description);
+				if (q.Status != eQuestStatus.Done)
 				{
-					pak.WriteByte((byte) name.Length);
-					pak.WriteShort((ushort) data.Status);
-					pak.WriteByte((byte) (data.Status == eQuestStatus.Done ? 0 : data.VisibleGoals.Count));
-					pak.WriteByte((byte) data.Level);
-					pak.WriteStringBytes(name);
-					pak.WritePascalString(data.Description);
-					if (data.Status != eQuestStatus.Done)
+					for (var idx = 0; idx < q.VisibleGoals.Count; ++idx)
 					{
-						for (var idx = 0; idx < data.VisibleGoals.Count; ++idx)
+						var goal = q.VisibleGoals[idx];
+						var desc = $"{goal.Description} ({goal.Progress} / {goal.ProgressTotal})\r";
+						pak.WriteShortLowEndian((ushort) desc.Length);
+						pak.WriteStringBytes(desc);
+						pak.WriteShortLowEndian(goal.PointA.ZoneId);
+						pak.WriteShortLowEndian(goal.PointA.X);
+						pak.WriteShortLowEndian(goal.PointA.Y);
+						pak.WriteShortLowEndian(0x00); // unknown
+						pak.WriteShortLowEndian((ushort) goal.Type);
+						pak.WriteShortLowEndian(0x00); // unknown
+						pak.WriteShortLowEndian(goal.PointB.ZoneId);
+						pak.WriteShortLowEndian(goal.PointB.X);
+						pak.WriteShortLowEndian(goal.PointB.Y);
+						pak.WriteByte((byte) ((goal.Status & eQuestGoalStatus.FlagDone) != 0 ? 1 : 0));
+						if (goal.QuestItem == null)
 						{
-							var goal = data.VisibleGoals[idx];
-							var desc = $"{goal.Description} ({goal.Progress} / {goal.ProgressTotal})\r";
-							pak.WriteShortLowEndian((ushort) desc.Length);
-							pak.WriteStringBytes(desc);
-							pak.WriteShortLowEndian(goal.PointA.ZoneId);
-							pak.WriteShortLowEndian(goal.PointA.X);
-							pak.WriteShortLowEndian(goal.PointA.Y);
-							pak.WriteShortLowEndian(0x00); // unknown
-							pak.WriteShortLowEndian((ushort) goal.Type);
-							pak.WriteShortLowEndian(0x00); // unknown
-							pak.WriteShortLowEndian(goal.PointB.ZoneId);
-							pak.WriteShortLowEndian(goal.PointB.X);
-							pak.WriteShortLowEndian(goal.PointB.Y);
-							pak.WriteByte((byte) ((goal.Status & eQuestGoalStatus.FlagDone) != 0 ? 1 : 0));
-							if (goal.QuestItem == null)
-							{
-								pak.WriteByte(0x00);
-							}
-							else
-							{
-								pak.WriteByte((byte) idx);
-								WriteTemplateData(pak, goal.QuestItem, 1);
-							}
+							pak.WriteByte(0x00);
+						}
+						else
+						{
+							pak.WriteByte((byte) idx);
+							WriteTemplateData(pak, goal.QuestItem, 1);
 						}
 					}
-
-					SendTCP(pak);
-					return;
 				}
 
-				var baseDesc = string.Format("[Step #{0}]: {1}", q.Step, q.Description);
-				pak.WriteByte((byte) name.Length);
-				pak.WriteShortLowEndian((ushort) baseDesc.Length);
-				pak.WriteByte(0); // Quest Zone ID ?
-				pak.WriteByte(0);
-				pak.WriteStringBytes(name); //Write Quest Name without trailing 0
-				pak.WriteStringBytes(baseDesc); //Write Quest Description without trailing 0
-
 				SendTCP(pak);
+
 			}
 		}
 
