@@ -9,7 +9,8 @@ namespace DOL.GS.Quests
 {
 	public abstract class DataQuestJsonGoal
 	{
-		public readonly DataQuestJson Quest;
+		public readonly ushort QuestId;
+		public DataQuestJson Quest => DataQuestJsonMgr.GetQuest(QuestId);
 		public readonly int GoalId;
 
 		public string Description { get; set; }
@@ -31,7 +32,7 @@ namespace DOL.GS.Quests
 
 		public DataQuestJsonGoal(DataQuestJson quest, int goalId, dynamic db)
 		{
-			Quest = quest;
+			QuestId = quest.Id;
 			GoalId = goalId;
 			Description = db.Description;
 			MessageStarted = db.MessageStarted ?? "";

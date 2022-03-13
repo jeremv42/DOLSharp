@@ -1411,7 +1411,7 @@ namespace DOL.GS.Commands
 			if (targetMob.Inventory != null)
 				info.Add(" + Inventory: " + targetMob.Inventory.AllItems.Count + " items");
 
-			info.Add(" + Quests to give:  " + targetMob.QuestListToGive.Count);
+			info.Add(" + Quests to give:  " + targetMob.QuestIdListToGive.Count);
 
 			if (targetMob.PathID != null && targetMob.PathID.Length > 0)
 				info.Add(" + Path: " + targetMob.PathID);
@@ -1622,15 +1622,15 @@ namespace DOL.GS.Commands
 
 		private void questinfo(GameClient client, GameNPC targetMob, string[] args)
 		{
-			if (targetMob.QuestListToGive.Count == 0)
+			if (targetMob.QuestIdListToGive.Count == 0)
 			{
 				client.Out.SendMessage("Mob does not have any quests.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 			}
 			else
 			{
 				client.Out.SendMessage("Quests: ------------------------", eChatType.CT_System, eChatLoc.CL_PopupWindow);
-				foreach (var quest in targetMob.QuestListToGive)
-					client.Out.SendMessage($"[{quest.Id}. {quest.Name}]", eChatType.CT_System, eChatLoc.CL_PopupWindow);
+				foreach (var id in targetMob.QuestIdListToGive)
+					client.Out.SendMessage($"[{id}. {DataQuestJsonMgr.Quests[id].Name}]", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 			}
 		}
 
@@ -1642,7 +1642,7 @@ namespace DOL.GS.Commands
 				{
 					player.Out.SendNPCsQuestEffect(targetMob, targetMob.GetQuestIndicator(player));
 				}
-				client.Out.SendMessage(targetMob.QuestListToGive.Count + " Quests loaded for this mob.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+				client.Out.SendMessage(targetMob.QuestIdListToGive.Count + " Quests loaded for this mob.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 			}
 			catch (Exception ex)
 			{

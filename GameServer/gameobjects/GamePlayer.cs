@@ -13469,14 +13469,12 @@ namespace DOL.GS
 			base.Notify(e, sender, args);
 
 			// events will only fire for currently active quests.
+			var quests = new List<PlayerQuest>(QuestList.Count);
 			lock (QuestList)
-			{
-				foreach (var q in m_questList)
-				{
-					// player forwards every single notify message to all active quests
-					q.Notify(e, sender, args);
-				}
-			}
+				quests.AddRange(QuestList);
+			// player forwards every single notify message to all active quests
+			foreach (var q in quests)
+				q.Notify(e, sender, args);
 
 			if (Task != null)
 				Task.Notify(e, sender, args);

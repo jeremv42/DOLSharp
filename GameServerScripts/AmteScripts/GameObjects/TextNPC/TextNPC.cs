@@ -68,7 +68,7 @@ namespace DOL.GS.Scripts
 			if (result != eQuestIndicator.None)
 				return result;
 
-			foreach (var q in QuestListToGive.OfType<PlayerQuest>())
+			foreach (var q in QuestIdListToGive.OfType<PlayerQuest>())
 			{
 				var quest = player.QuestList.OfType<PlayerQuest>().FirstOrDefault(pq => pq.QuestId == q.QuestId);
 				if (quest == null)

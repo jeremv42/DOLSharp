@@ -131,7 +131,8 @@ namespace DOL.GS.Quests
 
 		public class QuestRewards : IQuestRewards
 		{
-			public readonly DataQuestJson Quest;
+			public readonly ushort QuestId;
+			public DataQuestJson Quest => DataQuestJsonMgr.GetQuest(QuestId);
 			public List<ItemTemplate> BasicItems => Quest.FinalRewardItemTemplates;
 			public List<ItemTemplate> OptionalItems => Quest.OptionalRewardItemTemplates;
 			public int ChoiceOf => 1;
@@ -140,7 +141,7 @@ namespace DOL.GS.Quests
 
 			public QuestRewards(DataQuestJson quest)
 			{
-				Quest = quest;
+				QuestId = quest.Id;
 			}
 		}
 

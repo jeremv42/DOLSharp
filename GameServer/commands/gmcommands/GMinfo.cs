@@ -149,8 +149,8 @@ namespace DOL.GS.Commands
 						info.Add(" + SpawnPoint:  " + target.SpawnPoint.X + ", " + target.SpawnPoint.Y + ", " + target.SpawnPoint.Z);
 					}
 					
-					if (target.QuestListToGive.Count > 0)
-						info.Add(" + Quests to give:  " + target.QuestListToGive.Count);
+					if (target.QuestIdListToGive.Count > 0)
+						info.Add(" + Quests to give:  " + target.QuestIdListToGive.Count);
 						
 					if (target.PathID != null && target.PathID.Length > 0)
 						info.Add(" + Path: " + target.PathID);

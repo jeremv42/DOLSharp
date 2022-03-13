@@ -2655,12 +2655,12 @@ namespace DOL.GS
 		/// <summary>
 		/// Holds all the quests this npc can give to players
 		/// </summary>
-		protected readonly List<DataQuestJson> m_questListToGive = new();
+		protected readonly List<ushort> m_questIdListToGive = new();
 
 		/// <summary>
 		/// Gets the questlist of this player
 		/// </summary>
-		public IReadOnlyList<DataQuestJson> QuestListToGive => m_questListToGive;
+		public IReadOnlyList<ushort> QuestIdListToGive => m_questIdListToGive;
 
 		/// <summary>
 		/// Adds a scripted quest type to the npc questlist
@@ -2669,9 +2669,9 @@ namespace DOL.GS
 		/// <returns>true if added, false if the npc has already the quest!</returns>
 		public void AddQuestToGive(DataQuestJson quest)
 		{
-			lock (m_questListToGive)
+			lock (m_questIdListToGive)
 				if (!HasQuest(quest))
-					m_questListToGive.Add(quest);
+					m_questIdListToGive.Add(quest.Id);
 		}
 
 		/// <summary>
@@ -2681,8 +2681,8 @@ namespace DOL.GS
 		/// <returns>true if added, false if the npc has already the quest!</returns>
 		public bool RemoveQuestToGive(DataQuestJson quest)
 		{
-			lock (m_questListToGive)
-				return m_questListToGive.Remove(quest);
+			lock (m_questIdListToGive)
+				return m_questIdListToGive.Remove(quest.Id);
 		}
 
 		/// <summary>
@@ -2738,11 +2738,15 @@ namespace DOL.GS
 		public bool CanShowOneQuest(GamePlayer player)
 		{
 			// Scripted quests
-			lock (QuestListToGive)
+			lock (QuestIdListToGive)
 			{
-				foreach (var quest in QuestListToGive)
+				foreach (var id in QuestIdListToGive)
 				{
-					int doingQuest = (player.IsDoingQuest(quest) != null ? 1 : 0);
+					var quest = DataQuestJsonMgr.GetQuest(id);
+					if (quest == null)
+						continue;
+
+					var doingQuest = (player.IsDoingQuest(quest) != null ? 1 : 0);
 					if (quest.CheckQuestQualification(player) && player.HasFinishedQuest(quest) + doingQuest < quest.MaxCount)
 						return true;
 				}
@@ -2752,10 +2756,14 @@ namespace DOL.GS
 
 		public bool CanFinishOneQuest(GamePlayer player)
 		{
-			lock (QuestListToGive)
+			lock (QuestIdListToGive)
 			{
-				foreach (var quest in QuestListToGive)
+				foreach (var id in QuestIdListToGive)
 				{
+					var quest = DataQuestJsonMgr.GetQuest(id);
+					if (quest == null)
+						continue;
+
 					var pq = player.IsDoingQuest(quest);
 					if (pq != null && pq.CanFinish())
 						return true;
@@ -2773,8 +2781,8 @@ namespace DOL.GS
 		/// <returns>the quest if the npc have the quest or null if not</returns>
 		protected bool HasQuest(DataQuestJson quest)
 		{
-			lock (m_questListToGive)
-				return m_questListToGive.Contains(quest);
+			lock (m_questIdListToGive)
+				return m_questIdListToGive.Contains(quest.Id);
 		}
 
 		#endregion

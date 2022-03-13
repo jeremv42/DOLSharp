@@ -13,7 +13,7 @@ public static class DataQuestJsonMgr
 {
 	private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-	public static Dictionary<int, DataQuestJson> Quests = new();
+	public static Dictionary<ushort, DataQuestJson> Quests = new();
 
 	[ScriptLoadedEvent]
 	public static void OnScriptsCompiled(DOLEvent e, object sender, EventArgs args)
@@ -30,6 +30,11 @@ public static class DataQuestJsonMgr
 		GameEventMgr.AddHandlerUnique(GamePlayerEvent.AcceptQuest, OnAcceptQuest);
 	}
 
+	public static DataQuestJson GetQuest(ushort id)
+	{
+		return Quests.TryGetValue(id, out var quest) ? quest : null;
+	}
+
 	public static List<string> ReloadQuests()
 	{
 		var old = Quests;
@@ -37,7 +42,7 @@ public static class DataQuestJsonMgr
 			quest.Unload();
 
 		var errors = new List<string>();
-		var quests = new Dictionary<int, DataQuestJson>();
+		var quests = new Dictionary<ushort, DataQuestJson>();
 		foreach (var db in GameServer.Database.SelectAllObjects<DBDataQuestJson>())
 		{
 			try
@@ -115,7 +120,7 @@ public static class DataQuestJsonMgr
 
 	public static (PlayerQuest quest, PlayerGoalState goal) FindQuestAndGoalFromPlayer(GamePlayer player, ushort questId, int goalId)
 	{
-		var quest = player.QuestList.Find(q => q is PlayerQuest pq && pq.QuestId == questId) as PlayerQuest;
+		var quest = player.QuestList.Find(q => q.QuestId == questId);
 		var goal = quest?.GoalStates.Find(gs => gs.GoalId == goalId);
 		return (quest, goal);
 	}

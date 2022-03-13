@@ -137,7 +137,7 @@ public class AmteMob : GameNPC, IAmteNPC
 		if (res != eQuestIndicator.None)
 			return res;
 
-		foreach (var q in QuestListToGive.OfType<PlayerQuest>())
+		foreach (var q in QuestIdListToGive.OfType<PlayerQuest>())
 		{
 			var quest = player.QuestList.OfType<PlayerQuest>().FirstOrDefault(pq => pq.QuestId == q.QuestId);
 			if (quest == null)

@@ -42,26 +42,20 @@ namespace DOL.GS.Quests
 		private void OnPlayerEnterArea(DOLEvent e, object sender, EventArgs arguments)
 		{
 			var args = (AreaEventArgs)arguments;
-			if (!(args.GameObject is GamePlayer player))
+			if (args.GameObject is not GamePlayer player)
 				return;
-			var questData = player.QuestList.Find(q => q is PlayerQuest pq && pq.QuestId == Quest.Id) as PlayerQuest;
-			if (questData != null && IsActive(questData))
-			{
-				var goalData = questData.GoalStates.Find(s => s.GoalId == GoalId);
-				if (goalData != null)
-					AdvanceGoal(questData, goalData);
-			}
+			var (quest, goal) = DataQuestJsonMgr.FindQuestAndGoalFromPlayer(player, Quest.Id, GoalId);
+			if (quest != null && goal?.IsActive == true)
+				AdvanceGoal(quest, goal);
 		}
 		private void OnPlayerLeaveArea(DOLEvent e, object sender, EventArgs arguments)
 		{
 			var args = (AreaEventArgs)arguments;
-			if (!(args.GameObject is GamePlayer player))
+			if (args.GameObject is not GamePlayer player)
 				return;
 			var (quest, goal) = DataQuestJsonMgr.FindQuestAndGoalFromPlayer(player, Quest.Id, GoalId);
-			if (quest != null && IsActive(quest))
+			if (quest != null && goal?.IsActive == true)
 			{
-				if (goal == null)
-					return;
 				goal.Progress = 0;
 				goal.State = eQuestGoalStatus.Active;
 				quest.SaveIntoDatabase();

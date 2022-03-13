@@ -339,7 +339,7 @@ namespace DOL.GS.Commands
 									player.Out.SendNPCsQuestEffect(npc, npc.GetQuestIndicator(player));
 								}
 
-								client.Out.SendMessage(npc.QuestListToGive.Count + " Quests loaded for this npc.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+								client.Out.SendMessage(npc.QuestIdListToGive.Count + " Quests loaded for this npc.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 							}
 						}
 						catch (Exception)
