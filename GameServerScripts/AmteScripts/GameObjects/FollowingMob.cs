@@ -219,17 +219,17 @@ namespace DOL.AI.Brain
 {
 	public class FollowingBrain : AmteMobBrain
 	{
-		private string FollowMobID
-		{
-			get { return ((FollowingMob)Body).FollowMobID; }
-		}
+		private string FollowMobID => (Body as FollowingMob)?.FollowMobID;
 
 		public override bool Start()
 		{
-			if (!base.Start()) return false;
+			if (!base.Start())
+				return false;
+			if (Body is not FollowingMob)
+				return false;
 			if (FollowMobID != "")
 				SetMobByMobID();
-			if (((FollowingMob)Body).MobFollow != null)
+			if ((Body as FollowingMob)?.MobFollow != null)
 				Body.Follow(((FollowingMob)Body).MobFollow, 10, 3000);
 			return true;
 		}
@@ -255,10 +255,10 @@ namespace DOL.AI.Brain
 			if (Body.CurrentSpellHandler != null || Body.IsMoving || Body.AttackState ||
 				Body.InCombat || Body.IsMovingOnPath || Body.CurrentFollowTarget != null)
 				return;
-			if (((FollowingMob)Body).MobFollow == null && FollowMobID != "")
+			if ((Body as FollowingMob)?.MobFollow == null && FollowMobID != "")
 				SetMobByMobID();
 
-			if (((FollowingMob)Body).MobFollow != null)
+			if ((Body as FollowingMob)?.MobFollow != null)
 				Body.Follow(((FollowingMob)Body).MobFollow, 10, 3000);
 			else
 				Body.WalkToSpawn();
