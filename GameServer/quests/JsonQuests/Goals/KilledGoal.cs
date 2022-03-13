@@ -27,15 +27,15 @@ namespace DOL.GS.Quests
 			return dict;
 		}
 
-		public override void NotifyActive(PlayerQuest questData, PlayerGoalState goalData, DOLEvent e, object sender, EventArgs args)
+		public override void NotifyActive(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args)
 		{
 			// The player is dying, check quests and steps
-			if (e == GameLivingEvent.Dying && args is DyingEventArgs dyingEventArgs && sender == questData.Owner)
+			if (e == GameLivingEvent.Dying && args is DyingEventArgs dyingEventArgs && sender == quest.Owner)
 			{
 				var killer = dyingEventArgs.Killer;
 				if (killer == null || m_target.Name != killer.Name || m_target.CurrentRegion != killer.CurrentRegion)
 					return;
-				AdvanceGoal(questData, goalData);
+				AdvanceGoal(quest, goal);
 			}
 		}
 	}

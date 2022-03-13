@@ -54,12 +54,12 @@ namespace DOL.GS.Quests
 		public bool IsDone(PlayerQuest questData) => questData.GoalStates.Any(gs => gs.GoalId == GoalId && gs.IsDone);
 		public bool IsFinished(PlayerQuest questData) => questData.GoalStates.Any(gs => gs.GoalId == GoalId && gs.IsFinished);
 
-		public void NotifyActive(PlayerQuest questData, DOLEvent e, object sender, EventArgs args)
+		public void NotifyActive(PlayerQuest quest, DOLEvent e, object sender, EventArgs args)
 		{
-			var goalData = questData.GoalStates.Find(gs => gs.GoalId == GoalId);
-			NotifyActive(questData, goalData, e, sender, args);
+			var goalData = quest.GoalStates.Find(gs => gs.GoalId == GoalId);
+			NotifyActive(quest, goalData, e, sender, args);
 		}
-		public abstract void NotifyActive(PlayerQuest questData, PlayerGoalState goalData, DOLEvent e, object sender, EventArgs args);
+		public abstract void NotifyActive(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args);
 
 		// this one is always called, useful if you want to start a goal with some hidden task
 		public void Notify(PlayerQuest questData, DOLEvent e, object sender, EventArgs args)

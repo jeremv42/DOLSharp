@@ -31,7 +31,7 @@ namespace DOL.GS.Quests
 			return dict;
 		}
 
-		public override void NotifyActive(PlayerQuest questData, PlayerGoalState goalData, DOLEvent e, object sender, EventArgs args)
+		public override void NotifyActive(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args)
 		{
 			// Enemy of player with quest was killed, check quests and steps
 			if (e == GameLivingEvent.EnemyKilled && args is EnemyKilledEventArgs killedArgs)
@@ -39,7 +39,7 @@ namespace DOL.GS.Quests
 				var killed = killedArgs.Target;
 				if (killed == null || m_target.Name != killed.Name || m_target.CurrentRegion != killed.CurrentRegion)
 					return;
-				AdvanceGoal(questData, goalData);
+				AdvanceGoal(quest, goal);
 			}
 		}
 	}

@@ -27,7 +27,7 @@ namespace DOL.GS.Quests
 			return dict;
 		}
 
-		public override void NotifyActive(PlayerQuest questData, PlayerGoalState goalData, DOLEvent e, object sender, EventArgs args)
+		public override void NotifyActive(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args)
 		{
 		}
 

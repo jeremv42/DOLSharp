@@ -27,14 +27,14 @@ namespace DOL.GS.Quests
 			return dict;
 		}
 
-		public override void NotifyActive(PlayerQuest questData, PlayerGoalState goalData, DOLEvent e, object sender, EventArgs args)
+		public override void NotifyActive(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args)
 		{
-			var player = questData.Owner;
+			var player = quest.Owner;
 			if (e == GamePlayerEvent.UseSlot && args is UseSlotEventArgs useSlot)
 			{
 				var usedItem = player.Inventory.GetItem((eInventorySlot)useSlot.Slot);
 				if (usedItem.Id_nb == QuestItem.Id_nb)
-					AdvanceGoal(questData, goalData);
+					AdvanceGoal(quest, goal);
 			}
 		}
 	}

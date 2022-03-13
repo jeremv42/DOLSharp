@@ -26,10 +26,10 @@ namespace DOL.GS.Quests
 			return dict;
 		}
 
-		public override void NotifyActive(PlayerQuest questData, PlayerGoalState goalData, DOLEvent e, object sender, EventArgs args)
+		public override void NotifyActive(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args)
 		{
-			if (e == GamePlayerEvent.GameEntered && sender == questData.Owner)
-				StartTimer(questData, goalData);
+			if (e == GamePlayerEvent.GameEntered && sender == quest.Owner)
+				StartTimer(quest, goal);
 		}
 
 		public override PlayerGoalState ForceStartGoal(PlayerQuest questData)

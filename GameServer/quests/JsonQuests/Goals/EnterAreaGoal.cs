@@ -25,8 +25,6 @@ namespace DOL.GS.Quests
 
 			var reg = WorldMgr.GetRegion(m_areaRegion);
 			reg.AddArea(m_area);
-			m_area.RegisterPlayerEnter(OnPlayerEnterArea);
-			m_area.RegisterPlayerLeave(OnPlayerLeaveArea);
 			m_pointA = new QuestZonePoint(reg.GetZone(m_area.Position), m_area.Position);
 		}
 
@@ -39,40 +37,31 @@ namespace DOL.GS.Quests
 			return dict;
 		}
 
-		private void OnPlayerEnterArea(DOLEvent e, object sender, EventArgs arguments)
+		private void OnPlayerEnterArea(PlayerQuest quest, PlayerGoalState goal)
 		{
-			var args = (AreaEventArgs)arguments;
-			if (args.GameObject is not GamePlayer player)
-				return;
-			var (quest, goal) = DataQuestJsonMgr.FindQuestAndGoalFromPlayer(player, Quest.Id, GoalId);
-			if (quest != null && goal?.IsActive == true)
-				AdvanceGoal(quest, goal);
+			AdvanceGoal(quest, goal);
 		}
-		private void OnPlayerLeaveArea(DOLEvent e, object sender, EventArgs arguments)
+		private void OnPlayerLeaveArea(PlayerQuest quest, PlayerGoalState goal)
 		{
-			var args = (AreaEventArgs)arguments;
-			if (args.GameObject is not GamePlayer player)
-				return;
-			var (quest, goal) = DataQuestJsonMgr.FindQuestAndGoalFromPlayer(player, Quest.Id, GoalId);
-			if (quest != null && goal?.IsActive == true)
-			{
-				goal.Progress = 0;
-				goal.State = eQuestGoalStatus.Active;
-				quest.SaveIntoDatabase();
-				quest.Owner.Out.SendQuestUpdate(quest);
-			}
+			goal.Progress = 0;
+			goal.State = eQuestGoalStatus.Active;
+			quest.SaveIntoDatabase();
+			quest.Owner.Out.SendQuestUpdate(quest);
 		}
 
-		public override void NotifyActive(PlayerQuest questData, PlayerGoalState goalData, DOLEvent e, object sender, EventArgs args)
+		public override void NotifyActive(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args)
 		{
-			// nothing to do, everything is in the area handler
+			if (sender != m_area || args is not AreaEventArgs arguments || arguments.GameObject != quest.Owner)
+				return;
+			if (e == AreaEvent.PlayerEnter)
+				OnPlayerEnterArea(quest, goal);
+			if (e == AreaEvent.PlayerLeave)
+				OnPlayerLeaveArea(quest, goal);
 		}
 
 		public override void Unload()
 		{
 			base.Unload();
-			m_area.UnRegisterPlayerEnter(OnPlayerEnterArea);
-			m_area.UnRegisterPlayerLeave(OnPlayerLeaveArea);
 			WorldMgr.GetRegion(m_areaRegion)?.RemoveArea(m_area);
 		}
 	}

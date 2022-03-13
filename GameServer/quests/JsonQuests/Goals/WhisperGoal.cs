@@ -35,13 +35,13 @@ namespace DOL.GS.Quests
 			return dict;
 		}
 
-		public override void NotifyActive(PlayerQuest questData, PlayerGoalState goalData, DOLEvent e, object sender, EventArgs args)
+		public override void NotifyActive(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args)
 		{
-			var player = questData.Owner;
+			var player = quest.Owner;
 			if (e == GameLivingEvent.Whisper && args is WhisperEventArgs interact && interact.Target.Name == m_target.Name && interact.Target.CurrentRegion == m_target.CurrentRegion && interact.Text == m_whisperText)
 			{
 				ChatUtil.SendPopup(player, BehaviourUtils.GetPersonalizedMessage(m_text, player));
-				AdvanceGoal(questData, goalData);
+				AdvanceGoal(quest, goal);
 			}
 		}
 	}

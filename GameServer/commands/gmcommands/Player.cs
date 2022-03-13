@@ -2179,7 +2179,7 @@ namespace DOL.GS.Commands
 
                         foreach (AbstractArea area in targetPlayer.CurrentAreas)
                         {
-                            string areaInfo = area.GetType().Name + ", ID:" + area.ID;
+                            string areaInfo = area.GetType().Name + ", ID:" + area.ID + ", " + area.Description;
                             areaList.Add(areaInfo);
                         }
 
