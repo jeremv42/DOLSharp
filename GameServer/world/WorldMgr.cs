@@ -944,11 +944,11 @@ namespace DOL.GS
 		/// <returns>true</returns>
 		public static bool StartRegionMgrs()
 		{
-			m_regions.FreezeWhile(dict => {
-			                      	foreach (Region reg in dict.Values)
-			                      		reg.StartRegionMgr();
-
-			                      });			
+			m_regions.FreezeWhile(dict =>
+			{
+				foreach (Region reg in dict.Values)
+					reg.StartRegionMgr();
+			});
 			return true;
 		}
 

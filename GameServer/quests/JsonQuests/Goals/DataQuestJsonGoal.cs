@@ -83,6 +83,8 @@ namespace DOL.GS.Quests
 			return gs?.State == eQuestGoalStatus.DoneAndActive && EndWhenGoalsDone.All(id => questData.GoalStates.Any(s => s.GoalId == id && s.IsDone));
 		}
 
+		public virtual bool CanInteractWith(PlayerQuest questData, PlayerGoalState state, GameObject target) => false;
+
 		public PlayerGoalState StartGoal(PlayerQuest questData)
 		{
 			if (CanStart(questData))

@@ -16,6 +16,9 @@ namespace DOL.GS.Quests
 
 		public GameNPC Target => m_target;
 
+		public override bool CanInteractWith(PlayerQuest questData, PlayerGoalState state, GameObject target)
+			=> state?.IsActive == true && target.Name == m_target.Name && target.CurrentRegion == m_target.CurrentRegion;
+
 		public EndGoal(DataQuestJson quest, int goalId, dynamic db) : base(quest, goalId, (object)db)
 		{
 			m_target = WorldMgr.GetNPCsByNameFromRegion((string)db.TargetName ??  "", (ushort)(db.TargetRegion ?? 0), eRealm.None).FirstOrDefault();

@@ -67,21 +67,21 @@ public static class DataQuestJsonMgr
 
 	public static void OnInteract(DOLEvent _, object sender, EventArgs args)
 	{
-		var arguments = args as InteractEventArgs;
-		if (arguments == null || arguments.Source == null || !(sender is GameNPC))
+		if (args is not InteractEventArgs arguments || arguments.Source == null)
 			return;
 
 		var player = arguments.Source;
-		var possibleQuests = Quests.Values.Where(q => q.Npc == sender).ToList();
+		var possibleQuests = sender is GameNPC npc ? npc.QuestIdListToGive : Array.Empty<ushort>();
 		if (possibleQuests.Count == 0)
 			return;
 
 		lock (player.QuestList)
-			if (player.QuestList.OfType<PlayerQuest>().Any(q => possibleQuests.Any(pq => pq.Id == q.QuestId)))
+			if (player.QuestList.Any(q => possibleQuests.Contains(q.QuestId) || q.CanInteractWith(sender)))
 				return; // Quest in progress
-		foreach (var quest in possibleQuests)
+		foreach (var questId in possibleQuests)
 		{
-			if (quest.CheckQuestQualification(player))
+			var quest = GetQuest(questId);
+			if (quest != null && quest.CheckQuestQualification(player))
 			{
 				player.Out.SendQuestOfferWindow(quest.Npc, player, PlayerQuest.CreateQuestPreview(quest, player));
 				return;
@@ -100,6 +100,9 @@ public static class DataQuestJsonMgr
 			return;
 		var npc = quest.Npc;
 
+		ChatUtil.SendScreenCenter(player, $"Quest \"{quest.Name}\" accepted!");
+		player.Out.SendSoundEffect(7, 0, 0, 0, 0, 0);
+
 		var dbQuest = new DBQuest
 		{
 			Character_ID = player.InternalID,
@@ -108,8 +111,6 @@ public static class DataQuestJsonMgr
 			CustomPropertiesString = JsonConvert.SerializeObject(new PlayerQuest.JsonState { QuestId = quest.Id, Goals = null }),
 		};
 		var dq = new PlayerQuest(player, dbQuest);
-		player.Out.SendSoundEffect(7, 0, 0, 0, 0, 0);
-		ChatUtil.SendScreenCenter(player, $"Quest \"{quest.Name}\" accepted!");
 		if (player.AddQuest(dq))
 		{
 			dq.SaveIntoDatabase();

@@ -98,6 +98,16 @@ namespace DOL.GS.Quests
 				GameServer.Database.AddObject(DbQuest);
 		}
 
+		public bool CanInteractWith(object actor)
+		{
+			if (actor is not GameObject gameObject)
+				return false;
+			foreach (var goal in Quest.Goals.Values)
+				if (goal.CanInteractWith(this, GoalStates.Find(gs => gs.GoalId == goal.GoalId), gameObject))
+					return true;
+			return false;
+		}
+
 		public bool CanFinish()
 		{
 			// TODO

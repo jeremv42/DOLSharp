@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using DOL.Database;
@@ -106,7 +107,7 @@ namespace DOL.GS
 
         /// <summary>
         /// Holds all the Areas inside this Region
-        /// 
+        ///
         /// ZoneID, AreaID, Area
         ///
         /// Areas can be registed to a reagion via AddArea
@@ -148,7 +149,7 @@ namespace DOL.GS
         /// The region time manager
         /// </summary>
         protected readonly GameTimer.TimeManager m_timeManager;
-        
+
         /// <summary>
         /// The Region Mob's Respawn Timer Collection
         /// </summary>
@@ -166,7 +167,7 @@ namespace DOL.GS
         }
 
         /// <summary>
-        /// Factory method to create regions.  Will create a region of data.ClassType, or default to Region if 
+        /// Factory method to create regions.  Will create a region of data.ClassType, or default to Region if
         /// an error occurs or ClassType is not specified
         /// </summary>
         /// <param name="time"></param>
@@ -731,7 +732,7 @@ namespace DOL.GS
         		return m_mobsRespawning;
         	}
         }
-        
+
         #endregion
 
         #region Methods
@@ -807,17 +808,17 @@ namespace DOL.GS
                 {
                     GameNPC myMob = null;
                     string error = string.Empty;
-  
+
                     // Default Classtype
                     string classtype = ServerProperties.Properties.GAMENPC_DEFAULT_CLASSTYPE;
-                    
+
                     // load template if any
                     INpcTemplate template = null;
                     if(mob.NPCTemplateID != -1)
                     {
                     	template = NpcTemplateMgr.GetTemplate(mob.NPCTemplateID);
                     }
-                    
+
 
                     if (Properties.USE_NPCGUILDSCRIPTS && mob.Guild.Length > 0 && mob.Realm >= 0 && mob.Realm <= (int)eRealm._Last)
                     {
@@ -826,9 +827,9 @@ namespace DOL.GS
                         {
                             try
                             {
-                                
+
                                 myMob = (GameNPC)type.Assembly.CreateInstance(type.FullName);
-                               	
+
                             }
                             catch (Exception e)
                             {
@@ -838,7 +839,7 @@ namespace DOL.GS
                         }
                     }
 
-  
+
                     if (myMob == null)
                     {
                     	if(template != null && template.ClassType != null && template.ClassType.Length > 0 && template.ClassType != Mob.DEFAULT_NPC_CLASSTYPE && template.ReplaceMobValues)
@@ -1339,17 +1340,7 @@ namespace DOL.GS
         {
             lock (m_lockAreas)
             {
-                ushort nextAreaID = 0;
-
-                foreach (ushort areaID in m_Areas.Keys)
-                {
-                    if (areaID >= nextAreaID)
-                    {
-                        nextAreaID = (ushort)(areaID + 1);
-                    }
-                }
-
-                area.ID = nextAreaID;
+                area.ID = (ushort)(m_Areas.Keys.Union(new []{ (ushort)0 }).Max() + 1);
                 m_Areas.Add(area.ID, area);
 
                 int zonePos = 0;
@@ -1357,7 +1348,7 @@ namespace DOL.GS
                 {
                     if (area.IsIntersectingZone(zone))
                     	m_ZoneAreas[zonePos][m_ZoneAreasCount[zonePos]++] = area.ID;
-                    
+
                     zonePos++;
                 }
                 return area;
@@ -1944,7 +1935,7 @@ namespace DOL.GS
         	{
         		zone.Relocate(null);
         	}
-        	
+
         	m_lastRelocationTime = DateTime.Now.Ticks / (10 * 1000);
         }
 
