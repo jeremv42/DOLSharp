@@ -10,7 +10,7 @@ namespace DOL.GS.Quests
 {
 	public class StopGoal : DataQuestJsonGoal
 	{
-		private readonly List<int> m_stopGoals = new List<int>();
+		private readonly List<int> m_stopGoals = new();
 
 		public override eQuestGoalType Type => eQuestGoalType.Unknown;
 		public override int ProgressTotal => 1;

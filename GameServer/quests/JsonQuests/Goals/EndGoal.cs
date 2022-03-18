@@ -9,28 +9,25 @@ namespace DOL.GS.Quests
 {
 	public class EndGoal : DataQuestJsonGoal
 	{
-		private GameNPC m_target;
-
 		public override eQuestGoalType Type => eQuestGoalType.Unknown;
 		public override int ProgressTotal => 1;
 
-		public GameNPC Target => m_target;
+		public GameNPC Target { get; }
 
 		public override bool CanInteractWith(PlayerQuest questData, PlayerGoalState state, GameObject target)
-			=> state?.IsActive == true && target.Name == m_target.Name && target.CurrentRegion == m_target.CurrentRegion;
+			=> state?.IsActive == true && target.Name == Target.Name && target.CurrentRegion == Target.CurrentRegion;
 
 		public EndGoal(DataQuestJson quest, int goalId, dynamic db) : base(quest, goalId, (object)db)
 		{
-			m_target = WorldMgr.GetNPCsByNameFromRegion((string)db.TargetName ??  "", (ushort)(db.TargetRegion ?? 0), eRealm.None).FirstOrDefault();
-			if (m_target == null)
-				m_target = quest.Npc;
+			Target = WorldMgr.GetNPCsByNameFromRegion((string)db.TargetName ?? "", (ushort)(db.TargetRegion ?? 0), eRealm.None)
+				.FirstOrDefault(quest.Npc);
 		}
 
 		public override Dictionary<string, object> GetDatabaseJsonObject()
 		{
 			var dict = base.GetDatabaseJsonObject();
-			dict.Add("TargetName", m_target.Name);
-			dict.Add("TargetRegion", m_target.CurrentRegionID);
+			dict.Add("TargetName", Target.Name);
+			dict.Add("TargetRegion", Target.CurrentRegionID);
 			return dict;
 		}
 
@@ -39,7 +36,7 @@ namespace DOL.GS.Quests
 			var player = quest.Owner;
 			
 			// interact with the final NPC
-			if (e == GameObjectEvent.InteractWith && args is InteractWithEventArgs interact && interact.Target.Name == m_target.Name && interact.Target.CurrentRegion == m_target.CurrentRegion)
+			if (e == GameObjectEvent.InteractWith && args is InteractWithEventArgs interact && interact.Target.Name == Target.Name && interact.Target.CurrentRegion == Target.CurrentRegion)
 				player.Out.SendQuestRewardWindow(interact.Target as GameNPC, player, quest);
 
 			// receive the quest window response

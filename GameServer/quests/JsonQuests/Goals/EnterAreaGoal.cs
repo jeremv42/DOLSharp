@@ -1,21 +1,18 @@
 ﻿using DOL.Events;
-using DOL.GS.Behaviour;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 
 namespace DOL.GS.Quests
 {
 	public class EnterAreaGoal : DataQuestJsonGoal
 	{
-		private Area.Circle m_area;
-		private ushort m_areaRegion;
-		private QuestZonePoint m_pointA;
+		private readonly Area.Circle m_area;
+		private readonly ushort m_areaRegion;
 
 		public override eQuestGoalType Type => eQuestGoalType.Unknown;
 		public override int ProgressTotal => 1;
-		public override QuestZonePoint PointA => m_pointA;
+		public override QuestZonePoint PointA { get; }
 
 		public EnterAreaGoal(DataQuestJson quest, int goalId, dynamic db) : base(quest, goalId, (object)db)
 		{
@@ -25,7 +22,7 @@ namespace DOL.GS.Quests
 
 			var reg = WorldMgr.GetRegion(m_areaRegion);
 			reg.AddArea(m_area);
-			m_pointA = new QuestZonePoint(reg.GetZone(m_area.Position), m_area.Position);
+			PointA = new QuestZonePoint(reg.GetZone(m_area.Position), m_area.Position);
 		}
 
 		public override Dictionary<string, object> GetDatabaseJsonObject()
@@ -61,8 +58,8 @@ namespace DOL.GS.Quests
 
 		public override void Unload()
 		{
-			base.Unload();
 			WorldMgr.GetRegion(m_areaRegion)?.RemoveArea(m_area);
+			base.Unload();
 		}
 	}
 }

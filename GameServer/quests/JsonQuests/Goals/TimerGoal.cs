@@ -16,7 +16,7 @@ namespace DOL.GS.Quests
 		public TimerGoal(DataQuestJson quest, int goalId, dynamic db) : base(quest, goalId, (object)db)
 		{
 			m_seconds = db.Seconds;
-			m_seconds = FastMath.Clamp(m_seconds, 1, int.MaxValue); // minimum 1 sec
+			m_seconds = m_seconds.Clamp(1, int.MaxValue); // minimum 1 sec
 		}
 
 		public override Dictionary<string, object> GetDatabaseJsonObject()

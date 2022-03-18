@@ -7,10 +7,10 @@ namespace DOL.GS.Quests
 {
 	public class KilledGoal : DataQuestJsonGoal
 	{
-		private GameNPC m_target;
+		private readonly GameNPC m_target;
 		public override eQuestGoalType Type => eQuestGoalType.Unknown;
 		public override int ProgressTotal => 1;
-		public override QuestZonePoint PointA => new QuestZonePoint(m_target);
+		public override QuestZonePoint PointA => new(m_target);
 
 		public KilledGoal(DataQuestJson quest, int goalId, dynamic db) : base(quest, goalId, (object)db)
 		{

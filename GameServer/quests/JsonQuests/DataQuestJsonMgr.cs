@@ -37,14 +37,33 @@ public static class DataQuestJsonMgr
 
 	public static List<string> ReloadQuests()
 	{
-		var old = Quests;
-		foreach (var quest in old.Values)
-			quest.Unload();
-
 		var errors = new List<string>();
+		var oldErrorQuests = new List<int>();
+
+		var old = Quests;
+		foreach (var quest in old.Values.Where(quest => quest != null))
+		{
+			try
+			{
+				quest.Unload();
+			}
+			catch (Exception ex)
+			{
+				errors.Add($"Error when unloading quest \"{quest.Name}\" (ID: {quest.Id}): {ex.Message}");
+				log.Error($"QuestLoader: error when unloading quest {quest.Id}", ex);
+				oldErrorQuests.Add(quest.Id);
+			}
+		}
+
 		var quests = new Dictionary<ushort, DataQuestJson>();
 		foreach (var db in GameServer.Database.SelectAllObjects<DBDataQuestJson>())
 		{
+			if (oldErrorQuests.Contains(db.Id))
+			{
+				quests.Add(db.Id, old[db.Id]);
+				errors.Add($"Quest \"{db.Name}\" (ID: {db.Id}) skipped because it's not unloaded");
+				continue;
+			}
 			try
 			{
 				var loaded = new DataQuestJson(db);

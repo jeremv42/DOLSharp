@@ -9,4 +9,8 @@
 /NetCore/Release
 **/*.csproj.user
 
+/Pathing_native/Detour/.vs
 /Pathing_native/Detour/out
+/Pathing_native/Detour/build
+/NetCore/.idea
+/.idea

@@ -245,7 +245,7 @@ namespace DOL.GS.Quests
 
 		public void Unload()
 		{
-			Npc.RemoveQuestToGive(this);
+			Npc?.RemoveQuestToGive(this);
 			foreach (var goal in Goals.Values)
 				goal.Unload();
 		}

@@ -9,14 +9,14 @@ namespace DOL.GS.Quests
 {
 	public class CollectGoal : DataQuestJsonGoal
 	{
-		private GameNPC m_target;
-		private string m_text;
-		private ItemTemplate m_item;
-		private int m_itemCount = 1;
+		private readonly GameNPC m_target;
+		private readonly string m_text;
+		private readonly ItemTemplate m_item;
+		private readonly int m_itemCount = 1;
 
 		public override eQuestGoalType Type => eQuestGoalType.Unknown;
 		public override int ProgressTotal => 1;
-		public override QuestZonePoint PointA => new QuestZonePoint(m_target);
+		public override QuestZonePoint PointA => new(m_target);
 		public override ItemTemplate QuestItem => m_item;
 
 		public CollectGoal(DataQuestJson quest, int goalId, dynamic db) : base(quest, goalId, (object)db)
@@ -68,7 +68,8 @@ namespace DOL.GS.Quests
 
 		public override void Unload()
 		{
-			GameEventMgr.RemoveHandler(m_target, GameObjectEvent.ReceiveItem, _Notify);
+			if (m_target != null)
+				GameEventMgr.RemoveHandler(m_target, GameObjectEvent.ReceiveItem, _Notify);
 			base.Unload();
 		}
 	}

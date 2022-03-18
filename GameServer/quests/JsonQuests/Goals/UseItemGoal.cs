@@ -9,7 +9,7 @@ namespace DOL.GS.Quests
 {
 	public class UseItemGoal : DataQuestJsonGoal
 	{
-		private ItemTemplate m_item;
+		private readonly ItemTemplate m_item;
 
 		public override eQuestGoalType Type => eQuestGoalType.Unknown;
 		public override int ProgressTotal => 1;
