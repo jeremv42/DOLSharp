@@ -197,9 +197,10 @@ namespace DOL.Network
 				return;
 			}
 
-			byte[] bytes = Constants.DefaultEncoding.GetBytes(str);
-			WriteByte((byte) bytes.Length);
-			Write(bytes, 0, bytes.Length);
+			var bytes = Constants.DefaultEncoding.GetBytes(str);
+			var length = Math.Min(255, bytes.Length);
+			WriteByte((byte) length);
+			Write(bytes, 0, length);
 		}
 
 		public void WritePascalStringIntLE(string str, int maxlen = 2048)
