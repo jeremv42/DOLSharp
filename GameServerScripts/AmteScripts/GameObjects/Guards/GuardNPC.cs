@@ -80,9 +80,9 @@ namespace DOL.GS.Scripts
 			return true;
 		}
 
-		public override Task<bool> WalkToSpawn(short speed)
+		public override void WalkToSpawn(short speed)
 		{
-			return base.WalkToSpawn(MaxSpeed);
+			base.WalkToSpawn(MaxSpeed);
 		}
 	}
 
