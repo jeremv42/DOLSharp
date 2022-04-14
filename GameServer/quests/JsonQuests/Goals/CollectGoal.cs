@@ -56,6 +56,8 @@ namespace DOL.GS.Quests
 			if (interact.Item.Id_nb != m_item.Id_nb)
 				return;
 			var (quest, goal) = DataQuestJsonMgr.FindQuestAndGoalFromPlayer(player, Quest.Id, GoalId);
+			if (quest == null || goal is not {IsActive: true})
+				return;
 
 			if (!player.Inventory.RemoveCountFromStack(interact.Item, m_itemCount))
 			{
