@@ -989,10 +989,8 @@ namespace DOL.GS.PacketHandler.Client.v168
 			}
 			//client.Player.Heading = (ushort)(newHeading & 0xFFF); //patch 0024 expermental
 
-			if (Vector3.DistanceSquared(client.Player.Position, new Vector3(newPlayerX, newPlayerY, newPlayerZ)) < 1)
-			{
+			if (Vector3.DistanceSquared(client.Player.Position, new Vector3(newPlayerX, newPlayerY, newPlayerZ)) > 0.1f)
 				client.Player.TempProperties.setProperty(LASTMOVEMENTTICK, client.Player.CurrentRegion.Time);
-			}
 
 			client.Player.Position = new Vector3(newPlayerX, newPlayerY, newPlayerZ);
 			client.Player.Heading = (ushort)(newHeading & 0xFFF);
