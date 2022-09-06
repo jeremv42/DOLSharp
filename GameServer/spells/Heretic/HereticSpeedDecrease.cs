@@ -203,17 +203,7 @@ namespace DOL.GS.Spells
 			if (owner.IsMezzed || owner.IsStunned)
 				return;
 
-			GamePlayer player = owner as GamePlayer;
-			if (player != null)
-				player.Out.SendUpdateMaxSpeed();
-
-			GameNPC npc = owner as GameNPC;
-			if (npc != null)
-			{
-				short maxSpeed = npc.MaxSpeed;
-				if (npc.CurrentSpeed > maxSpeed)
-					npc.CurrentSpeed = maxSpeed;
-			}
+			owner.UpdateMaxSpeed();
 		}
 
 	

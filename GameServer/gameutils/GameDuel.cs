@@ -104,10 +104,7 @@ namespace DOL.GS
 			GameEventMgr.RemoveHandler(Starter, GameLivingEvent.AttackedByEnemy, new DOLEventHandler(DuelOnAttack));
 			GameEventMgr.RemoveHandler(Starter, GameLivingEvent.AttackFinished, new DOLEventHandler(DuelOnAttack));
 			
-			lock (Starter.XPGainers.SyncRoot)
-			{
-				Starter.XPGainers.Clear();
-			}
+			Starter.XPGainers.Clear();
 			
 			Starter.Out.SendMessage(LanguageMgr.GetTranslation(Starter.Client, "GamePlayer.DuelStop.DuelEnds"), eChatType.CT_Emote, eChatLoc.CL_SystemWindow);
 		}

@@ -26,16 +26,8 @@ namespace DOL.GS.Effects
 			base.Start(target);
 			target.BuffBonusMultCategory1.Set((int)eProperty.MaxSpeed, this, 1.0 - 50 * 0.01);
 			owner = target;
-			GamePlayer player = owner as GamePlayer;
 			GameEventMgr.AddHandler(target, GameLivingEvent.AttackedByEnemy, new DOLEventHandler(OnAttacked));
-			if (player != null)
-			{
-				player.Out.SendUpdateMaxSpeed();
-			}
-			else
-			{
-				owner.CurrentSpeed = owner.MaxSpeed;
-			}
+			owner.UpdateMaxSpeed();
 
 		}
 
@@ -43,16 +35,8 @@ namespace DOL.GS.Effects
 		{
 			owner.BuffBonusMultCategory1.Remove((int)eProperty.MaxSpeed, this);
 			base.Stop();
-			GamePlayer player = owner as GamePlayer;
 			GameEventMgr.RemoveHandler(owner, GameLivingEvent.AttackedByEnemy, new DOLEventHandler(OnAttacked));
-			if (player != null)
-			{
-				player.Out.SendUpdateMaxSpeed();
-			}
-			else if (owner.CurrentSpeed > owner.MaxSpeed)
-			{
-				owner.CurrentSpeed = owner.MaxSpeed;
-			}
+			owner.UpdateMaxSpeed();
 		}
 
 		protected virtual void OnAttacked(DOLEvent e, object sender, EventArgs arguments)

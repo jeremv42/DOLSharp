@@ -323,12 +323,10 @@ namespace DOL.GS.PacketHandler
 				return;
 			using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.ClientRegion)))
 			{
-				var ip = region.ServerIP;
-				if (ip == "any" || ip == "0.0.0.0" || ip == "127.0.0.1" || ip.StartsWith("10.") || ip.StartsWith("192.168."))
-					ip = ((IPEndPoint)m_gameClient.Socket.LocalEndPoint).Address.ToString();
+				var ip = GameServer.Instance.Configuration.RegionIP.ToString();
 				pak.WritePascalStringIntLE(ip, 0x14);
-				pak.WriteIntLowEndian(region.ServerPort);
-				pak.WriteIntLowEndian(region.ServerPort);
+				pak.WriteIntLowEndian(GameServer.Instance.Configuration.RegionPort);
+				pak.WriteIntLowEndian(GameServer.Instance.Configuration.RegionPort);
 				SendTCP(pak);
 			}
 		}

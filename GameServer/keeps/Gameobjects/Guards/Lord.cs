@@ -178,10 +178,9 @@ namespace DOL.GS.Keeps
 
 						string listRPGainers = "";
 
-						foreach (System.Collections.DictionaryEntry de in XPGainers)
+						foreach (var de in XPGainers)
 						{
-							GameLiving living = de.Key as GameLiving;
-							if (living != null)
+							if (de.Key is GameLiving living)
 							{
 								listRPGainers += living.Name + ";";
 							}

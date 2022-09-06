@@ -64,7 +64,6 @@ namespace DOL.GS.Spells
                 deamons[i].CurrentRegion = Caster.CurrentRegion;
                 deamons[i].Heading = (ushort)((Caster.Heading + 2048) % 4096);
                 deamons[i].Realm = Caster.Realm;
-                deamons[i].CurrentSpeed = 0;
                 deamons[i].Level = 36;
                 deamons[i].Flags |= GameNPC.eFlags.FLYING;
                 deamons[i].AddToWorld();

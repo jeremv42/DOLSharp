@@ -42,7 +42,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 				var y = packet.ReadFloatLowEndian();
 				var z = packet.ReadFloatLowEndian();
 				client.Player.Position = new Vector3(x, y, z);
-				client.Player.CurrentSpeed = (short)packet.ReadFloatLowEndian();
+				client.Player.SetCurrentSpeed((short)packet.ReadFloatLowEndian());
 				client.Player.Heading = packet.ReadShort();
 			}
 			int flagSpeedData = packet.ReadShort();
@@ -98,11 +98,11 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 				if ((m_flagSpeedData & 0x200) != 0)
 				{
-					player.CurrentSpeed = (short)(-(m_flagSpeedData & 0x1ff)); // backward movement
+					player.SetCurrentSpeed((short) -(m_flagSpeedData & 0x1ff)); // backward movement
 				}
 				else
 				{
-					player.CurrentSpeed = (short)(m_flagSpeedData & 0x1ff); // forwardmovement
+					player.SetCurrentSpeed((short) (m_flagSpeedData & 0x1ff)); // forwardmovement
 				}
 
 				player.IsStrafing = (m_flagSpeedData & 0x4000) != 0;

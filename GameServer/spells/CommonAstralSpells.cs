@@ -133,7 +133,6 @@ namespace DOL.GS.Spells
             summoned.CurrentRegion = target.CurrentRegion;
             summoned.Heading = (ushort)((target.Heading + 2048) % 4096);
             summoned.Realm = target.Realm;
-            summoned.CurrentSpeed = 0;
             summoned.Level = Caster.Level;
             summoned.Size = 50;
             summoned.AddToWorld();

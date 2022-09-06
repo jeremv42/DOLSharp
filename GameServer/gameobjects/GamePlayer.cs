@@ -1293,7 +1293,7 @@ namespace DOL.GS
 		/// <summary>
 		/// tick when player is died
 		/// </summary>
-		protected int m_deathTick;
+		protected uint m_deathTick;
 
 		/// <summary>
 		/// choosed the player to release as soon as possible?
@@ -1417,7 +1417,7 @@ namespace DOL.GS
 				}
 				m_releaseType = releaseCommand;
 				// we use realtime, because timer window is realtime
-				int diff = m_deathTick - Environment.TickCount + RELEASE_MINIMUM_WAIT * 1000;
+				var diff = m_deathTick - GameTimer.GetTickCount() + RELEASE_MINIMUM_WAIT * 1000;
 				if (diff >= 1000)
 				{
 					if (m_automaticRelease)
@@ -1786,7 +1786,7 @@ namespace DOL.GS
 		{
 			if (IsAlive)
 				return 0;
-			int diffToRelease = Environment.TickCount - m_deathTick;
+			var diffToRelease = GameTimer.GetTickCount() - m_deathTick;
 			if (m_automaticRelease && diffToRelease > RELEASE_MINIMUM_WAIT * 1000)
 			{
 				Release(m_releaseType, true);
@@ -2431,10 +2431,7 @@ namespace DOL.GS
 
 				//We clean all damagedealers if we are fully healed,
 				//no special XP calculations need to be done
-				lock (m_xpGainers.SyncRoot)
-				{
-					m_xpGainers.Clear();
-				}
+				XPGainers.Clear();
 
 				return 0;
 			}
@@ -7673,7 +7670,7 @@ namespace DOL.GS
 				}
 				m_automaticRelease = m_releaseType == eReleaseType.Duel;
 				m_releasePhase = 0;
-				m_deathTick = Environment.TickCount; // we use realtime, because timer window is realtime
+				m_deathTick = GameTimer.GetTickCount(); // we use realtime, because timer window is realtime
 
 				Out.SendTimerWindow(LanguageMgr.GetTranslation(Client.Account.Language, "System.ReleaseTimer"), (m_automaticRelease ? RELEASE_MINIMUM_WAIT : RELEASE_TIME));
 				m_releaseTimer = new RegionTimer(this);
@@ -10111,7 +10108,6 @@ namespace DOL.GS
 			//we need to make the server know we have left the house
 			if ((CurrentHouse != null || InHouse) && CurrentHouse.RegionID != regionID)
 			{
-				InHouse = false;
 				CurrentHouse = null;
 			}
 			//if we send a jump, we get off the horse
@@ -10176,7 +10172,7 @@ namespace DOL.GS
 			//Set the new destination
 			//Current Speed = 0 when moved ... else X,Y,Z continue to be modified
 			CurrentSpeed = 0;
-			MovementStartTick = Environment.TickCount;
+			MovementStartTick = GameTimer.GetTickCount();
 			Vector3 originalPoint = Position;
 			Position = new Vector3(x, y, z);
 			Heading = heading;
@@ -10509,8 +10505,12 @@ namespace DOL.GS
 			set { m_areaUpdateTick = value; }
 		}
 
+		public uint LastNPCUpdateTick = 0;
+		public uint LastNPCUpdateAllTick = 0;
+
 		public override Vector3 Position
 		{
+			get => IsMoving ? base.Position + MovementElapsedTicks * Velocity : base.Position;
 			set
 			{
 				base.Position = value;
@@ -10524,19 +10524,11 @@ namespace DOL.GS
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the current speed of this player
-		/// </summary>
-		public override short CurrentSpeed
+		public void SetCurrentSpeed(short speed) => CurrentSpeed = Math.Min(speed, MaxSpeed);
+
+		public override void UpdateMaxSpeed()
 		{
-			set
-			{
-				base.CurrentSpeed = value;
-				if (value != 0)
-				{
-					OnPlayerMove();
-				}
-			}
+			Out.SendUpdateMaxSpeed();
 		}
 
 		/// <summary>
@@ -10566,12 +10558,12 @@ namespace DOL.GS
 		}
 
 
-		private int m_lastPositionUpdateTick = 0;
+		private uint m_lastPositionUpdateTick = 0;
 
 		/// <summary>
 		/// The environment tick count when this players position was last updated
 		/// </summary>
-		public int LastPositionUpdateTick
+		public uint LastPositionUpdateTick
 		{
 			get { return m_lastPositionUpdateTick; }
 			set { m_lastPositionUpdateTick = value; }
@@ -10881,10 +10873,8 @@ namespace DOL.GS
 		/// <summary>
 		/// the moving state of this player
 		/// </summary>
-		public override bool IsMoving
-		{
-			get { return base.IsMoving || IsStrafing; }
-		}
+		public override bool IsMoving => base.IsMoving || IsStrafing;
+
 		/// <summary>
 		/// The sprint effect of this player
 		/// </summary>
@@ -13900,12 +13890,10 @@ namespace DOL.GS
 		{
 			if (CurrentHouse == null || (!InHouse))
 			{
-				InHouse = false;
 				return;
 			}
 
 			House house = CurrentHouse;
-			InHouse = false;
 			CurrentHouse = null;
 
 			house.Exit(this, false);

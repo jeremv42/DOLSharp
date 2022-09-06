@@ -265,7 +265,7 @@ namespace DOL
 
 			while (current != null)
 			{
-				int start = Environment.TickCount;
+				var start = Environment.TickCount;
 
 				if (current._weakRef == null)
 				{

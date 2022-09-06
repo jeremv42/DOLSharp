@@ -34,7 +34,7 @@ namespace DOL.Integration.Server
 		public int id;
 		public object sync;
 		public volatile bool finished;
-		public int started;
+		public uint started;
 
 		[OneTimeSetUp]
 		public void Init()
@@ -148,7 +148,7 @@ namespace DOL.Integration.Server
 		{
 			try
 			{
-				started = Environment.TickCount;
+				started = GameTimer.GetTickCount();
 				Console.Out.WriteLine("[{0}] started", id);
 				AddRemoveObjects();
 			}
@@ -159,7 +159,7 @@ namespace DOL.Integration.Server
 			finally
 			{
 				finished = true;
-				Console.Out.WriteLine("[{0}] finished in {1}ms", id, Environment.TickCount - started);
+				Console.Out.WriteLine("[{0}] finished in {1}ms", id, GameTimer.GetTickCount() - started);
 			}
 		}
 	}

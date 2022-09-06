@@ -411,7 +411,6 @@ namespace DOL.GS
 					add.Heading = (ushort)(Util.Random(0, 4095));
 					add.Realm = 0;
 					add.Position = Position;
-					add.CurrentSpeed = 0;
 					add.Level = (byte)level;
 					add.RespawnInterval = -1;
 					add.AddToWorld();

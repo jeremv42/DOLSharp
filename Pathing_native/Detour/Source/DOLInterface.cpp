@@ -168,7 +168,7 @@ void PathOptimize(dtNavMeshQuery* query, int* pointCount, float* pointBuffer, dt
 		dtVadd(pt, A, pt);
 		float distAC = dtVdist(pt, B);
 
-		if (distAC < 4.0f)
+		if (distAC < 2.0f)
 		{
 			std::copy(pointBuffer + (i + 2) * 3, pointBuffer + (*pointCount) * 3, pointBuffer + (i + 1) * 3);
 			std::copy(refs + i + 2, refs + *pointCount, refs + i + 1);

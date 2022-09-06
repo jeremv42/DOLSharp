@@ -118,7 +118,6 @@ namespace DOL.GS
 
 			CurrentHouse = house;
 			CurrentRegionID = house.RegionID;
-			InHouse = true;
 			Position = position.Value;
 			Heading = (ushort) (hookedItem.Heading%4096);
 			AddToWorld();

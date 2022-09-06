@@ -65,7 +65,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 				return;
 			}
 
-			int environmentTick = Environment.TickCount;
+			var environmentTick = GameTimer.GetTickCount();
 			int oldSpeed = client.Player.CurrentSpeed;
 
 			//read the state of the player
@@ -82,9 +82,9 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 			if (client.Player.IsMezzed || client.Player.IsStunned)
 				// Nidel: updating client.Player.CurrentSpeed instead of speed
-				client.Player.CurrentSpeed = 0;
+				client.Player.SetCurrentSpeed(0);
 			else
-				client.Player.CurrentSpeed = (short)speed;
+				client.Player.SetCurrentSpeed((short)speed);
 
 			client.Player.IsStrafing = ((speedData & 0xe000) != 0);
 
@@ -181,7 +181,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 			float coordsPerSec = 0;
 			float jumpDetect = 0;
-			int timediff = Environment.TickCount - client.Player.LastPositionUpdateTick;
+			var timediff = GameTimer.GetTickCount() - client.Player.LastPositionUpdateTick;
 			float distance = 0;
 
 			if (timediff > 0)
@@ -208,7 +208,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 			#endif
 			#endregion DEBUG
 
-			client.Player.LastPositionUpdateTick = Environment.TickCount;
+			client.Player.LastPositionUpdateTick = GameTimer.GetTickCount();
 			client.Player.LastPositionUpdatePoint = realPos;
 
 			int tolerance = ServerProperties.Properties.CPS_TOLERANCE;
@@ -316,7 +316,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 			var flags = (byte)packet.ReadByte();
 
 			client.Player.Heading = (ushort)(headingflag & 0xFFF);
-			if (client.Player.Position.X != realPos.X || client.Player.Position.Y != realPos.Y)
+			if (Vector3.DistanceSquared(client.Player.Position, realPos) > 0.1f)
 				client.Player.TempProperties.setProperty(LASTMOVEMENTTICK, client.Player.CurrentRegion.Time);
 			client.Player.Position = realPos;
 
@@ -326,7 +326,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 			// used to predict current position, should be before
 			// any calculation (like fall damage)
-			client.Player.MovementStartTick = Environment.TickCount;
+			client.Player.MovementStartTick = GameTimer.GetTickCount();
 
 			// Begin ---------- New Area System -----------
 			if (client.Player.CurrentRegion.Time > client.Player.AreaUpdateTick) // check if update is needed
@@ -365,7 +365,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 			const string SHLASTUPDATETICK = "SHPLAYERPOSITION_LASTUPDATETICK";
 			const string SHLASTFLY = "SHLASTFLY_STRING";
 			const string SHLASTSTATUS = "SHLASTSTATUS_STRING";
-			int SHlastTick = client.Player.TempProperties.getProperty<int>(SHLASTUPDATETICK);
+			var SHlastTick = client.Player.TempProperties.getProperty<uint>(SHLASTUPDATETICK);
 			int SHlastFly = client.Player.TempProperties.getProperty<int>(SHLASTFLY);
 			int SHlastStatus = client.Player.TempProperties.getProperty<int>(SHLASTSTATUS);
 			int SHcount = client.Player.TempProperties.getProperty<int>(SHSPEEDCOUNTER);
@@ -761,7 +761,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 				(client.ClientState != GameClient.eClientState.Playing))
 				return;
 
-			int environmentTick = Environment.TickCount;
+			uint environmentTick = GameTimer.GetTickCount();
 			int oldSpeed = client.Player.CurrentSpeed;
 
 			var newPlayerX = packet.ReadFloatLowEndian();
@@ -786,9 +786,9 @@ namespace DOL.GS.PacketHandler.Client.v168
 			//Flags2 = (eFlags2)playerAction;                        
 
 			if (client.Player.IsMezzed || client.Player.IsStunned)
-				client.Player.CurrentSpeed = 0;
+				client.Player.SetCurrentSpeed(0);
 			else
-				client.Player.CurrentSpeed = (short)newPlayerSpeed;
+				client.Player.SetCurrentSpeed((short)newPlayerSpeed);
 			/*
 			client.Player.IsStrafing = Flags1 == eFlags1.STRAFELEFT || Flags1 == eFlags1.STRAFERIGHT;
 			client.Player.IsDiving = Flags2 == eFlags2.DIVING ? true : false;
@@ -866,7 +866,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 			float coordsPerSec = 0;
 			float jumpDetect = 0;
-			int timediff = Environment.TickCount - client.Player.LastPositionUpdateTick;
+			uint timediff = GameTimer.GetTickCount() - client.Player.LastPositionUpdateTick;
 			float distance = 0;
 
 			if (timediff > 0)
@@ -880,7 +880,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 				}
 			}
 
-			client.Player.LastPositionUpdateTick = Environment.TickCount;
+			client.Player.LastPositionUpdateTick = GameTimer.GetTickCount();
 			client.Player.LastPositionUpdatePoint = new Vector3(newPlayerX, newPlayerY, newPlayerZ);
 			client.Player.Position = client.Player.LastPositionUpdatePoint;
 
@@ -990,14 +990,17 @@ namespace DOL.GS.PacketHandler.Client.v168
 			//client.Player.Heading = (ushort)(newHeading & 0xFFF); //patch 0024 expermental
 
 			if (Vector3.DistanceSquared(client.Player.Position, new Vector3(newPlayerX, newPlayerY, newPlayerZ)) > 0.1f)
+			{
 				client.Player.TempProperties.setProperty(LASTMOVEMENTTICK, client.Player.CurrentRegion.Time);
+				client.Player.OnPlayerMove();
+			}
 
 			client.Player.Position = new Vector3(newPlayerX, newPlayerY, newPlayerZ);
 			client.Player.Heading = (ushort)(newHeading & 0xFFF);
 
 			// used to predict current position, should be before
 			// any calculation (like fall damage)
-			client.Player.MovementStartTick = Environment.TickCount; // experimental 0024
+			client.Player.MovementStartTick = GameTimer.GetTickCount(); // experimental 0024
 
 			// Begin ---------- New Area System -----------
 			if (client.Player.CurrentRegion.Time > client.Player.AreaUpdateTick) // check if update is needed

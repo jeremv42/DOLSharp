@@ -106,7 +106,6 @@ namespace DOL.GS.Commands
 						merchant.Name = LanguageMgr.GetTranslation(ServerProperties.Properties.SERV_LANGUAGE, "GMCommands.Merchant.NewName");
 						merchant.Model = 9;
 						//Fill the living variables
-						merchant.CurrentSpeed = 0;
 						merchant.MaxSpeedBase = 200;
 						merchant.GuildName = LanguageMgr.GetTranslation(ServerProperties.Properties.SERV_LANGUAGE, "GMCommands.Merchant.NewGuildName");
 						merchant.Size = 50;
@@ -425,8 +424,7 @@ namespace DOL.GS.Commands
 						merchant.Name = targetMerchant.Name;
 						merchant.Model = targetMerchant.Model;
 						//Fill the living variables
-						merchant.CurrentSpeed = targetMerchant.CurrentSpeed; ;
-						merchant.MaxSpeedBase = targetMerchant.MaxSpeedBase; ;
+						merchant.MaxSpeedBase = targetMerchant.MaxSpeedBase;
 						merchant.GuildName = targetMerchant.GuildName;
 						merchant.Size = targetMerchant.Size;
 						merchant.Inventory = targetMerchant.Inventory;

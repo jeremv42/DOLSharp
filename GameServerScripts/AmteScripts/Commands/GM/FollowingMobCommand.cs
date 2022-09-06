@@ -80,7 +80,6 @@ namespace DOL.GS.Commands
 					mob.Flags = oldmob.Flags;
 					mob.MeleeDamageType = oldmob.MeleeDamageType;
 					mob.RespawnInterval = oldmob.RespawnInterval;
-					mob.CurrentSpeed = 0;
 					mob.MaxSpeedBase = oldmob.MaxSpeedBase;
 					mob.GuildName = oldmob.GuildName;
 					mob.Size = oldmob.Size;

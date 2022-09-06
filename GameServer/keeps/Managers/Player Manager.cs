@@ -1,3 +1,4 @@
+using DOL.AI.Brain;
 using DOL.Database;
 using DOL.GS;
 using DOL.GS.PacketHandler;
@@ -204,18 +205,17 @@ namespace DOL.GS.Keeps
 		/// <param name="lord">The lord object</param>
 		public static void UpdateStats(GuardLord lord)
 		{
-			lock (lord.XPGainers.SyncRoot)
+			foreach (var de in lord.XPGainers)
 			{
-				foreach (System.Collections.DictionaryEntry de in lord.XPGainers)
+				var player = de.Key as GamePlayer;
+				if (de.Key is GameNPC npc && npc.Brain is IControlledBrain brain)
+					player = brain.GetPlayerOwner();
+				if (player != null)
 				{
-					GameObject obj = (GameObject)de.Key;
-					if (obj is GamePlayer)
-					{
-						GamePlayer player = obj as GamePlayer;
-						if (lord.Component.Keep != null && lord.Component.Keep is GameKeep)
-							player.CapturedKeeps++;
-						else player.CapturedTowers++;
-					}
+					if (lord.Component.Keep is GameKeep)
+						player.CapturedKeeps++;
+					else
+						player.CapturedTowers++;
 				}
 			}
 		}

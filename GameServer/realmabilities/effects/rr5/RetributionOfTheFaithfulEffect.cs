@@ -31,15 +31,7 @@ namespace DOL.GS.Effects
             owner.StopAttack();
             owner.StopCurrentSpellcast();
             owner.DisableTurning(true);
-            GamePlayer player = owner as GamePlayer;
-            if (player != null)
-            {
-                player.Out.SendUpdateMaxSpeed();
-            }
-            else if(owner.CurrentSpeed > owner.MaxSpeed) 
-            {
-                owner.CurrentSpeed = owner.MaxSpeed;
-            }
+            owner.UpdateMaxSpeed();
         }
 
 
@@ -52,15 +44,7 @@ namespace DOL.GS.Effects
         {
             owner.IsStunned = false;
             owner.DisableTurning(false);
-            GamePlayer player = owner as GamePlayer;
-            if (player != null)
-            {
-                player.Out.SendUpdateMaxSpeed();
-            }
-            else
-            {
-                owner.CurrentSpeed = owner.MaxSpeed;
-            }
+            owner.UpdateMaxSpeed();
             base.Stop();
 
         }

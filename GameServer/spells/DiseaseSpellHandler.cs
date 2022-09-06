@@ -99,21 +99,11 @@ namespace DOL.GS.Spells
 
 		protected virtual void SendUpdates(GameSpellEffect effect)
 		{
-			GamePlayer player = effect.Owner as GamePlayer;
-			if (player != null)
+			effect.Owner.UpdateMaxSpeed();
+			if (effect.Owner is GamePlayer player)
 			{
-				if (!player.IsMezzed && !player.IsStunned)
-					player.Out.SendUpdateMaxSpeed();
 				player.Out.SendCharStatsUpdate();
 				player.Out.SendUpdateWeaponAndArmorStats();
-			}
-
-			GameNPC npc = effect.Owner as GameNPC;
-			if (npc != null)
-			{
-				short maxSpeed = npc.MaxSpeed;
-				if (npc.CurrentSpeed > maxSpeed)
-					npc.CurrentSpeed = maxSpeed;
 			}
 		}
 

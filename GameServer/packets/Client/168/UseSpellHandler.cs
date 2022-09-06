@@ -47,7 +47,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 				var y = packet.ReadFloatLowEndian();
 				var z = packet.ReadFloatLowEndian();
 				client.Player.Position = new Vector3(x, y, z);
-				client.Player.CurrentSpeed = (short)packet.ReadFloatLowEndian();
+				client.Player.SetCurrentSpeed((short)packet.ReadFloatLowEndian());
 				client.Player.Heading = packet.ReadShort();
 				flagSpeedData = packet.ReadShort(); // target visible ? 0xA000 : 0x0000
 				spellLevel = packet.ReadByte();
@@ -74,7 +74,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 					else
 					{
 						client.Player.Position = new Vector3(newZone.XOffset + xOffsetInZone, newZone.YOffset + yOffsetInZone, realZ);
-						client.Player.MovementStartTick = Environment.TickCount;
+						client.Player.MovementStartTick = GameTimer.GetTickCount();
 					}
 				}
 
@@ -136,11 +136,11 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 				if ((m_flagSpeedData & 0x200) != 0)
 				{
-					player.CurrentSpeed = (short)(-(m_flagSpeedData & 0x1ff)); // backward movement
+					player.SetCurrentSpeed((short) -(m_flagSpeedData & 0x1ff)); // backward movement
 				}
 				else
 				{
-					player.CurrentSpeed = (short)(m_flagSpeedData & 0x1ff); // forward movement
+					player.SetCurrentSpeed((short) (m_flagSpeedData & 0x1ff)); // forward movement
 				}
 				player.IsStrafing = (m_flagSpeedData & 0x4000) != 0;
 				player.TargetInView = (m_flagSpeedData & 0xa000) != 0; // why 2 bits? that has to be figured out

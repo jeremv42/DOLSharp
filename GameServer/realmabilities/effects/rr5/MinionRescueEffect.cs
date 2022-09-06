@@ -123,7 +123,6 @@ namespace DOL.GS.Effects
             spirits[spiritId].Realm = EffectOwner.Realm;
             spirits[spiritId].Name = spiritName;
             spirits[spiritId].Model = spiritModel;
-            spirits[spiritId].CurrentSpeed = 0;
             spirits[spiritId].MaxSpeedBase = spiritSpeed;
             spirits[spiritId].GuildName = "";
             spirits[spiritId].Size = 50;

@@ -165,16 +165,14 @@ namespace DOL.GS
 		/// </summary>
 		protected abstract void OnTick();
 
-		private static long StopwatchFrequencyMilliseconds = Stopwatch.Frequency / 1000;
+		private static Stopwatch _stopwatch = Stopwatch.StartNew();
 		/// <summary>
-		/// Get the tick count, this is needed because Environment.TickCount resets to 0
-		/// when server has been up 48 days because it returned an int,
-		/// this is a long
+		/// Get the tick count (reset every ~48 days)
 		/// </summary>
 		/// <returns></returns>
-		public static long GetTickCount()
+		public static uint GetTickCount()
 		{
-			return Stopwatch.GetTimestamp() / StopwatchFrequencyMilliseconds;
+			return (uint)_stopwatch.ElapsedMilliseconds;
 		}
 
 		#region TimeManager

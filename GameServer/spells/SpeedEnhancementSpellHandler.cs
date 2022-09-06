@@ -138,17 +138,7 @@ namespace DOL.GS.Spells
 			if (owner.IsMezzed || owner.IsStunned)
 				return;
 
-			if (owner is GamePlayer)
-			{
-				((GamePlayer)owner).Out.SendUpdateMaxSpeed();
-			}
-			else if (owner is GameNPC)
-			{
-				GameNPC npc = (GameNPC)owner;
-				short maxSpeed = npc.MaxSpeed;
-				if (npc.CurrentSpeed > maxSpeed)
-					npc.CurrentSpeed = maxSpeed;
-			}
+			owner.UpdateMaxSpeed();
 		}
 
 		private void OnAttack(DOLEvent e, object sender, EventArgs arguments)

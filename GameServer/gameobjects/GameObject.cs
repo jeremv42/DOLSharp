@@ -97,7 +97,13 @@ namespace DOL.GS
 		#endregion
 
 		#region Position
-		public virtual Vector3 Position {get; set;}
+
+		private Vector3 _position = Vector3.Zero;
+		public virtual Vector3 Position
+		{
+			get => _position;
+			set => _position = value;
+		}
 
 		[Obsolete("use Position.X")]
 		public float X
@@ -258,7 +264,7 @@ namespace DOL.GS
 			// if target is closer than 32 units it is considered always in view
 			// tested and works this way for normal evade, parry, block (in 1.69)
 			if (rangeCheck)
-				return System.Numerics.Vector3.DistanceSquared(Position, target.Position) <= 32 * 32;
+				return Vector3.DistanceSquared(Position, target.Position) <= 32 * 32;
 
 			return false;
 		}
@@ -333,15 +339,7 @@ namespace DOL.GS
 			set { m_currentHouse = value; }
 		}
 
-		/// <summary>
-		/// Is this object in a house
-		/// </summary>
-		protected bool m_inHouse;
-		public virtual bool InHouse
-		{
-			get { return m_inHouse; }
-			set { m_inHouse = value; }
-		}
+		public bool InHouse => CurrentHouse != null;
 
 		/// <summary>
 		/// Is this object visible to another?
@@ -353,8 +351,7 @@ namespace DOL.GS
 		{
 			if (checkObject == null ||
 				CurrentRegion != checkObject.CurrentRegion ||
-				InHouse != checkObject.InHouse ||
-				(InHouse && checkObject.InHouse && CurrentHouse != checkObject.CurrentHouse))
+				CurrentHouse != checkObject.CurrentHouse)
 			{
 				return false;
 			}
@@ -755,6 +752,9 @@ namespace DOL.GS
 		/// <returns>true if object was created</returns>
 		public virtual bool AddToWorld()
 		{
+			if (!float.IsNormal(Position.X) || !float.IsNormal(Position.Y) || !float.IsNormal(Position.Z))
+				return false;
+
 			/****** MODIFIED BY KONIK & WITCHKING *******/
 			Zone currentZone = CurrentZone;
 			// CurrentZone checks for null Region.

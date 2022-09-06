@@ -49,7 +49,7 @@ namespace DOL.GS.Quests
 		/// <summary>
 		/// Time player must wait after failed task check to get new chance for a task, in milliseconds
 		/// </summary>
-		protected static int CHECK_TASK_DELAY = ServerProperties.Properties.TASK_PAUSE_TICKS; // moved to server properties to avoid tasks overruns...
+		protected static uint CHECK_TASK_DELAY = ServerProperties.Properties.TASK_PAUSE_TICKS; // moved to server properties to avoid tasks overruns...
 
 		/// <summary>
 		/// Chance of npc having task for player
@@ -531,7 +531,7 @@ namespace DOL.GS.Quests
 				player.Out.SendMessage("You cannot do more than "+MaxTasksDone(player.Level).ToString()+" tasks at your level!",eChatType.CT_System,eChatLoc.CL_SystemWindow);
 				return false;
 			}
-			else if (player.TempProperties.getProperty<int>(CHECK_TASK_TICK) > Environment.TickCount)
+			else if (player.TempProperties.getProperty<uint>(CHECK_TASK_TICK) > GameTimer.GetTickCount())
 			{
 				player.Out.SendMessage("I have no tasks for you at the moment. Come back sometime later, perhaps then you can help me with something.",eChatType.CT_Say,eChatLoc.CL_PopupWindow);
 				return false;
@@ -544,7 +544,7 @@ namespace DOL.GS.Quests
 			{
 				player.Out.SendMessage("I have no tasks for you at the moment. Come back sometime later, perhaps then you can help me with something.",eChatType.CT_Say,eChatLoc.CL_PopupWindow);
 				// stored time of try to disable task for defined time.
-				player.TempProperties.setProperty(CHECK_TASK_TICK, Environment.TickCount + CHECK_TASK_DELAY);
+				player.TempProperties.setProperty(CHECK_TASK_TICK, GameTimer.GetTickCount() + CHECK_TASK_DELAY);
 				return false;
 			}
 		}

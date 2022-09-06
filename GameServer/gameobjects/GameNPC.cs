@@ -813,10 +813,7 @@ namespace DOL.GS
 		/// we dont need to calculate things like AI if mob is in no way
 		/// visible to at least one player
 		/// </summary>
-		public virtual bool IsVisibleToPlayers
-		{
-			get { return (uint)Environment.TickCount - m_lastVisibleToPlayerTick < 60000; }
-		}
+		public virtual bool IsVisibleToPlayers => GameTimer.GetTickCount() - m_lastVisibleToPlayerTick < 60000;
 
 		/// <summary>
 		/// Gets or sets the spawnposition of this npc
@@ -865,23 +862,6 @@ namespace DOL.GS
 		}
 
 		/// <summary>
-		/// Gets or sets the current speed of the npc
-		/// </summary>
-		public override short CurrentSpeed
-		{
-			set
-			{
-				SaveCurrentPosition();
-
-				if (base.CurrentSpeed != value)
-				{
-					base.CurrentSpeed = value;
-					BroadcastUpdate();
-				}
-			}
-		}
-
-		/// <summary>
 		/// Stores the currentwaypoint that npc has to wander to
 		/// </summary>
 		protected PathPoint m_currentWayPoint = null;
@@ -898,31 +878,6 @@ namespace DOL.GS
 		/// Stores the speed for traveling on path
 		/// </summary>
 		protected short m_pathingNormalSpeed;
-
-		public override Vector3 Position
-		{
-			get
-			{
-				var basePos = base.Position;
-				if (!IsMoving)
-					return basePos;
-				if (TargetPosition != Vector3.Zero)
-				{
-					var expectedDistance = (int)Vector3.Distance(basePos, TargetPosition);
-					if (expectedDistance == 0)
-						return TargetPosition;
-
-					var actualDistance = (int)(MovementElapsedTicks * new Vector3(TickSpeedX, TickSpeedY, TickSpeedZ)).Length();
-					if (expectedDistance - actualDistance < 0)
-						return TargetPosition;
-				}
-				return basePos;
-			}
-			set
-			{
-				base.Position = value;
-			}
-		}
 
 		/// <summary>
 		/// The stealth state of this NPC
@@ -1006,19 +961,8 @@ namespace DOL.GS
 		/// <summary>
 		/// Is the mob roaming towards a target?
 		/// </summary>
-		public bool IsRoaming
-		{
-			get
-			{
-				return m_arriveAtTargetAction != null && m_arriveAtTargetAction.IsAlive;
-			}
-		}
+		public bool IsRoaming => m_arriveAtTargetAction != null && m_arriveAtTargetAction.IsAlive;
 
-		/// <summary>
-		/// Timer to be set if an OnCloseToTarget
-		/// handler is set before calling the WalkTo function
-		/// </summary>
-		//protected CloseToTargetAction m_closeToTargetAction;
 		/// <summary>
 		/// Object that this npc is following as weakreference
 		/// </summary>
@@ -1059,26 +1003,28 @@ namespace DOL.GS
 			set { m_pathID = value; }
 		}
 
-		private Vector3 m_targetPosition = new Vector3(0, 0, 0);
+		private Vector3 _basePosition = Vector3.Zero;
+		public override Vector3 Position
+		{
+			set => _basePosition = value;
+			get
+			{
+				if (!IsMoving || TargetPosition == Vector3.Zero)
+					return _basePosition;
+
+				if (MovementElapsedTicks > (Vector3.Distance(_basePosition, TargetPosition) * 1000 / CurrentSpeed))
+					return TargetPosition;
+				return _basePosition + MovementElapsedTicks * Velocity;
+			}
+		}
 
 		/// <summary>
 		/// The target position.
 		/// </summary>
-		public virtual Vector3 TargetPosition
+		public Vector3 TargetPosition
 		{
-			get
-			{
-				return m_targetPosition;
-			}
-
-			protected set
-			{
-				if (value != m_targetPosition)
-				{
-					SaveCurrentPosition();
-					m_targetPosition = value;
-				}
-			}
+			get;
+			private set;
 		}
 
 		/// <summary>
@@ -1104,82 +1050,9 @@ namespace DOL.GS
 		}
 
 		/// <summary>
-		/// Updates the tick speed for this living.
-		/// </summary>
-		protected override void UpdateTickSpeed()
-		{
-			MovementStartTick = Environment.TickCount;
-			if (!IsMoving)
-			{
-				SetTickSpeed(0, 0, 0);
-				return;
-			}
-
-			if (TargetPosition != Vector3.Zero)
-			{
-				var dist = Vector3.Distance(Position, TargetPosition);
-
-				if (dist <= 0)
-				{
-					SetTickSpeed(0, 0, 0);
-					return;
-				}
-
-				var diff = (TargetPosition - Position) / dist;
-				SetTickSpeed(diff.X, diff.Y, diff.Z, CurrentSpeed);
-				return;
-			}
-
-			base.UpdateTickSpeed();
-		}
-
-		/// <summary>
 		/// True if the mob is at its target position, else false.
 		/// </summary>
-		public bool IsAtTargetPosition
-		{
-			get
-			{
-				return Vector3.DistanceSquared(Position, TargetPosition) < 1;
-			}
-		}
-
-		/// <summary>
-		/// Turns the npc towards a specific spot
-		/// </summary>
-		/// <param name="tx">Target X</param>
-		/// <param name="ty">Target Y</param>
-		public void TurnTo(float tx, float ty)
-		{
-			TurnTo(tx, ty, true);
-		}
-
-		/// <summary>
-		/// Turns the npc towards a specific spot
-		/// optionally sends update to client
-		/// </summary>
-		/// <param name="tx">Target X</param>
-		/// <param name="ty">Target Y</param>
-		public virtual void TurnTo(float tx, float ty, bool sendUpdate)
-		{
-			if (IsStunned || IsMezzed) return;
-
-			Notify(GameNPCEvent.TurnTo, this, new TurnToEventArgs(tx, ty));
-
-			if (sendUpdate)
-				Heading = GameMath.GetHeading(Position, new Vector2(tx, ty));
-			else
-				base.Heading = GameMath.GetHeading(Position, new Vector2(tx, ty));
-		}
-
-		/// <summary>
-		/// Turns the npc towards a specific heading
-		/// </summary>
-		/// <param name="newHeading">the new heading</param>
-		public virtual void TurnTo(ushort heading)
-		{
-			TurnTo(heading, true);
-		}
+		public bool IsAtTargetPosition => Vector3.DistanceSquared(Position, TargetPosition) < 1.0f;
 
 		/// <summary>
 		/// Turns the npc towards a specific heading
@@ -1192,28 +1065,15 @@ namespace DOL.GS
 
 			Notify(GameNPCEvent.TurnToHeading, this, new TurnToHeadingEventArgs(heading));
 
-			if (sendUpdate)
-				if (Heading != heading) Heading = heading;
-				else
-				if (base.Heading != heading) base.Heading = heading;
+			if (sendUpdate && Heading != heading)
+				Heading = heading;
+			else
+				base.Heading = heading;
 		}
-
-		/// <summary>
-		/// Turns the NPC towards a specific gameObject
-		/// which can be anything ... a player, item, mob, npc ...
-		/// </summary>
-		/// <param name="target">GameObject to turn towards</param>
-		public virtual void TurnTo(GameObject target)
-		{
-			TurnTo(target, true);
-		}
-
-		/// <summary>
-		/// Turns the NPC towards a specific gameObject
-		/// which can be anything ... a player, item, mob, npc ...
-		/// optionally sends update to client
-		/// </summary>
-		/// <param name="target">GameObject to turn towards</param>
+		public void TurnTo(float tx, float ty) => TurnTo(tx, ty, true);
+		public void TurnTo(float tx, float ty, bool sendUpdate) => TurnTo(GameMath.GetHeading(Position, new Vector2(tx, ty)), sendUpdate);
+		public void TurnTo(ushort heading) => TurnTo(heading, true);
+		public void TurnTo(GameObject target) => TurnTo(target, true);
 		public void TurnTo(GameObject target, bool sendUpdate)
 		{
 			if (target == null || target.CurrentRegion != CurrentRegion)
@@ -1350,7 +1210,7 @@ namespace DOL.GS
 				Notify(GameNPCEvent.ArriveAtSpawnPoint, this);
 		}
 
-		public virtual void CancelWalkToTimer()
+		public void CancelWalkToTimer()
 		{
 			if (_arriveAtPathNodeAction != null)
 			{
@@ -1370,26 +1230,9 @@ namespace DOL.GS
 		/// <param name="target"></param>
 		/// <param name="speed"></param>
 		/// <returns></returns>
-		public virtual int GetTicksToArriveAt(Vector3 target, int speed)
+		public int GetTicksToArriveAt(Vector3 target, short speed)
 		{
-			return (int)Vector3.Distance(Position, target) * 1000 / speed;
-		}
-
-		/// <summary>
-		/// Make the current (calculated) position permanent.
-		/// </summary>
-		private void SaveCurrentPosition()
-		{
-			SavePosition(Position);
-		}
-
-		/// <summary>
-		/// Make the target position permanent.
-		/// </summary>
-		private void SavePosition(Vector3 target)
-		{
-			Position = target;
-			UpdateTickSpeed();
+			return (int)(Vector3.Distance(Position, target) * 1000 / speed);
 		}
 
 		/// <summary>
@@ -1400,7 +1243,7 @@ namespace DOL.GS
 		/// <param name="tz"></param>
 		/// <param name="speed"></param>
 		[Obsolete("Use .PathTo instead")]
-		public virtual void WalkTo(float targetX, float targetY, float targetZ, short speed)
+		public void WalkTo(float targetX, float targetY, float targetZ, short speed)
 		{
 			WalkTo(new Vector3(targetX, targetY, targetZ), speed);
 		}
@@ -1421,26 +1264,19 @@ namespace DOL.GS
 			if (speed <= 0)
 				return;
 
-			TargetPosition = target; // this also saves the current position
-
-			if (IsWithinRadius(TargetPosition, CONST_WALKTOTOLERANCE))
+			if (IsWithinRadius(target, CONST_WALKTOTOLERANCE))
 			{
 				// No need to start walking.
-
-				Notify(GameNPCEvent.ArriveAtTarget, this);
+				TargetPosition = target;
+				Position = target;
+				_OnArrivedAtTarget();
 				return;
 			}
 
-			CancelWalkToTimer();
+			_StartWalk(target, speed);
 
-			m_Heading = GameMath.GetHeading(Position, TargetPosition);
-			m_currentSpeed = speed;
-
-			UpdateTickSpeed();
 			Notify(GameNPCEvent.WalkTo, this, new WalkToEventArgs(TargetPosition, speed));
-
 			StartArriveAtTargetAction(GetTicksToArriveAt(TargetPosition, speed));
-			BroadcastUpdate();
 		}
 
 		private void StartArriveAtTargetAction(int requiredTicks)
@@ -1475,39 +1311,16 @@ namespace DOL.GS
 			StopAttack();
 			StopFollowing();
 
-			StandardMobBrain brain = Brain as StandardMobBrain;
-
-			if (brain != null && brain.HasAggro)
-			{
+			if (Brain is StandardMobBrain brain && brain.HasAggro)
 				brain.ClearAggroList();
-			}
 
 			TargetObject = null;
+			if (Brain is IControlledBrain)
+				return;
 
 			IsReturningHome = true;
 			IsReturningToSpawnPoint = true;
 			PathTo(SpawnPoint, speed);
-		}
-
-		/// <summary>
-		/// This function is used to start the mob walking. It will
-		/// walk in the heading direction until the StopMovement function
-		/// is called
-		/// </summary>
-		/// <param name="speed">walk speed</param>
-		[Obsolete("fundamentally does not work well with pathing; avoid if possible")]
-		public virtual void Walk(short speed)
-		{
-			Notify(GameNPCEvent.Walk, this, new WalkEventArgs(speed));
-
-			CancelWalkToTimer();
-			SaveCurrentPosition();
-			TargetPosition = Vector3.Zero;
-
-			m_currentSpeed = speed;
-
-			UpdateTickSpeed();
-			BroadcastUpdate();
 		}
 
 		/// <summary>
@@ -1595,33 +1408,34 @@ namespace DOL.GS
 			if (speed <= 0)
 				return;
 
-			SavePosition(Position); // update current pos
-			m_targetPosition = node;
+			_StartWalk(node, speed);
 
-			if (IsWithinRadius(node, 5))
-			{
-				// goToNextNodeCallback(this);
-				BroadcastUpdate();
-				return;
-			}
+			_StartArriveAtPathNodeAction(GetTicksToArriveAt(node, speed));
+		}
 
+		private void _StartWalk(Vector3 target, short speed)
+		{
 			CancelWalkToTimer();
 
-			m_Heading = GetHeading(node);
-			m_currentSpeed = speed;
+			if (IsMoving)
+			{
+				Position = Position;
+			}
+			m_Heading = GetHeading(target);
+			TargetPosition = target;
+			CurrentSpeed = speed;
+			MovementStartTick = GameTimer.GetTickCount();
 
 			UpdateTickSpeed();
-			_StartArriveAtPathNodeAction(Math.Max(1, GetTicksToArriveAt(node, speed) - 150));
+			BroadcastUpdate();
 		}
 
 		private ArriveAtPathNodeAction _arriveAtPathNodeAction;
 		private void _StartArriveAtPathNodeAction(int requiredTicks)
 		{
 			CancelWalkToTimer();
-
-			BroadcastUpdate();
 			_arriveAtPathNodeAction = new ArriveAtPathNodeAction(this);
-			_arriveAtPathNodeAction.Start(requiredTicks);
+			_arriveAtPathNodeAction.Start(Math.Max(1,requiredTicks));
 		}
 		private class ArriveAtPathNodeAction : RegionAction
 		{
@@ -1631,6 +1445,7 @@ namespace DOL.GS
 			protected override void OnTick()
 			{
 				var npc = (GameNPC)m_actionSource;
+				npc.DebugSend("calculate next node..." + npc.MovementElapsedTicks + " / " + (uint)(Vector3.Distance(npc._basePosition, npc.TargetPosition) * 1000 / npc.CurrentSpeed));
 				// Pick the next pathing node, and walk towards it
 				npc.PathCalculator.CalculateNextTargetAsync().ContinueWith(res =>
 				{
@@ -1669,30 +1484,51 @@ namespace DOL.GS
 		/// <summary>
 		/// Stops the movement of the mob.
 		/// </summary>
-		public virtual void StopMoving()
+		public void StopMoving()
 		{
 			CancelWalkToSpawn();
+			if (!IsMoving)
+				return;
 
-			if (IsMoving)
-				CurrentSpeed = 0;
+			if (MovementElapsedTicks > (Vector3.Distance(_basePosition, TargetPosition) * 1000 / CurrentSpeed))
+				Position = TargetPosition;
+			else
+				Position = _basePosition + MovementElapsedTicks * Velocity;
+			MovementStartTick = GameTimer.GetTickCount();
+			TargetPosition = Vector3.Zero;
+			CurrentSpeed = 0;
+			BroadcastUpdate();
 		}
 
-		/// <summary>
-		/// Stops the movement of the mob and forcibly moves it to the
-		/// given target position.
-		/// </summary>
-		public virtual void StopMovingAt(Vector3 target)
+		protected override void UpdateTickSpeed()
 		{
-			CancelWalkToSpawn();
-
-			if (IsMoving)
+			if (CurrentSpeed == 0)
 			{
-				m_currentSpeed = 0;
-				UpdateTickSpeed();
+				base.UpdateTickSpeed();
+				return;
 			}
 
-			SavePosition(target);
-			BroadcastUpdate();
+			if (TargetPosition == Vector3.Zero)
+			{
+				CurrentSpeed = 0;
+				return;
+			}
+
+			Heading = GetHeading(TargetPosition);
+			base.UpdateTickSpeed();
+		}
+
+		public override void UpdateMaxSpeed()
+		{
+			if (!IsMoving)
+				return;
+
+			if (CurrentSpeed > MaxSpeed || !IsReturningToSpawnPoint)
+			{
+				Position = Position;
+				CurrentSpeed = MaxSpeed;
+				BroadcastUpdate();
+			}
 		}
 
 		public const int STICKMINIMUMRANGE = 100;
@@ -2969,7 +2805,7 @@ namespace DOL.GS
 		{
 			base.BroadcastUpdate();
 
-			m_lastUpdateTickCount = (uint)Environment.TickCount;
+			m_lastUpdateTickCount = GameTimer.GetTickCount();
 		}
 
 		/// <summary>
@@ -2978,7 +2814,7 @@ namespace DOL.GS
 		/// </summary>
 		public void NPCUpdatedCallback()
 		{
-			m_lastVisibleToPlayerTick = (uint)Environment.TickCount;
+			m_lastVisibleToPlayerTick = GameTimer.GetTickCount();
 			lock (BrainSync)
 			{
 				ABrain brain = Brain;
@@ -3010,7 +2846,7 @@ namespace DOL.GS
 			}
 
 			if (anyPlayer)
-				m_lastVisibleToPlayerTick = (uint)Environment.TickCount;
+				m_lastVisibleToPlayerTick = GameTimer.GetTickCount();
 
 			m_spawnPoint = Position;
 			m_spawnHeading = Heading;
@@ -3899,10 +3735,6 @@ namespace DOL.GS
 
 			if (AttackState)
 			{
-				// if we're moving we need to lock down the current position
-				if (IsMoving)
-					SaveCurrentPosition();
-
 				if (ActiveWeaponSlot == eActiveWeaponSlot.Distance)
 				{
 					// Archer mobs sometimes bug and keep trying to fire at max range unsuccessfully so force them to get just a tad closer.
@@ -4050,38 +3882,26 @@ namespace DOL.GS
 			{
 				if (CurrentRegion == null || CurrentRegion.Time - CHARMED_NOEXP_TIMEOUT < TempProperties.getProperty<long>(CHARMED_TICK_PROP))
 					return false;
-				if (this.Brain is IControlledBrain)
+				if (Brain is IControlledBrain)
 					return false;
-				lock (m_xpGainers.SyncRoot)
+				
+				if (XPGainers.IsEmpty)
+					return false;
+
+				foreach (var de in XPGainers)
 				{
-					if (m_xpGainers.Keys.Count == 0) return false;
-					foreach (DictionaryEntry de in m_xpGainers)
-					{
-						GameObject obj = (GameObject)de.Key;
-						if (obj is GamePlayer)
-						{
-							//If a gameplayer with privlevel > 1 attacked the
-							//mob, then the players won't gain xp ...
-							if (((GamePlayer)obj).Client.Account.PrivLevel > 1)
-								return false;
-							//If a player to which we are gray killed up we
-							//aren't worth anything either
-							if (((GamePlayer)obj).IsObjectGreyCon(this))
-								return false;
-						}
-						else
-						{
-							//If object is no gameplayer and realm is != none
-							//then it means that a npc has hit this living and
-							//it is not worth any xp ...
-							//if(obj.Realm != (byte)eRealm.None)
-							//If grey to at least one living then no exp
-							if (obj is GameLiving && ((GameLiving)obj).IsObjectGreyCon(this))
-								return false;
-						}
-					}
-					return true;
+					GameObject obj = de.Key;
+					// If a player to which we are gray killed up we
+					// aren't worth anything either
+					if (obj is GameLiving living && living.IsObjectGreyCon(this))
+						return false;
+					
+					//If a gameplayer with privlevel > 1 attacked the
+					//mob, then the players won't gain xp ...
+					if (obj is GamePlayer player && player.Client.Account.PrivLevel > 1)
+						return false;
 				}
+				return true;
 			}
 			set
 			{
@@ -4127,16 +3947,15 @@ namespace DOL.GS
 				if ((Faction != null) && (killer is GamePlayer))
 				{
 					// Get All Attackers. // TODO check if this shouldn't be set to Attackers instead of XPGainers ?
-					foreach (DictionaryEntry de in this.XPGainers)
+					foreach (var de in XPGainers)
 					{
-						GameLiving living = de.Key as GameLiving;
-						GamePlayer player = living as GamePlayer;
+						var player = de.Key as GamePlayer;
 
 						// Get Pets Owner (// TODO check if they are not already treated as attackers ?)
-						if (living is GameNPC && (living as GameNPC).Brain is IControlledBrain)
-							player = ((living as GameNPC).Brain as IControlledBrain).GetPlayerOwner();
+						if (de.Key is GameNPC npc && npc.Brain is IControlledBrain brain)
+							player = brain.GetPlayerOwner();
 
-						if (player != null && player.ObjectState == GameObject.eObjectState.Active && player.IsAlive && player.IsWithinRadius(this, WorldMgr.MAX_EXPFORKILL_DISTANCE))
+						if (player != null && player.ObjectState == eObjectState.Active && player.IsAlive && player.IsWithinRadius(this, WorldMgr.MAX_EXPFORKILL_DISTANCE))
 						{
 							Faction.KillMember(player);
 						}
@@ -4580,139 +4399,132 @@ namespace DOL.GS
 			ArrayList autolootlist = new ArrayList();
 			ArrayList aplayer = new ArrayList();
 
-			lock (m_xpGainers.SyncRoot)
+			var gainers = XPGainers.ToArray();
+			XPGainers.Clear();
+			if (gainers.Length == 0)
+				return;
+
+			ItemTemplate[] lootTemplates = LootMgr.GetLoot(this, killer);
+
+			foreach (ItemTemplate lootTemplate in lootTemplates)
 			{
-				if (m_xpGainers.Keys.Count == 0) return;
-
-				ItemTemplate[] lootTemplates = LootMgr.GetLoot(this, killer);
-
-				foreach (ItemTemplate lootTemplate in lootTemplates)
+				if (lootTemplate == null) continue;
+				GameStaticItem loot = null;
+				if (GameMoney.IsItemMoney(lootTemplate.Name))
 				{
-					if (lootTemplate == null) continue;
-					GameStaticItem loot = null;
-					if (GameMoney.IsItemMoney(lootTemplate.Name))
+					long value = lootTemplate.Price;
+					//GamePlayer killerPlayer = killer as GamePlayer;
+
+					//[StephenxPimentel] - Zone Bonus XP Support
+					if (ServerProperties.Properties.ENABLE_ZONE_BONUSES)
 					{
-						long value = lootTemplate.Price;
-						//GamePlayer killerPlayer = killer as GamePlayer;
-
-						//[StephenxPimentel] - Zone Bonus XP Support
-						if (ServerProperties.Properties.ENABLE_ZONE_BONUSES)
+						GamePlayer killerPlayer = killer as GamePlayer;
+						if (killer is GameNPC)
 						{
-							GamePlayer killerPlayer = killer as GamePlayer;
-							if (killer is GameNPC)
-							{
-								if (killer is GameNPC && ((killer as GameNPC).Brain is IControlledBrain))
-									killerPlayer = ((killer as GameNPC).Brain as IControlledBrain).GetPlayerOwner();
-								else return;
-							}
-
-							int zoneBonus = (((int)value * ZoneBonus.GetCoinBonus(killerPlayer) / 100));
-							if (zoneBonus > 0)
-							{
-								long amount = (long)(zoneBonus * ServerProperties.Properties.MONEY_DROP);
-								killerPlayer.AddMoney(amount,
-													  ZoneBonus.GetBonusMessage(killerPlayer, (int)(zoneBonus * ServerProperties.Properties.MONEY_DROP), ZoneBonus.eZoneBonusType.COIN),
-													  eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-								InventoryLogging.LogInventoryAction(this, killerPlayer, eInventoryActionType.Loot, amount);
-							}
+							if (killer is GameNPC && ((killer as GameNPC).Brain is IControlledBrain))
+								killerPlayer = ((killer as GameNPC).Brain as IControlledBrain).GetPlayerOwner();
+							else return;
 						}
 
-						if (Keeps.KeepBonusMgr.RealmHasBonus(DOL.GS.Keeps.eKeepBonusType.Coin_Drop_5, (eRealm)killer.Realm))
-							value += (value / 100) * 5;
-						else if (Keeps.KeepBonusMgr.RealmHasBonus(DOL.GS.Keeps.eKeepBonusType.Coin_Drop_3, (eRealm)killer.Realm))
-							value += (value / 100) * 3;
-
-						//this will need to be changed when the ML for increasing money is added
-						if (value != lootTemplate.Price)
+						int zoneBonus = (((int)value * ZoneBonus.GetCoinBonus(killerPlayer) / 100));
+						if (zoneBonus > 0)
 						{
-							GamePlayer killerPlayer = killer as GamePlayer;
-							if (killerPlayer != null)
-								killerPlayer.Out.SendMessage(LanguageMgr.GetTranslation(killerPlayer.Client, "GameNPC.DropLoot.AdditionalMoney", Money.GetString(value - lootTemplate.Price)), eChatType.CT_Loot, eChatLoc.CL_SystemWindow);
+							long amount = (long)(zoneBonus * ServerProperties.Properties.MONEY_DROP);
+							killerPlayer.AddMoney(amount,
+												  ZoneBonus.GetBonusMessage(killerPlayer, (int)(zoneBonus * ServerProperties.Properties.MONEY_DROP), ZoneBonus.eZoneBonusType.COIN),
+												  eChatType.CT_Important, eChatLoc.CL_SystemWindow);
+							InventoryLogging.LogInventoryAction(this, killerPlayer, eInventoryActionType.Loot, amount);
 						}
+					}
 
-						//Mythical Coin bonus property (Can be used for any equipped item, bonus 235)
-						if (killer is GamePlayer)
+					if (Keeps.KeepBonusMgr.RealmHasBonus(DOL.GS.Keeps.eKeepBonusType.Coin_Drop_5, (eRealm)killer.Realm))
+						value += (value / 100) * 5;
+					else if (Keeps.KeepBonusMgr.RealmHasBonus(DOL.GS.Keeps.eKeepBonusType.Coin_Drop_3, (eRealm)killer.Realm))
+						value += (value / 100) * 3;
+
+					//this will need to be changed when the ML for increasing money is added
+					if (value != lootTemplate.Price)
+					{
+						GamePlayer killerPlayer = killer as GamePlayer;
+						if (killerPlayer != null)
+							killerPlayer.Out.SendMessage(LanguageMgr.GetTranslation(killerPlayer.Client, "GameNPC.DropLoot.AdditionalMoney", Money.GetString(value - lootTemplate.Price)), eChatType.CT_Loot, eChatLoc.CL_SystemWindow);
+					}
+
+					//Mythical Coin bonus property (Can be used for any equipped item, bonus 235)
+					if (killer is GamePlayer)
+					{
+						GamePlayer killerPlayer = killer as GamePlayer;
+						if (killerPlayer.GetModified(eProperty.MythicalCoin) > 0)
 						{
-							GamePlayer killerPlayer = killer as GamePlayer;
-							if (killerPlayer.GetModified(eProperty.MythicalCoin) > 0)
-							{
-								value += (value * killerPlayer.GetModified(eProperty.MythicalCoin)) / 100;
-								killerPlayer.Out.SendMessage(LanguageMgr.GetTranslation(killerPlayer.Client,
-																						"GameNPC.DropLoot.ItemAdditionalMoney", Money.GetString(value - lootTemplate.Price)), eChatType.CT_Loot, eChatLoc.CL_SystemWindow);
-							}
+							value += (value * killerPlayer.GetModified(eProperty.MythicalCoin)) / 100;
+							killerPlayer.Out.SendMessage(LanguageMgr.GetTranslation(killerPlayer.Client,
+																					"GameNPC.DropLoot.ItemAdditionalMoney", Money.GetString(value - lootTemplate.Price)), eChatType.CT_Loot, eChatLoc.CL_SystemWindow);
 						}
+					}
 
-						loot = new GameMoney(value, this);
-						loot.Name = lootTemplate.Name;
-						loot.Model = (ushort)lootTemplate.Model;
+					loot = new GameMoney(value, this);
+					loot.Name = lootTemplate.Name;
+					loot.Model = (ushort)lootTemplate.Model;
+				}
+				else
+				{
+					InventoryItem invitem;
+
+					if (lootTemplate is ItemUnique)
+					{
+						GameServer.Database.AddObject(lootTemplate);
+						invitem = GameInventoryItem.Create(lootTemplate as ItemUnique);
 					}
 					else
+						invitem = GameInventoryItem.Create(lootTemplate);
+
+					loot = new WorldInventoryItem(invitem);
+					loot.Position = Position;
+					loot.Heading = Heading;
+					loot.CurrentRegion = CurrentRegion;
+					(loot as WorldInventoryItem).Item.IsCrafted = false;
+					(loot as WorldInventoryItem).Item.Creator = Name;
+
+					// This may seem like an odd place for this code, but loot-generating code further up the line
+					// is dealing strictly with ItemTemplate objects, while you need the InventoryItem in order
+					// to be able to set the Count property.
+					// Converts single drops of loot with PackSize > 1 (and MaxCount >= PackSize) to stacks of Count = PackSize
+					if (((WorldInventoryItem)loot).Item.PackSize > 1 && ((WorldInventoryItem)loot).Item.MaxCount >= ((WorldInventoryItem)loot).Item.PackSize)
 					{
-						InventoryItem invitem;
-
-						if (lootTemplate is ItemUnique)
-						{
-							GameServer.Database.AddObject(lootTemplate);
-							invitem = GameInventoryItem.Create(lootTemplate as ItemUnique);
-						}
-						else
-							invitem = GameInventoryItem.Create(lootTemplate);
-
-						loot = new WorldInventoryItem(invitem);
-						loot.Position = Position;
-						loot.Heading = Heading;
-						loot.CurrentRegion = CurrentRegion;
-						(loot as WorldInventoryItem).Item.IsCrafted = false;
-						(loot as WorldInventoryItem).Item.Creator = Name;
-
-						// This may seem like an odd place for this code, but loot-generating code further up the line
-						// is dealing strictly with ItemTemplate objects, while you need the InventoryItem in order
-						// to be able to set the Count property.
-						// Converts single drops of loot with PackSize > 1 (and MaxCount >= PackSize) to stacks of Count = PackSize
-						if (((WorldInventoryItem)loot).Item.PackSize > 1 && ((WorldInventoryItem)loot).Item.MaxCount >= ((WorldInventoryItem)loot).Item.PackSize)
-						{
-							((WorldInventoryItem)loot).Item.Count = ((WorldInventoryItem)loot).Item.PackSize;
-						}
+						((WorldInventoryItem)loot).Item.Count = ((WorldInventoryItem)loot).Item.PackSize;
 					}
+				}
 
-					GamePlayer playerAttacker = null;
-					foreach (GameObject gainer in m_xpGainers.Keys)
+				GamePlayer playerAttacker = null;
+				foreach (var (gainer, _dmg) in gainers)
+				{
+					if (gainer is GamePlayer player)
 					{
-						if (gainer is GamePlayer)
-						{
-							playerAttacker = gainer as GamePlayer;
-							if (loot.Realm == 0)
-								loot.Realm = ((GamePlayer)gainer).Realm;
-						}
-						loot.AddOwner(gainer);
-						if (gainer is GameNPC)
-						{
-							IControlledBrain brain = ((GameNPC)gainer).Brain as IControlledBrain;
-							if (brain != null)
-							{
-								playerAttacker = brain.GetPlayerOwner();
-								loot.AddOwner(brain.GetPlayerOwner());
-							}
-						}
+						playerAttacker = player;
+						if (loot.Realm == 0)
+							loot.Realm = player.Realm;
 					}
-					if (playerAttacker == null) return; // no loot if mob kills another mob
-
-
-					droplist.Add(loot.GetName(1, false));
-					loot.AddToWorld();
-
-					foreach (GameObject gainer in m_xpGainers.Keys)
+					loot.AddOwner(gainer);
+					if (gainer is GameNPC npc && npc.Brain is IControlledBrain brain)
 					{
-						if (gainer is GamePlayer)
-						{
-							GamePlayer player = gainer as GamePlayer;
-							if (player.Autoloot && loot.IsWithinRadius(player, 1500)) // should be large enough for most casters to autoloot
-							{
-								if (player.Group == null || (player.Group != null && player == player.Group.Leader))
-									aplayer.Add(player);
-								autolootlist.Add(loot);
-							}
-						}
+						playerAttacker = brain.GetPlayerOwner();
+						loot.AddOwner(brain.GetPlayerOwner());
+					}
+				}
+				if (playerAttacker == null)
+					return; // no loot if mob kills another mob
+
+				droplist.Add(loot.GetName(1, false));
+				loot.AddToWorld();
+
+				foreach (var (gainer, _dmg) in gainers)
+				{
+					if (gainer is GamePlayer player && player.Autoloot &&
+					    loot.IsWithinRadius(player, 1500)) // should be large enough for most casters to autoloot
+					{
+						if (player.Group == null || (player.Group != null && player == player.Group.Leader))
+							aplayer.Add(player);
+						autolootlist.Add(loot);
 					}
 				}
 			}
@@ -4739,7 +4551,7 @@ namespace DOL.GS
 		/// <param name="healSource"></param>
 		/// <param name="changeType"></param>
 		/// <param name="healAmount"></param>
-		public override void EnemyHealed(GameLiving enemy, GameObject healSource, GameLiving.eHealthChangeType changeType, int healAmount)
+		public override void EnemyHealed(GameLiving enemy, GameObject healSource, eHealthChangeType changeType, int healAmount)
 		{
 			base.EnemyHealed(enemy, healSource, changeType, healAmount);
 
@@ -4759,7 +4571,8 @@ namespace DOL.GS
 			{
 				// collect "helping" group players in range
 				var xpGainers = attackerGroup.GetMembersInTheGroup()
-					.Where(l => this.IsWithinRadius(l, WorldMgr.MAX_EXPFORKILL_DISTANCE) && l.IsAlive && l.ObjectState == eObjectState.Active).ToArray();
+					.Where(l => IsWithinRadius(l, WorldMgr.MAX_EXPFORKILL_DISTANCE) && l.IsAlive && l.ObjectState == eObjectState.Active)
+					.ToArray();
 
 				float damageAmount = (float)healAmount / xpGainers.Length;
 

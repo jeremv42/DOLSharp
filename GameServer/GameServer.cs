@@ -103,7 +103,7 @@ namespace DOL.GS
 		/// <summary>
 		/// Holds the startSystemTick when server is up.
 		/// </summary>
-		protected int m_startTick;
+		protected uint m_startTick;
 
 		/// <summary>
 		/// Game server status variable
@@ -151,7 +151,7 @@ namespace DOL.GS
 
 		protected virtual IObjectDatabase DataBaseImpl => Instance.m_database;
 
-		protected virtual IServerRules ServerRulesImpl
+		protected IServerRules ServerRulesImpl
 		{
 			get
 			{
@@ -216,9 +216,9 @@ namespace DOL.GS
 		/// <summary>
 		/// Gets the number of millisecounds elapsed since the GameServer started.
 		/// </summary>
-		public int TickCount
+		public uint TickCount
 		{
-			get { return Environment.TickCount - m_startTick; }
+			get { return GameTimer.GetTickCount() - m_startTick; }
 		}
 
 		#endregion
@@ -459,11 +459,11 @@ namespace DOL.GS
 		/// <param name="callback"></param>
 		public void SendUDP(byte[] bytes, int count, EndPoint clientEndpoint, AsyncCallback callback)
 		{
-			int start = Environment.TickCount;
+			var start = GameTimer.GetTickCount();
 
 			m_udpSocket.BeginSendTo(bytes, 0, count, SocketFlags.None, clientEndpoint, callback, m_udpSocket);
 
-			int took = Environment.TickCount - start;
+			var took = GameTimer.GetTickCount() - start;
 			if (took > 100 && log.IsWarnEnabled)
 				log.WarnFormat("m_udpSocket.BeginSendTo took {0}ms! (UDP to {1})", took, clientEndpoint.ToString());
 		}
@@ -704,7 +704,7 @@ namespace DOL.GS
 
 				//---------------------------------------------------------------
 				//Set the GameServer StartTick
-				m_startTick = Environment.TickCount;
+				m_startTick = GameTimer.GetTickCount();
 
 				//---------------------------------------------------------------
 				//Notify everyone that the server is now started!
@@ -1374,7 +1374,7 @@ namespace DOL.GS
 		{
 			try
 			{
-				int startTick = Environment.TickCount;
+				var startTick = GameTimer.GetTickCount();
 				if (log.IsInfoEnabled)
 					log.Info("Saving database...");
 				if (log.IsDebugEnabled)
@@ -1403,7 +1403,7 @@ namespace DOL.GS
 				}
 				if (log.IsInfoEnabled)
 					log.Info("Saving database complete!");
-				startTick = Environment.TickCount - startTick;
+				startTick = GameTimer.GetTickCount() - startTick;
 				if (log.IsInfoEnabled)
 					log.Info("Saved all databases and " + saveCount + " players in " + startTick + "ms");
 			}

@@ -796,7 +796,7 @@ namespace DOL.GS.PacketHandler
 				if (npc.IsMoving && !npc.IsAtTargetPosition)
 				{
 					speed = npc.CurrentSpeed;
-					if (npc.TargetPosition.X != 0 || npc.TargetPosition.Y != 0 || npc.TargetPosition.Z != 0)
+					if (npc.TargetPosition != Vector3.Zero)
 					{
 						Zone tz = npc.CurrentRegion.GetZone(npc.TargetPosition);
 						if (tz != null)
@@ -1047,7 +1047,7 @@ namespace DOL.GS.PacketHandler
 				if (npc.IsMoving && !npc.IsAtTargetPosition)
 				{
 					speed = npc.CurrentSpeed;
-					speedZ = (ushort) npc.TickSpeedZ;
+					speedZ = (ushort) npc.Velocity.Z;
 				}
 				pak.WriteShort((ushort) npc.ObjectID);
 				pak.WriteShort((ushort) speed);

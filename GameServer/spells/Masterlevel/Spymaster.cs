@@ -128,7 +128,6 @@ namespace DOL.GS.Spells
                 decoy.Inventory = load;
                 decoy.BroadcastLivingEquipmentUpdate();
             }
-            decoy.CurrentSpeed = 0;
             decoy.GuildName = "";
         }
 

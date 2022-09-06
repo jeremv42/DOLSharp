@@ -508,12 +508,12 @@ namespace DOL.GS.GameEvents
 				return 0;
 
 			float totaldmg = 0f;
-			foreach (DictionaryEntry de in killedPlayer.XPGainers)
+			foreach (var de in killedPlayer.XPGainers)
 			{
-				totaldmg += (float)de.Value;
+				totaldmg += de.Value;
 			}
 
-			foreach (DictionaryEntry de in killedPlayer.XPGainers)
+			foreach (var de in killedPlayer.XPGainers)
 			{
 				GamePlayer key = de.Key as GamePlayer;
 				if (killer == key)
@@ -521,7 +521,7 @@ namespace DOL.GS.GameEvents
 					if (!killer.IsWithinRadius(killedPlayer, WorldMgr.MAX_EXPFORKILL_DISTANCE))
 						return 0;
 
-					double damagePercent = (float)de.Value / totaldmg;
+					double damagePercent = de.Value / totaldmg;
 					if (!key.IsAlive)//Dead living gets 25% exp only
 						damagePercent *= 0.25;
 

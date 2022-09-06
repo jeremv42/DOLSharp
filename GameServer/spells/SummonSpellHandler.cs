@@ -164,7 +164,6 @@ namespace DOL.GS.Spells
 			m_pet.Heading = heading;
 			m_pet.CurrentRegion = region;
 
-			m_pet.CurrentSpeed = 0;
 			m_pet.Realm = Caster.Realm;
 
 			if (m_isSilent)

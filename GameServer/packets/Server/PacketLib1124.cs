@@ -179,7 +179,7 @@ namespace DOL.GS.PacketHandler
 				if (!npc.IsAtTargetPosition)
 				{
 					speed = npc.CurrentSpeed;
-					speedZ = (ushort)npc.TickSpeedZ;
+					speedZ = (ushort)npc.Velocity.Z;
 				}
 				pak.WriteShort((ushort)npc.ObjectID);
 				pak.WriteShort((ushort)(speed));
@@ -579,7 +579,8 @@ namespace DOL.GS.PacketHandler
 				if (q == null || q.Status == eQuestStatus.NotDoing)
 				{
 					pak.WriteByte(0); // name length
-					pak.WriteShort(0); // status
+					pak.WriteByte(0); // unknown
+					pak.WriteByte(0); // status
 					pak.WriteByte(0); // goal count
 					pak.WriteByte(0); // level
 					SendTCP(pak);
@@ -591,7 +592,8 @@ namespace DOL.GS.PacketHandler
 					name = name.Substring(0, 256);
 
 				pak.WriteByte((byte) name.Length);
-				pak.WriteShort((ushort)(q.Status == eQuestStatus.InProgress ? 0 : 1));
+				pak.WriteByte(0); // unknown
+				pak.WriteByte((byte) (q.Status == eQuestStatus.InProgress ? 0 : 1));
 				pak.WriteByte((byte) (q.Status == eQuestStatus.Done ? 0 : q.VisibleGoals.Count));
 				pak.WriteByte(q.Quest.MinLevel);
 				pak.WriteStringBytes(name);

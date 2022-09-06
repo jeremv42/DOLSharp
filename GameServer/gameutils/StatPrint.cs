@@ -19,6 +19,7 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -44,6 +45,8 @@ namespace DOL.GS.GameEvents
 		private static long m_lastPacketsIn = 0;
 		private static long m_lastPacketsOut = 0;
 		private static long m_lastMeasureTick = DateTime.Now.Ticks;
+		private static long m_lastPathToCalls = 0;
+		private static long m_lastPathToCalculateNextTargetCalls = 0;
 
 		private static PerformanceCounter m_systemCpuUsedCounter;
 		private static PerformanceCounter m_processCpuUsedCounter;
@@ -131,10 +134,14 @@ namespace DOL.GS.GameEvents
 				long outRate = (Statistics.BytesOut - m_lastBytesOut)/time;
 				long inPckRate = (Statistics.PacketsIn - m_lastPacketsIn)/time;
 				long outPckRate = (Statistics.PacketsOut - m_lastPacketsOut)/time;
+				var lastPathToCall = (Statistics.PathToCalls - m_lastPathToCalls)/time;
+				var lastPathToCallNext = (Statistics.PathToCalculateNextTargetCalls - m_lastPathToCalculateNextTargetCalls)/time;
 				m_lastBytesIn = Statistics.BytesIn;
 				m_lastBytesOut = Statistics.BytesOut;
 				m_lastPacketsIn = Statistics.PacketsIn;
 				m_lastPacketsOut = Statistics.PacketsOut;
+				m_lastPathToCalls = Statistics.PathToCalls;
+				m_lastPathToCalculateNextTargetCalls = Statistics.PathToCalculateNextTargetCalls;
 				
 				// Get threadpool info
 				int iocpCurrent, iocpMin, iocpMax;
@@ -148,16 +155,21 @@ namespace DOL.GS.GameEvents
 
 				if (log.IsInfoEnabled)
 				{
+					var clients = WorldMgr.GetAllClients();
 					StringBuilder stats = new StringBuilder(256)
-						.Append("-stats- Mem=").Append(GC.GetTotalMemory(false)/1024/1024).Append("MB")
-						.Append("  Clients=").Append(GameServer.Instance.ClientCount)
-						.Append("  Down=").Append(inRate/1024).Append( "kb/s (" ).Append(Statistics.BytesIn/1024/1024).Append( "MB)" )
-						.Append("  Up=").Append(outRate/1024).Append( "kb/s (" ).Append(Statistics.BytesOut/1024/1024).Append( "MB)" )
-						.Append("  In=").Append(inPckRate).Append( "pck/s (" ).Append(Statistics.PacketsIn/1000).Append( "K)" )
-						.Append("  Out=").Append(outPckRate).Append( "pck/s (" ).Append(Statistics.PacketsOut/1000).Append( "K)" )
-						.AppendFormat("  Pool={0}/{1}({2})", poolCurrent, poolMax, poolMin)
-						.AppendFormat("  IOCP={0}/{1}({2})", iocpCurrent, iocpMax, iocpMin)
-						.AppendFormat("  GH/OH={0}/{1}", globalHandlers, objectHandlers);
+							.Append("-stats- Mem=").Append(GC.GetTotalMemory(false) / 1024 / 1024).Append("MB")
+							.Append("  Clients=").Append(GameServer.Instance.ClientCount)
+							.Append("  Players=").Append(clients.Count(c => c.IsPlaying && c.Player.ObjectState == GameObject.eObjectState.Active))
+							.Append("  UDP Act=").Append(clients.Count(c => c.UdpPingTime + 60 * 1000 * 10_000L > DateTime.Now.Ticks))
+							.AppendFormat("  Pathing (c/s): call={0}, next={1}", lastPathToCall, lastPathToCallNext)
+							.Append("  Down=").Append(inRate / 1024).Append("kb/s (").Append(Statistics.BytesIn / 1024 / 1024).Append("MB)")
+							.Append("  Up=").Append(outRate / 1024).Append("kb/s (").Append(Statistics.BytesOut / 1024 / 1024).Append("MB)")
+							.Append("  In=").Append(inPckRate).Append("pck/s (").Append(Statistics.PacketsIn / 1000).Append("K)")
+							.Append("  Out=").Append(outPckRate).Append("pck/s (").Append(Statistics.PacketsOut / 1000).Append("K)")
+							.AppendFormat("  Pool={0}/{1}({2})", poolCurrent, poolMax, poolMin)
+							.AppendFormat("  IOCP={0}/{1}({2})", iocpCurrent, iocpMax, iocpMin)
+							.AppendFormat("  GH/OH={0}/{1}", globalHandlers, objectHandlers)
+						;
 
 					lock (m_timerStatsByMgr.SyncRoot)
 					{

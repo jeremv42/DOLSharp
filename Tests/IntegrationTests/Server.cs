@@ -73,7 +73,7 @@ namespace DOL.Integration.Server
 		public static void StartWatch()
 		{
 			//Tickcount is more accurate than gametimer ticks :)
-			gametick = Environment.TickCount;
+			gametick = GameTimer.GetTickCount();
 			Console.WriteLine("StartWatch: "+gametick);
 		}
 
@@ -85,8 +85,8 @@ namespace DOL.Integration.Server
 		/// </summary>
 		public static void StopWatch()
 		{
-			Console.WriteLine("Stop watch: "+Environment.TickCount);
-			long elapsed = Environment.TickCount - gametick;
+			Console.WriteLine("Stop watch: "+GameTimer.GetTickCount());
+			var elapsed = GameTimer.GetTickCount() - gametick;
 			Console.WriteLine(elapsed+" ticks(ms) elapsed");
 		}
 		

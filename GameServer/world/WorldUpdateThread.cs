@@ -22,12 +22,13 @@ using System.Threading.Tasks;
 
 using System.Linq;
 using System.Collections.Generic;
-
+using System.Numerics;
 using log4net;
 
 using DOL.GS.Housing;
 using DOL.AI.Brain;
 using DOL.Events;
+using DOL.GS.PacketHandler;
 
 namespace DOL.GS
 {
@@ -125,7 +126,7 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="player">The player needing update</param>
 		/// <param name="nowTicks">The actual time of the refresh.</param>
-		private static void UpdatePlayerWorld(GamePlayer player, long nowTicks)
+		private static void UpdatePlayerWorld(GamePlayer player, uint nowTicks)
 		{
 			// Update Player Player's
 			if (ServerProperties.Properties.WORLD_PLAYERTOPLAYER_UPDATE_INTERVAL > 0)
@@ -148,7 +149,7 @@ namespace DOL.GS
 				UpdatePlayerHousing(player, nowTicks);
 		}
 
-		private static void UpdatePlayerOtherPlayers(GamePlayer player, long nowTicks)
+		private static void UpdatePlayerOtherPlayers(GamePlayer player, uint nowTicks)
 		{
 			// Get All Player in Range
 			var players = player.GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE).Cast<GamePlayer>().Where(p => p != null && p.IsVisibleTo(player) && (!p.IsStealthed || player.CanDetect(p))).ToArray();
@@ -218,79 +219,28 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="nowTicks"></param>
-		private static void UpdatePlayerNPCs(GamePlayer player, long nowTicks)
+		private static void UpdatePlayerNPCs(GamePlayer player, uint nowTicks)
 		{
-			// Get All Mobs in Range
-			var npcs = player.GetNPCsInRadius(WorldMgr.VISIBILITY_DISTANCE).Cast<GameNPC>().Where(n => n != null && n.IsVisibleTo(player)).ToArray();
+			if (player.LastNPCUpdateTick + 100 > nowTicks)
+				return;
+			var all = player.LastNPCUpdateAllTick + 1000 < nowTicks;
+			player.LastNPCUpdateTick = nowTicks;
+			if (all)
+				player.LastNPCUpdateAllTick = nowTicks;
 
-			try
-			{
-				// Clean Cache
-				foreach (var objEntry in player.Client.GameObjectUpdateArray)
-				{
-					var objKey = objEntry.Key;
-					GameObject obj = WorldMgr.GetRegion(objKey.Item1).GetObject(objKey.Item2);
-					
-					// Brain is updating to its master, no need to handle it.
-					if (obj is GameNPC && ((GameNPC)obj).Brain is IControlledBrain && ((IControlledBrain)((GameNPC)obj).Brain).GetPlayerOwner() == player)
-						continue;
-					
-					// We have a NPC in cache that is not in vincinity
-					if (obj is GameNPC && !npcs.Contains((GameNPC)obj) && (nowTicks - objEntry.Value) >= GetPlayerNPCUpdateInterval)
-					{
-						// Update him out of View
-						if (obj.IsVisibleTo(player))
-							player.Client.Out.SendObjectUpdate(obj);
-						
-						long dummy;
-						// this will add the object to the cache again, remove it after sending...
-						player.Client.GameObjectUpdateArray.TryRemove(objKey, out dummy);
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				if (log.IsErrorEnabled)
-					log.ErrorFormat("Error while Cleaning NPC cache for Player : {0}, Exception : {1}", player.Name, e);
-			}
-			
-			try
-			{
-				// Now Send remaining npcs
-				foreach (GameNPC lnpc in npcs)
-				{
-					GameNPC npc = lnpc;
-										
-					// Get last update time
-					long lastUpdate;
-					if (player.Client.GameObjectUpdateArray.TryGetValue(new Tuple<ushort, ushort>(npc.CurrentRegionID, (ushort)npc.ObjectID), out lastUpdate))
-					{
-						// This NPC Needs Update
-						if ((nowTicks - lastUpdate) >= GetPlayerNPCUpdateInterval)
-						{
-							player.Client.Out.SendObjectUpdate(npc);
-						}
-					}
-					else
-					{
-						// Not in cache, Object entering in range, sending update will add it to cache.
-						player.Client.Out.SendObjectUpdate(npc);
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				if (log.IsErrorEnabled)
-					log.ErrorFormat("Error while updating NPC for Player : {0}, Exception : {1}", player.Name, e);
-			}
+			// Get All Mobs in Range
+			var query = player.GetNPCsInRadius(WorldMgr.VISIBILITY_DISTANCE).Cast<GameNPC>().Where(n => n.IsVisibleTo(player));
+			if (!all)
+				query = query.Where(n => n.IsMoving);
+			query.Foreach(player.Client.Out.SendObjectUpdate);
 		}
-		
+
 		/// <summary>
 		/// Send Game Static Item depending on last refresh time
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="nowTicks"></param>
-		private static void UpdatePlayerItems(GamePlayer player, long nowTicks)
+		private static void UpdatePlayerItems(GamePlayer player, uint nowTicks)
 		{
 			// Get All Static Item in Range
 			var objs = player.GetItemsInRadius(WorldMgr.OBJ_UPDATE_DISTANCE).Cast<GameStaticItem>().Where(i => i != null && i.IsVisibleTo(player)).ToArray();
@@ -351,7 +301,7 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="nowTicks"></param>
-		private static void UpdatePlayerDoors(GamePlayer player, long nowTicks)
+		private static void UpdatePlayerDoors(GamePlayer player, uint nowTicks)
 		{
 			// Get All Game Doors in Range
 			var doors = player.GetDoorsInRadius(WorldMgr.OBJ_UPDATE_DISTANCE).Cast<IDoor>().OfType<GameObject>().Where(o => o.IsVisibleTo(player)).ToArray();
@@ -413,7 +363,7 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="nowTicks"></param>
-		public static void UpdatePlayerHousing(GamePlayer player, long nowTicks)
+		public static void UpdatePlayerHousing(GamePlayer player, uint nowTicks)
 		{
 			// If no house update needed exit.
 			if (player.CurrentRegion == null || !player.CurrentRegion.HousingEnabled)
@@ -597,7 +547,7 @@ namespace DOL.GS
 				{
 					// Start Time of the loop
 					long begin = GameTimer.GetTickCount();
-					
+
 					// Get All Clients
 					var clients = WorldMgr.GetAllClients();
 					

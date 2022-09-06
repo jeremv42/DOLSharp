@@ -184,30 +184,27 @@ namespace DOL.GS.Quests
 						return;
 
 					int lowestCon = int.MaxValue;
-					lock (target.XPGainers.SyncRoot)
+					if (target.XPGainers.IsEmpty)
 					{
-						if (target.XPGainers.Keys.Count == 0)
+						return;
+					}
+					foreach (var gainer in target.XPGainers.Keys)
+					{
+						if (gainer is GamePlayer)
 						{
-							return;
-						}
-						foreach (GameObject gainer in target.XPGainers.Keys)
-						{
-							if (gainer is GamePlayer)
+							if (gainer.Level <= GameLiving.NoXPForLevel.Length)
 							{
-								if (gainer.Level <= GameLiving.NoXPForLevel.Length)
+								if (target.Level <= GameLiving.NoXPForLevel[gainer.Level])
 								{
-									if (target.Level <= GameLiving.NoXPForLevel[gainer.Level])
-									{
-										lowestCon = -3;
-									}
+									lowestCon = -3;
 								}
-								else
+							}
+							else
+							{
+								int con = (int)gainer.GetConLevel(target);
+								if (con < lowestCon)
 								{
-									int con = (int)gainer.GetConLevel(target);
-									if (con < lowestCon)
-									{
-										lowestCon = con;
-									}
+									lowestCon = con;
 								}
 							}
 						}

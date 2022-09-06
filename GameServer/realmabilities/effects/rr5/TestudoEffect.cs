@@ -24,26 +24,13 @@ namespace DOL.GS.Effects
 		{
 			base.Start(target);
 			owner = target;
-			GamePlayer player = target as GamePlayer;
-			if (player != null)
-			{
-				foreach (GamePlayer p in player.GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))
-				{
-					p.Out.SendSpellEffectAnimation(player, player, Icon, 0, false, 1);
-				}
-			}
+			foreach (GamePlayer p in owner.GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))
+				p.Out.SendSpellEffectAnimation(owner, owner, Icon, 0, false, 1);
 
 			target.StopAttack();
 			GameEventMgr.AddHandler(target, GameLivingEvent.AttackedByEnemy, new DOLEventHandler(OnAttack));
 			GameEventMgr.AddHandler(target, GameLivingEvent.AttackFinished, new DOLEventHandler(attackEventHandler));
-			if (player != null)
-			{
-				player.Out.SendUpdateMaxSpeed();
-			}
-			else
-			{
-				owner.CurrentSpeed = owner.MaxSpeed;
-			}
+			owner.UpdateMaxSpeed();
 		}
 
 		private void OnAttack(DOLEvent e, object sender, EventArgs arguments)
@@ -107,15 +94,7 @@ namespace DOL.GS.Effects
 			GameEventMgr.RemoveHandler(owner, GameLivingEvent.AttackedByEnemy, new DOLEventHandler(OnAttack));
 			GameEventMgr.RemoveHandler(owner, GameLivingEvent.AttackFinished, new DOLEventHandler(attackEventHandler));
 			base.Stop();
-			GamePlayer player = owner as GamePlayer;
-			if (player != null)
-			{
-				player.Out.SendUpdateMaxSpeed();
-			}
-			else
-			{
-				owner.CurrentSpeed = owner.MaxSpeed;
-			}
+			owner.UpdateMaxSpeed();
 		}
 
 		public override string Name { get { return "Testudo"; } }

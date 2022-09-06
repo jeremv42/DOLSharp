@@ -681,7 +681,7 @@ namespace DOL.GS.ServerProperties
 		/// Time player must wait after failed task
 		/// </summary>
 		[ServerProperty("world", "task_pause_ticks", "Time player must wait after failed task check to get new chance for a task, in milliseconds", 5 * 60 * 1000)]
-		public static int TASK_PAUSE_TICKS;
+		public static uint TASK_PAUSE_TICKS;
 
 		/// <summary>
 		/// Should we handle tasks with items

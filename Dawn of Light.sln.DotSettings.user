@@ -1,0 +1,11 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=7c847267_002D76ce_002D48cc_002Db4fc_002Dfc5e5fd855a8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="UT_WhereLinqExpression" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::564E8F20-3834-4F3D-B5F3-2981C1FC8300::.NETFramework,Version=v4.8::DOL.UnitTests.Database.UT_WhereLinqExpression&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::564E8F20-3834-4F3D-B5F3-2981C1FC8300::.NETFramework,Version=v4.8::DOL.UnitTests.Gameserver.UT_Colliders.CheckOrientedBoundingBox_ContainingPoint&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=8b8f5610_002D2c4a_002D4ee7_002D82b4_002D019105db00d1/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from &amp;lt;Tests&amp;gt;" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Project Location="C:\prog\amtenael\amtenael\Tests" Presentation="&amp;lt;Tests&amp;gt;" /&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

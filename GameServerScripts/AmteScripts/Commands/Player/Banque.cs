@@ -55,7 +55,7 @@ namespace DOL.GS.Commands
 						ItemUnique item = new ItemUnique
 							{
 								Model = 499,
-								Id_nb = "BANQUE_CHEQUE_" + client.Player.Name + "_" + Environment.TickCount.ToString("X8"),
+								Id_nb = "BANQUE_CHEQUE_" + client.Player.Name + "_" + (DateTime.Now.Ticks / 10000).ToString("X8"),
 								Price = newMoney,
 								Weight = 2,
 								Name = "Chèque de " + client.Player.Name,

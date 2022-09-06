@@ -40,6 +40,9 @@ namespace DOL.AI.Brain
 			if (GameServer.ServerRules.IsSameRealm(Body, target, true))
 				return 0;
 
+			if (target.IsObjectGreyCon(Body))
+				return 0; // only attack if green+ to target
+
 			// related to the pet owner if applicable
 			if (target is GamePet)
 			{
@@ -47,9 +50,6 @@ namespace DOL.AI.Brain
 				if (thisLiving != null && thisLiving.IsObjectGreyCon(Body))
 					return 0;
 			}
-
-			if (target.IsObjectGreyCon(Body))
-				return 0; // only attack if green+ to target
 
 			int aggro = AggroLevel;
 			if (target is GamePlayer player)
@@ -60,25 +60,23 @@ namespace DOL.AI.Brain
 					aggro += 20;
 			}
 
-			if (aggro >= 100)
-				return 100;
-			return aggro;
+			return Math.Min(100, aggro);
 		}
 
 		public override void CheckAbilities()
 		{
-			/// load up abilities
+			// load up abilities
 			if (Body.Abilities != null && Body.Abilities.Count > 0)
 			{
-				foreach (Ability ab in Body.Abilities.Values)
+				foreach (var ab in Body.Abilities.Values)
 				{
 					switch (ab.KeyName)
 					{
 						case Abilities.ChargeAbility:
 						{
-							if (Body.TargetObject is GameLiving
-							    && !Body.IsWithinRadius(Body.TargetObject, 500)
-							    && GameServer.ServerRules.IsAllowedToAttack(Body, Body.TargetObject as GameLiving, true))
+							if (Body.TargetObject is GameLiving target
+							    && !Body.IsWithinRadius(Body.TargetObject, 1000)
+							    && GameServer.ServerRules.IsAllowedToAttack(Body, target, true))
 							{
 								ChargeAbility charge = Body.GetAbility<ChargeAbility>();
 								if (charge != null && Body.GetSkillDisabledDuration(charge) <= 0)
