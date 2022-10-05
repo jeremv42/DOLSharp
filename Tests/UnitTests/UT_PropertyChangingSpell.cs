@@ -35,6 +35,7 @@ namespace DOL.UnitTests.Gameserver
             var caster = new FakeNPC();
             var target = new FakeNPC();
             target.Level = 50;
+            target.Constitution = 1;
             var spell = NewSpellWithValue(50);
             var spellLine = NewBasecSpellLine();
             var constitutionBuff = new ConstitutionBuff(caster, spell, spellLine);
