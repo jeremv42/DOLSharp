@@ -4,27 +4,13 @@
   </PropertyGroup>
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
-    <ProjectType>Local</ProjectType>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{ACB92917-3D42-4F40-97F9-EA904A41DE36}</ProjectGuid>
+    <TargetFramework>net6.0</TargetFramework>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <DefaultClientScript>JScript</DefaultClientScript>
-    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
-    <DefaultTargetSchema>IE50</DefaultTargetSchema>
-    <DelaySign>false</DelaySign>
+    <AssemblyName>GameServer</AssemblyName>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
-    <NoStdLib>False</NoStdLib>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>1570%3b1572%3b1573%3b1587%3b1591%3b1592</NoWarn>
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
     <IntermediateOutputPath>..\build\GameServer\$(Configuration)\obj\</IntermediateOutputPath>
-    <NoWin32Manifest>False</NoWin32Manifest>
-    <OutputPath>..\$(Configuration)\lib\</OutputPath>
-    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <OutputPath>..\build\GameServer\$(Configuration)\lib\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <PropertyGroup>
@@ -40,43 +26,30 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <Optimize>False</Optimize>
     <DebugSymbols>true</DebugSymbols>
-    <RemoveIntegerChecks>false</RemoveIntegerChecks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>None</DebugType>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>True</Optimize>
-    <DebugSymbols>true</DebugSymbols>
-    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
-    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <RegisterForComInterop>False</RegisterForComInterop>
-    <BaseAddress>285212672</BaseAddress>
-    <FileAlignment>4096</FileAlignment>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.Net.Http" />
-    <PackageReference Include="CuttingEdge.Conditions" Version="1.2.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.17.2" />
-    <PackageReference Include="Grpc" Version="2.38.0" />
-    <PackageReference Include="System.Resources.Extensions" Version="6.0.0" PrivateAssets="False" />
-    <PackageReference Include="log4net" Version="2.0.13" PrivateAssets="all" />
+    <PackageReference Include="Google.Protobuf" Version="3.19.4" />
+    <PackageReference Include="Grpc" Version="2.43.0" />
+    <PackageReference Include="log4net" Version="2.0.13" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
     <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="2.0.226801" />
-    <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="3.6.0" />
-    <ProjectReference Include="..\DOLBase\DOLBase.csproj" Name="DOLBase" Private="False" />
-    <ProjectReference Include="..\DOLDatabase\DOLDatabase.csproj" Name="DOLDatabase" Private="False" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.0" />
+    <ProjectReference Include="..\DOLBase\DOLBase.csproj" Name="DOLBase" />
+    <ProjectReference Include="..\DOLDatabase\DOLDatabase.csproj" Name="DOLDatabase" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="config\logconfig.xml" />
-    <EmbeddedResource Include="config\invalidnames.txt" />
-    <TranslationFiles Include="language\**\*.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="dol_detour.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <EmbeddedResource Include="..\GameServer\config\*" />
+    <TranslationFiles Include="..\GameServer\language\**\*.txt" />
   </ItemGroup>
   <Target Name="CopyFiles" AfterTargets="AfterBuild">
     <Copy SourceFiles="@(TranslationFiles)" DestinationFiles="@(TranslationFiles->'$(MSBuildProjectDirectory)\..\$(Configuration)\languages\%(RecursiveDir)%(Filename)%(Extension)')" />

@@ -57,6 +57,13 @@ namespace DOL.Database
 						Expressions.Add(DB.Column(GetColumnName(node.Arguments[0])).IsIn((IEnumerable<string>) GetValue(node.Object)));
 					else if (node.Method.DeclaringType?.GetInterfaces().Contains(typeof(IList)) ?? false)
 						Expressions.Add(DB.Column(GetColumnName(node.Arguments[0])).IsIn((IEnumerable<object>) GetValue(node.Object)));
+					else if (node.Method.DeclaringType == typeof(string))
+						Expressions.Add(DB.Column(GetColumnName(node.Arguments[0])).IsLike(GetValue(node.Object)));
+				}
+				else if (node.Method.Name == "StartsWith")
+				{
+					if (node.Method.DeclaringType == typeof(string))
+						Expressions.Add(DB.Column(GetColumnName(node.Arguments[0])).IsLike(GetValue(node.Object) + "%"));
 				}
 				return base.VisitMethodCall(node);
 			}

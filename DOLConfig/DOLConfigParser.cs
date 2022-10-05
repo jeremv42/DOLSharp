@@ -83,15 +83,8 @@ namespace DOLConfig
 		/// <returns></returns>
 		public static void saveCurrentConfiguration(GameServerConfiguration gsc)
 		{
-			try
-			{
-				FileInfo configFileInfo = new FileInfo(getCurrentConfigFile());
-				gsc.SaveToXMLFile(configFileInfo);
-			}
-			catch (Exception e)
-			{
-				throw e;
-			}
+			FileInfo configFileInfo = new FileInfo(getCurrentConfigFile());
+			gsc.SaveToXMLFile(configFileInfo);
 		}
 
 		/// <summary>

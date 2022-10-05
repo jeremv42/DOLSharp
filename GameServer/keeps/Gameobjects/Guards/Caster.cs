@@ -68,11 +68,6 @@ namespace DOL.GS.Keeps
 			return success;
 		}
 
-		public override double GetArmorAbsorb(eArmorSlot slot)
-		{
-			return base.GetArmorAbsorb(slot) - 0.05;
-		}
-
 		protected override ICharacterClass GetClass()
 		{
 			if (ModelRealm == eRealm.Albion) return new ClassWizard();

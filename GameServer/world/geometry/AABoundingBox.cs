@@ -25,6 +25,22 @@ namespace DOL.GS.Geometry
 			var tMin = Math.Max(Math.Max(Math.Min(t1.X, t2.X), Math.Min(t1.Y, t2.Y)), Math.Min(t1.Z, t2.Z));
 			var tMax = Math.Min(Math.Min(Math.Max(t1.X, t2.X), Math.Max(t1.Y, t2.Y)), Math.Max(t1.Z, t2.Z));
 
+			if (float.IsNaN(tMin) || float.IsNaN(tMax))
+			{
+				t1 = new Vector3(
+					float.IsNaN(t1.X) ? float.PositiveInfinity : t1.X,
+					float.IsNaN(t1.Y) ? float.PositiveInfinity : t1.Y,
+					float.IsNaN(t1.Z) ? float.PositiveInfinity : t1.Z
+				);
+				t2 = new Vector3(
+					float.IsNaN(t2.X) ? float.PositiveInfinity : t2.X,
+					float.IsNaN(t2.Y) ? float.PositiveInfinity : t2.Y,
+					float.IsNaN(t2.Z) ? float.PositiveInfinity : t2.Z
+				);
+				tMin = Math.Max(Math.Max(Math.Min(t1.X, t2.X), Math.Min(t1.Y, t2.Y)), Math.Min(t1.Z, t2.Z));
+				tMax = Math.Min(Math.Min(Math.Max(t1.X, t2.X), Math.Max(t1.Y, t2.Y)), Math.Max(t1.Z, t2.Z));
+			}
+
 			// AABB is behind the origin
 			if (tMax < 0)
 				return maxDistance;

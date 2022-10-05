@@ -15,11 +15,6 @@ namespace DOL.GS.Keeps
 		private eRealm m_lastRealm = eRealm.None;
 		private long m_lastKillTime = 0;
 
-		public override double GetArmorAbsorb(eArmorSlot slot)
-		{
-			return base.GetArmorAbsorb(slot) + 0.05;
-		}
-
 		public override int MaxHealth => base.MaxHealth * 3;
 
 		public override int RealmPointsValue

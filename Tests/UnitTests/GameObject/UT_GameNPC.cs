@@ -28,6 +28,7 @@ namespace DOL.UnitTests.Gameserver
         public void GetArmorAbsorb_LevelZeroNPCHasOneConstitution_Circa5Percent()
         {
             var npc = NewNPC();
+            npc.ArmorAbsorb = -5;
 
             var actual = npc.GetArmorAbsorb(eArmorSlot.NOTSET);
 
@@ -40,6 +41,7 @@ namespace DOL.UnitTests.Gameserver
             var npc = NewNPC();
             npc.Constitution = 60;
             npc.BaseBuffBonusCategory[eProperty.Constitution] = 120;
+            npc.ArmorAbsorb = 30;
 
             var actual = npc.GetArmorAbsorb(eArmorSlot.NOTSET);
 
@@ -52,6 +54,7 @@ namespace DOL.UnitTests.Gameserver
             var npc = NewNPC();
             npc.Level = 30;
             npc.Constitution = 60;
+            npc.ArmorAbsorb = 27;
 
             var actual = npc.GetArmorAbsorb(eArmorSlot.NOTSET);
 
@@ -64,6 +67,7 @@ namespace DOL.UnitTests.Gameserver
             var npc = NewNPC();
             npc.Constitution = 60;
             npc.DebuffCategory[eProperty.Constitution] = 50;
+            npc.ArmorAbsorb = -25;
 
             var actual = npc.GetArmorAbsorb(eArmorSlot.NOTSET);
 
@@ -88,6 +92,7 @@ namespace DOL.UnitTests.Gameserver
             var guard = new GameKeepGuard();
             guard.Level = 30;
             guard.Constitution = 60;
+            guard.ArmorAbsorb = 27;
 
             var actual = guard.GetArmorAbsorb(eArmorSlot.NOTSET);
 
@@ -100,6 +105,7 @@ namespace DOL.UnitTests.Gameserver
             var guard = new GuardLord();
             guard.Level = 30;
             guard.Constitution = 60;
+            guard.ArmorAbsorb = 32;
 
             var actual = guard.GetArmorAbsorb(eArmorSlot.NOTSET);
 
@@ -112,6 +118,7 @@ namespace DOL.UnitTests.Gameserver
             var guard = new GuardCaster();
             guard.Level = 30;
             guard.Constitution = 60;
+            guard.ArmorAbsorb = 22;
 
             var actual = guard.GetArmorAbsorb(eArmorSlot.NOTSET);
 

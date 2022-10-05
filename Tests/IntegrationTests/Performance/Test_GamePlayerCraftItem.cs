@@ -44,6 +44,8 @@ namespace DOL.Integration.Performance
             GameServer.LoadTestDouble(fakeServer);
 
             AddOneCompleteRecipeToDatabase();
+
+            CraftingMgr.Init();
         }
 
         [Test]

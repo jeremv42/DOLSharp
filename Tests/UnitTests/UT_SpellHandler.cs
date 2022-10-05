@@ -132,8 +132,9 @@ namespace DOL.UnitTests.Gameserver
         public void CalculateDamageVariance_TargetIsGameLiving_MinIs125Percent()
         {
             var target = NewFakeLiving();
+            var caster = NewFakeNPC();
             var spellLine = NewSpellLine();
-            var spellHandler = new SpellHandler(null, null, spellLine);
+            var spellHandler = new SpellHandler(caster, null, spellLine);
 
             spellHandler.CalculateDamageVariance(target, out double actual, out double ignoredValue);
 
@@ -144,8 +145,9 @@ namespace DOL.UnitTests.Gameserver
         public void CalculateDamageVariance_TargetIsGameLiving_MaxIs125Percent()
         {
             var target = NewFakeLiving();
+            var caster = NewFakeNPC();
             var spellLine = NewSpellLine();
-            var spellHandler = new SpellHandler(null, null, spellLine);
+            var spellHandler = new SpellHandler(caster, null, spellLine);
 
             spellHandler.CalculateDamageVariance(target, out double ignoredValue, out double actual);
 

@@ -65,7 +65,7 @@ namespace DOL.GS.Scripts
 				return true;
 			}
 
-			var cloaks = GameServer.Database.SelectObjects<NPCEquipment>("TemplateID like 'gvg_guard_%' AND Slot = 26");
+			var cloaks = GameServer.Database.SelectObjects<NPCEquipment>(item => item.TemplateID.StartsWith("gvg_guard_") && item.Slot == 26);
 			player.Out.SendMessage(
 				$"Bonjour {player.Name}, vous pouvez modifier l'équippement que je porte, sélectionnez l'ensemble que vous souhaitez :\n" +
 				string.Join("\n", cloaks.Select(c => $"[{c.TemplateID.Substring(10)}]")),
@@ -88,7 +88,7 @@ namespace DOL.GS.Scripts
 				return true;
 			}
 
-			var cloaks = GameServer.Database.SelectObjects<NPCEquipment>("TemplateID like 'gvg_guard_%' AND Slot = 26");
+			var cloaks = GameServer.Database.SelectObjects<NPCEquipment>(item => item.TemplateID.StartsWith("gvg_guard_") && item.Slot == 26);
 			text = $"gvg_guard_{text}";
 			if (cloaks.Any(c => c.TemplateID == text))
 				LoadEquipmentTemplateFromDatabase(text);

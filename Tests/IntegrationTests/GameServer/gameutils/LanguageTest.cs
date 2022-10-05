@@ -27,6 +27,7 @@ namespace DOL.Integration.Server
 	{
 		public LanguageTest()
 		{
+			LanguageMgr.Init();
 		}
 		
 		[Test]

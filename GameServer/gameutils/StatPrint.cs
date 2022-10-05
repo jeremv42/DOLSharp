@@ -77,6 +77,9 @@ namespace DOL.GS.GameEvents
 		/// <returns></returns>
 		public static string GetProcessCounterName()
 		{
+			if (!OperatingSystem.IsWindows())
+				return "";
+
 			Process process = Process.GetCurrentProcess();
 			int id = process.Id;
 			PerformanceCounterCategory perfCounterCat = new PerformanceCounterCategory("Process");
@@ -189,14 +192,17 @@ namespace DOL.GS.GameEvents
 						}
 					}
 
-					if (m_systemCpuUsedCounter != null)
-						stats.Append("  CPU=").Append(m_systemCpuUsedCounter.NextValue().ToString("0.0")).Append('%');
-					if (m_processCpuUsedCounter != null)
-						stats.Append("  DOL=").Append(m_processCpuUsedCounter.NextValue().ToString("0.0")).Append('%');
-					if (m_memoryPages != null)
-						stats.Append("  pg/s=").Append(m_memoryPages.NextValue().ToString("0.0"));
-					if (m_physycalDisk != null)
-						stats.Append("  dsk/s=").Append(m_physycalDisk.NextValue().ToString("0.0"));
+					if (OperatingSystem.IsWindows())
+					{
+						if (m_systemCpuUsedCounter != null)
+							stats.Append("  CPU=").Append(m_systemCpuUsedCounter.NextValue().ToString("0.0")).Append('%');
+						if (m_processCpuUsedCounter != null)
+							stats.Append("  DOL=").Append(m_processCpuUsedCounter.NextValue().ToString("0.0")).Append('%');
+						if (m_memoryPages != null)
+							stats.Append("  pg/s=").Append(m_memoryPages.NextValue().ToString("0.0"));
+						if (m_physycalDisk != null)
+							stats.Append("  dsk/s=").Append(m_physycalDisk.NextValue().ToString("0.0"));
+					}
 
 					log.Info(stats);
 				}
@@ -255,6 +261,9 @@ namespace DOL.GS.GameEvents
 		/// <returns></returns>
 		private static PerformanceCounter CreatePerformanceCounter(string categoryName, string counterName, string instanceName)
 		{
+			if (!OperatingSystem.IsWindows())
+				return null;
+
 			PerformanceCounter ret = null;
 			try
 			{
@@ -277,7 +286,7 @@ namespace DOL.GS.GameEvents
 		/// <param name="performanceCounter">The performance counter.</param>
 		private static void ReleasePerformanceCounter(ref PerformanceCounter performanceCounter)
 		{
-			if (performanceCounter != null)
+			if (performanceCounter != null && OperatingSystem.IsWindows())
 			{
 				performanceCounter.Close();
 				performanceCounter = null;

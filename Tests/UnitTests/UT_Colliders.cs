@@ -85,16 +85,16 @@ namespace DOL.UnitTests.Gameserver
 		public void CheckOrientedBoundingBox_RayCollision()
 		{
 			var boxA = new OrientedBoundingBox(Vector3.One, Vector3.One, Quaternion.Identity);
-			Assert.AreEqual(boxA.CollideWithRay(Vector3.Zero, Vector3.Normalize(Vector3.One), 10), 0, 1e-6);
-			Assert.AreEqual(boxA.CollideWithRay(Vector3.One, Vector3.UnitX, 10), 0, 1e-6);
-			Assert.AreEqual(boxA.CollideWithRay(-Vector3.One, Vector3.Normalize(Vector3.One), 10), Vector3.One.Length(), 1e-6);
-			Assert.AreEqual(boxA.CollideWithRay(-Vector3.One, Vector3.UnitX, 10), 10);
+			Assert.AreEqual(0, boxA.CollideWithRay(Vector3.Zero, Vector3.Normalize(Vector3.One), 10), 1e-6);
+			Assert.AreEqual(0, boxA.CollideWithRay(Vector3.One, Vector3.UnitX, 10), 1e-6);
+			Assert.AreEqual(Vector3.One.Length(), boxA.CollideWithRay(-Vector3.One, Vector3.Normalize(Vector3.One), 10), 1e-6);
+			Assert.AreEqual(10, boxA.CollideWithRay(-Vector3.One, Vector3.UnitX, 10));
 
 			var boxB = new OrientedBoundingBox(Vector3.One, new Vector3(1, 2, 3), Quaternion.CreateFromAxisAngle(Vector3.UnitZ, (float)Math.PI / 4));
-			Assert.Less(boxB.CollideWithRay(Vector3.Zero, Vector3.Normalize(Vector3.One), 10), 1);
-			Assert.AreEqual(boxB.CollideWithRay(Vector3.One, Vector3.UnitX, 10), 0, 1e-6);
-			Assert.Less(boxB.CollideWithRay(-Vector3.One, Vector3.Normalize(Vector3.One), 10), 2.3f);
-			Assert.AreEqual(boxB.CollideWithRay(-2 * Vector3.One, Vector3.UnitX, 10), 10);
+			Assert.Greater(1, boxB.CollideWithRay(Vector3.Zero, Vector3.Normalize(Vector3.One), 10));
+			Assert.AreEqual(0, boxB.CollideWithRay(Vector3.One, Vector3.UnitX, 10), 1e-6);
+			Assert.Greater(2.3f, boxB.CollideWithRay(-Vector3.One, Vector3.Normalize(Vector3.One), 10));
+			Assert.AreEqual(10, boxB.CollideWithRay(-2 * Vector3.One, Vector3.UnitX, 10));
 		}
 	}
 }
