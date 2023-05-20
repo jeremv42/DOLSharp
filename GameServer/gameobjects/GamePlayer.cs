@@ -1384,9 +1384,15 @@ namespace DOL.GS
 		/// <param name="forced">if true, will release even if not dead</param>
 		public virtual void Release(eReleaseType releaseCommand, bool forced)
 		{
+			if (IsAlive)
+			{
+				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Release.NotDead"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
+				return;
+			}
+
 			DOLCharacters character = DBCharacter;
 			if (character == null) return;
-			
+
 			// check if valid housebind
 			if (releaseCommand == eReleaseType.House && character.BindHouseRegion < 1)
 			{
@@ -1400,12 +1406,6 @@ namespace DOL.GS
 			{
 				if (Level > bg.MaxLevel)
 					releaseCommand = eReleaseType.Normal;
-			}
-
-			if (IsAlive)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Release.NotDead"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				return;
 			}
 
 			if (!forced)
@@ -1735,17 +1735,17 @@ namespace DOL.GS
 
 			int oldRegion = CurrentRegionID;
 
-			//Call MoveTo after new GameGravestone(this...
-			//or the GraveStone will be located at the player's bindpoint
-			
-			MoveTo(relRegion, relX, relY, relZ, relHeading);
 			//It is enough if we revive the player on this client only here
 			//because for other players the player will be removed in the MoveTo
 			//method and added back again (if in view) with full health ... so no
 			//revive needed for others...
 			Out.SendPlayerRevive(this);
-			//			Out.SendUpdatePlayer();
+			Out.SendUpdatePlayer();
 			Out.SendUpdatePoints();
+
+			//Call MoveTo after new GameGravestone(this...
+			//or the GraveStone will be located at the player's bindpoint
+			MoveTo(relRegion, relX, relY, relZ, relHeading);
 
 			//Set property indicating that we are releasing to another region; used for Released event
 			if (oldRegion != CurrentRegionID)
