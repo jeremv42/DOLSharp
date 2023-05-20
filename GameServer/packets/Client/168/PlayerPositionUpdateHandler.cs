@@ -148,17 +148,12 @@ namespace DOL.GS.PacketHandler.Client.v168
 				if (client.Player.LastPositionUpdateZone != null && newZone.ZoneRegion.ID != client.Player.LastPositionUpdateZone.ZoneRegion.ID)
 					client.Player.MaxLastZ = int.MinValue;
 
-				// Update water level and diving flag for the new zone
-				client.Out.SendPlayerPositionAndObjectID();
-				zoneChange = true;
-
 				/*
 				 * "You have entered Burial Tomb."
 				 * "Burial Tomb"
 				 * "Current area is adjusted for one level 1 player."
 				 * "Current area has a 50% instance bonus."
 				 */
-
                 string description = newZone.Description;
                 string screenDescription = description;
 
@@ -579,6 +574,10 @@ namespace DOL.GS.PacketHandler.Client.v168
             if (client.Player.Steed != null && client.Player.Steed.ObjectState == GameObject.eObjectState.Active)
 				client.Player.Heading = client.Player.Steed.Heading;
 
+			if (zoneChange)
+				// Update water level and diving flag for the new zone
+				client.Out.SendPlayerPositionAndObjectID();
+
 			var outpak = new GSUDPPacketOut(client.Out.GetPacketCode(eServerPackets.PlayerPosition));
 			outpak.WriteShort((ushort)client.SessionID);
 			if (client.Player.Steed != null && client.Player.Steed.ObjectState == GameObject.eObjectState.Active)
@@ -831,11 +830,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 			{
 				//If the region changes -> make sure we don't take any falling damage
 				if (client.Player.LastPositionUpdateZone != null && newZone.ZoneRegion.ID != client.Player.LastPositionUpdateZone.ZoneRegion.ID)
-				{
 					client.Player.MaxLastZ = int.MinValue;
-				}
-				// Update water level and diving flag for the new zone
-				client.Out.SendPlayerPositionAndObjectID();
 
 				/*
 				 * "You have entered Burial Tomb."
@@ -843,7 +838,6 @@ namespace DOL.GS.PacketHandler.Client.v168
 				 * "Current area is adjusted for one level 1 player."
 				 * "Current area has a 50% instance bonus."
 				 */
-
 				string description = newZone.Description;
 				string screenDescription = description;
 
@@ -1150,6 +1144,10 @@ namespace DOL.GS.PacketHandler.Client.v168
 			else if ((playerState >> 10) == 4) // patch 0062 fix bug on release preventing players from receiving res sickness
 				client.Player.IsSitting = true;
 
+			if (zoneChange)
+				// Update water level and diving flag for the new zone
+				client.Out.SendPlayerPositionAndObjectID();
+
 			GSUDPPacketOut outpak1124 = new GSUDPPacketOut(client.Out.GetPacketCode(eServerPackets.PlayerPosition));
 			//patch 0069 test to fix player swim out byte flag
 			byte playerOutAction = 0x00;
@@ -1237,7 +1235,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 					continue;
 				}
 				//no position updates in different houses
-				if ((client.Player.InHouse || player.InHouse) && player.CurrentHouse != client.Player.CurrentHouse)
+				if (player.CurrentHouse != client.Player.CurrentHouse)
 					continue;
 
 				if (!client.Player.IsStealthed || player.CanDetect(client.Player))
