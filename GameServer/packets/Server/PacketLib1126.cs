@@ -371,11 +371,24 @@ namespace DOL.GS.PacketHandler
 
 		public override void SendAddFriends(string[] friendNames)
 		{
-			using var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.AddFriend));
-			pak.WriteByte((byte) friendNames.Length);
-			foreach (var friend in friendNames)
-				pak.WritePascalStringIntLE(friend);
-			SendTCP(pak);
+			if (friendNames.Length == 1)
+			{
+				// in 1.126, packets has changed:
+				// AddFriend seems to be "init friend list",
+				// RemoveFriend seems to be "a friend entered/left" (1 for entered, 0 for left)
+				using var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.RemoveFriend));
+				pak.WriteByte(0x01);
+				pak.WritePascalStringIntLE(friendNames[0], 0x18);
+				SendTCP(pak);
+			}
+			else
+			{
+				using var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.AddFriend));
+				pak.WriteByte((byte) friendNames.Length);
+				foreach (var friend in friendNames)
+					pak.WritePascalStringIntLE(friend, 0x18);
+				SendTCP(pak);
+			}
 		}
 
 		public override void SendRemoveFriends(string[] friendNames)
@@ -383,7 +396,7 @@ namespace DOL.GS.PacketHandler
 			using var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.RemoveFriend));
 			pak.WriteByte(0x00);
 			foreach (var friend in friendNames)
-				pak.WritePascalStringIntLE(friend);
+				pak.WritePascalStringIntLE(friend, 0x18);
 			SendTCP(pak);
 		}
 	}
