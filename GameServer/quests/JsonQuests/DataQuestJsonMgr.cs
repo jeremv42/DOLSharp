@@ -141,7 +141,8 @@ public static class DataQuestJsonMgr
 	public static (PlayerQuest quest, PlayerGoalState goal) FindQuestAndGoalFromPlayer(GamePlayer player, ushort questId, int goalId)
 	{
 		var quest = player.QuestList.Find(q => q.QuestId == questId);
-		var goal = quest?.GoalStates.Find(gs => gs.GoalId == goalId);
+		PlayerGoalState goal = null;
+		quest?.GoalStates.TryGetValue(goalId, out goal);
 		return (quest, goal);
 	}
 }

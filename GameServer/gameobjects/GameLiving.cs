@@ -6108,7 +6108,7 @@ namespace DOL.GS
 			Notify(GameLivingEvent.ReceiveItem, this, new ReceiveItemEventArgs(source, this, item));
 
 			//If the item has been removed by the event handlers : return
-			if (item == null || item.OwnerID == null)
+			if (item.OwnerID == null)
 			{
 				return true;
 			}

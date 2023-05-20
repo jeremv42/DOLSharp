@@ -41,7 +41,7 @@ namespace DOL.GS.Quests
 		}
 
 		public override bool CanInteractWith(PlayerQuest questData, PlayerGoalState state, GameObject target)
-			=> state?.IsActive == true && target.Name == m_target.Name && target.CurrentRegion == m_target.CurrentRegion;
+			=> state?.IsActive == true && target.CurrentRegion == m_target.CurrentRegion && target.Name == m_target.Name;
 
 		public override void NotifyActive(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args)
 		{
@@ -49,9 +49,9 @@ namespace DOL.GS.Quests
 
 		private void _Notify(DOLEvent e, object sender, EventArgs args)
 		{
-			if (e != GameObjectEvent.ReceiveItem || !(args is ReceiveItemEventArgs interact))
+			if (e != GameObjectEvent.ReceiveItem || args is not ReceiveItemEventArgs interact)
 				return;
-			if (!(interact.Source is GamePlayer player) || interact.Target != m_target)
+			if (interact.Source is not GamePlayer player || interact.Target != m_target)
 				return;
 			if (interact.Item.Id_nb != m_item.Id_nb)
 				return;

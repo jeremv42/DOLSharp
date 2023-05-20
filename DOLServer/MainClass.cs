@@ -153,6 +153,7 @@ namespace DOL.DOLServer
 		[STAThread]
 		private static void Main(string[] args)
 		{
+			System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 			// Graveen: the lib path append is now specified in the .config file.
 			//AppDomain.CurrentDomain.AppendPrivatePath("."+Path.DirectorySeparatorChar+"lib");
 

@@ -92,6 +92,6 @@ namespace DOL.GS.Quests
 			Y = (ushort)(globalPos.Y - zone.YOffset);
 		}
 
-		public static QuestZonePoint None => new QuestZonePoint { ZoneId = 0, X = 0, Y = 0 };
+		public static QuestZonePoint None => new() { ZoneId = 0, X = 0, Y = 0 };
 	}
 }

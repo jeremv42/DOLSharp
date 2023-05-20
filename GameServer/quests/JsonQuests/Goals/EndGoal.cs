@@ -15,7 +15,7 @@ namespace DOL.GS.Quests
 		public GameNPC Target { get; }
 
 		public override bool CanInteractWith(PlayerQuest questData, PlayerGoalState state, GameObject target)
-			=> state?.IsActive == true && target.Name == Target.Name && target.CurrentRegion == Target.CurrentRegion;
+			=> state?.IsActive == true && target.CurrentRegion == Target.CurrentRegion && target.Name == Target.Name;
 
 		public EndGoal(DataQuestJson quest, int goalId, dynamic db) : base(quest, goalId, (object)db)
 		{

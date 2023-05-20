@@ -4,8 +4,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using DOL.GS.PacketHandler;
 using DOL.Language;
+using log4net;
 
 namespace DOL.GS.Quests
 {
@@ -26,9 +28,11 @@ namespace DOL.GS.Quests
 	/// </summary>
 	public class PlayerQuest : IQuestPlayerData
 	{
+		private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
 		private ushort m_questId;
 		public ushort QuestId => m_questId;
-		public readonly List<PlayerGoalState> GoalStates = new();
+		public readonly Dictionary<int, PlayerGoalState> GoalStates = new();
 
 		public DataQuestJson Quest => DataQuestJsonMgr.Quests[m_questId];
 
@@ -38,7 +42,7 @@ namespace DOL.GS.Quests
 
 		public eQuestStatus Status => (eQuestStatus)DbQuest.Step;
 
-		public IList<IQuestGoal> Goals => Quest.Goals.Values.Select(g => g.ToQuestGoal(this, GoalStates.Find(gs => gs.GoalId == g.GoalId))).ToList();
+		public IList<IQuestGoal> Goals => Quest.Goals.Values.Select(g => g.ToQuestGoal(this, GoalStates.TryGetValue(g.GoalId, out var state) ? state : null)).ToList();
 		public IList<IQuestGoal> VisibleGoals => Quest.GetVisibleGoals(this);
 
 		public IQuestRewards FinalRewards => new QuestRewards(Quest);
@@ -67,22 +71,40 @@ namespace DOL.GS.Quests
 				DataQuestJsonMgr.Quests.Add(m_questId, new DataQuestJson {Name = "ERROR"});
 
 			if (json.Goals != null)
-				GoalStates = json.Goals;
+			{
+				foreach (var state in json.Goals)
+				{
+					if (GoalStates.TryGetValue(state.GoalId, out var old))
+					{
+						if (old.IsDone || (old.IsFinished && !state.IsFinished))
+							continue;
+						GoalStates[state.GoalId] = state;
+					}
+					else
+						GoalStates.Add(state.GoalId, state);
+				}
+			}
 			else
 				// start the quest
 				Quest.Goals.Values.Where(g => g.CanStart(this)).Foreach(g => g.StartGoal(this));
 
 			// shoudn't happen, we start the next goal
 			if (VisibleGoals.Count == 0)
+			{
+				log.Error($"Player {owner.InternalID} ({owner.Name}), quest {Quest.Id}: 0 visible goal");
 				Quest.Goals.Values.Foreach(g => g.StartGoal(this));
+			}
 
 			// happen when the quest has been removed
 			if (VisibleGoals.Count == 0)
+			{
+				log.Error($"Player {owner.InternalID} ({owner.Name}), quest {Quest.Id}: 0 visible goal after start, abort the quest!");
 				new RegionTimer(owner, _timer =>
 				{
 					AbortQuest();
 					return 0;
 				}).Start(1);
+			}
 		}
 
 		public bool CheckQuestQualification(GamePlayer player) => Quest.CheckQuestQualification(player);
@@ -91,7 +113,7 @@ namespace DOL.GS.Quests
 
 		public void SaveIntoDatabase()
 		{
-			DbQuest.CustomPropertiesString = JsonConvert.SerializeObject(new JsonState { QuestId = QuestId, Goals = GoalStates });
+			DbQuest.CustomPropertiesString = JsonConvert.SerializeObject(new JsonState { QuestId = QuestId, Goals = GoalStates.Values.ToList() });
 			if (DbQuest.IsPersisted)
 				GameServer.Database.SaveObject(DbQuest);
 			else
@@ -103,7 +125,7 @@ namespace DOL.GS.Quests
 			if (actor is not GameObject gameObject)
 				return false;
 			foreach (var goal in Quest.Goals.Values)
-				if (goal.CanInteractWith(this, GoalStates.Find(gs => gs.GoalId == goal.GoalId), gameObject))
+				if (goal.CanInteractWith(this, GoalStates.TryGetValue(goal.GoalId, out var s) ? s : null, gameObject))
 					return true;
 			return false;
 		}

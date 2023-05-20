@@ -50,37 +50,40 @@ namespace DOL.GS.Quests
 					EndWhenGoalsDone.Add((int)id);
 		}
 
-		public bool IsActive(PlayerQuest questData) => questData.GoalStates.Any(gs => gs.GoalId == GoalId && gs.IsActive);
-		public bool IsDone(PlayerQuest questData) => questData.GoalStates.Any(gs => gs.GoalId == GoalId && gs.IsDone);
-		public bool IsFinished(PlayerQuest questData) => questData.GoalStates.Any(gs => gs.GoalId == GoalId && gs.IsFinished);
+		public bool IsActive(PlayerQuest questData) => questData.GoalStates.TryGetValue(GoalId, out var state) && state.IsActive;
+		public bool IsDone(PlayerQuest questData) => questData.GoalStates.TryGetValue(GoalId, out var state) && state.IsDone;
+		public bool IsFinished(PlayerQuest questData) => questData.GoalStates.TryGetValue(GoalId, out var state) && state.IsFinished;
 
 		public void NotifyActive(PlayerQuest quest, DOLEvent e, object sender, EventArgs args)
 		{
-			var goalData = quest.GoalStates.Find(gs => gs.GoalId == GoalId);
+			PlayerGoalState goalData = null;
+			quest.GoalStates.TryGetValue(GoalId, out goalData);
 			NotifyActive(quest, goalData, e, sender, args);
 		}
 		public abstract void NotifyActive(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args);
 
 		// this one is always called, useful if you want to start a goal with some hidden task
-		public void Notify(PlayerQuest questData, DOLEvent e, object sender, EventArgs args)
+		public void Notify(PlayerQuest quest, DOLEvent e, object sender, EventArgs args)
 		{
-			var goalData = questData.GoalStates.Find(gs => gs.GoalId == GoalId);
-			Notify(questData, goalData, e, sender, args);
+			PlayerGoalState goalData = null;
+			quest.GoalStates.TryGetValue(GoalId, out goalData);
+			Notify(quest, goalData, e, sender, args);
 		}
 		// this one is always called, useful if you want to start a goal with some hidden task
-		public virtual void Notify(PlayerQuest questData, PlayerGoalState goalData, DOLEvent e, object sender, EventArgs args) {}
+		public virtual void Notify(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args) {}
 
 		public virtual bool CanStart(PlayerQuest questData)
 		{
 			if (IsActive(questData) || IsFinished(questData))
 				return false;
-			return StartGoalsDone.All(gId => questData.GoalStates.Any(gs => gs.GoalId == gId && gs.IsDone));
+			return StartGoalsDone.All(gId => questData.GoalStates.TryGetValue(gId, out var gs) && gs.IsDone);
 		}
 
 		public virtual bool CanComplete(PlayerQuest questData)
 		{
-			var gs = questData.GoalStates.Find(s => s.GoalId == GoalId);
-			return gs?.State == eQuestGoalStatus.DoneAndActive && EndWhenGoalsDone.All(id => questData.GoalStates.Any(s => s.GoalId == id && s.IsDone));
+			if (!questData.GoalStates.TryGetValue(GoalId, out var gs))
+				return false;
+			return gs.State == eQuestGoalStatus.DoneAndActive && EndWhenGoalsDone.All(id => questData.GoalStates.TryGetValue(id, out var s) && s.IsDone);
 		}
 
 		public virtual bool CanInteractWith(PlayerQuest questData, PlayerGoalState state, GameObject target) => false;
@@ -99,7 +102,7 @@ namespace DOL.GS.Quests
 				GoalId = GoalId,
 				State = eQuestGoalStatus.Active,
 			};
-			questData.GoalStates.Add(goalData);
+			questData.GoalStates.Add(GoalId, goalData);
 			var player = questData.Owner;
 			if (Visible)
 			{
@@ -129,8 +132,7 @@ namespace DOL.GS.Quests
 
 		public void AbortGoal(PlayerQuest questData)
 		{
-			var goalState = questData.GoalStates.Find(gs => gs.GoalId == GoalId);
-			if (goalState == null)
+			if (!questData.GoalStates.TryGetValue(GoalId, out var goalState))
 			{
 				goalState = new PlayerGoalState
 				{
@@ -138,7 +140,7 @@ namespace DOL.GS.Quests
 					Progress = 0,
 					State = eQuestGoalStatus.Aborted,
 				};
-				questData.GoalStates.Add(goalState);
+				questData.GoalStates.Add(GoalId, goalState);
 			}
 			else if (!goalState.IsFinished)
 				goalState.State = eQuestGoalStatus.Aborted;
@@ -176,15 +178,11 @@ namespace DOL.GS.Quests
 			except.Add(this);
 			foreach (var goal in Quest.Goals.Values)
 				if (!except.Contains(goal) && goal.CanComplete(questData))
-					goal.EndGoal(questData, questData.GoalStates.Find(s => s.GoalId == goal.GoalId), except);
+					goal.EndGoal(questData, questData.GoalStates.TryGetValue(goal.GoalId, out var s) ? s : null, except);
 		}
 
 		private void CompleteGoal(PlayerQuest questData, PlayerGoalState goalData)
 		{
-			// try starting new goals
-			foreach (var goal in Quest.Goals.Values)
-				goal.StartGoal(questData);
-
 			if (!CanComplete(questData))
 				return;
 
@@ -194,6 +192,10 @@ namespace DOL.GS.Quests
 			goalData.State = eQuestGoalStatus.Completed;
 			if (!string.IsNullOrWhiteSpace(MessageCompleted))
 				ChatUtil.SendImportant(player, $"[Quest {Quest.Name}] " + BehaviourUtils.GetPersonalizedMessage(MessageCompleted, player));
+
+			// try starting new goals
+			foreach (var goal in Quest.Goals.Values)
+				goal.StartGoal(questData);
 		}
 
 		public virtual IQuestGoal ToQuestGoal(PlayerQuest questData, PlayerGoalState goalData)
@@ -237,11 +239,11 @@ namespace DOL.GS.Quests
 		{
 			public string Description => Goal.Description;
 			public eQuestGoalType Type => Goal.Type;
-			public int Progress { get; set; }
+			public int Progress { get; }
 			public int ProgressTotal => Goal.ProgressTotal;
 			public QuestZonePoint PointA => Goal.PointA;
 			public QuestZonePoint PointB => Goal.PointB;
-			public eQuestGoalStatus Status { get; set; }
+			public eQuestGoalStatus Status { get; }
 			public ItemTemplate QuestItem => Goal.QuestItem;
 
 			public readonly DataQuestJsonGoal Goal;

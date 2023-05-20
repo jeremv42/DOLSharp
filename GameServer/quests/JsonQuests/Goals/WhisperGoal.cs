@@ -14,7 +14,6 @@ namespace DOL.GS.Quests
 
 		public override eQuestGoalType Type => eQuestGoalType.Unknown;
 		public override int ProgressTotal => 1;
-		public override bool Visible => false;
 
 		public WhisperGoal(DataQuestJson quest, int goalId, dynamic db) : base(quest, goalId, (object)db)
 		{
@@ -35,7 +34,7 @@ namespace DOL.GS.Quests
 		}
 
 		public override bool CanInteractWith(PlayerQuest questData, PlayerGoalState state, GameObject target)
-			=> state?.IsActive == true && target.Name == m_target.Name && target.CurrentRegion == m_target.CurrentRegion;
+			=> state?.IsActive == true && target.CurrentRegion == m_target.CurrentRegion && target.Name == m_target.Name;
 
 		public override void NotifyActive(PlayerQuest quest, PlayerGoalState goal, DOLEvent e, object sender, EventArgs args)
 		{
