@@ -258,7 +258,7 @@ namespace DOL.GS.Spells
 		}
 
 		public override string ShortDescription 
-			=> $"Does {Spell.Damage * 10} {ConvertPropertyToText(Property1)} damage and decreases the target's resistances to {ConvertPropertyToText(Property1)} by {Spell.Value}%.";
+			=> $"Does {Spell.Damage} {ConvertPropertyToText(Property1)} damage and decreases the target's resistances to {ConvertPropertyToText(Property1)} by {Spell.Value}%.";
 
 		public DirectDamageDebuffSpellHandler(GameLiving caster, Spell spell, SpellLine line) : base(caster, spell, line) {}
 	}
