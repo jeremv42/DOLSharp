@@ -2553,8 +2553,9 @@ namespace DOL.GS
 		public virtual int CalculateMaxHealth(int level, int constitution)
 		{
 			constitution -= 50;
-			if (constitution < 0) constitution *= 2;
-			
+			if (constitution < 0)
+				constitution *= 2;
+
 			// hp1 : from level
 			// hp2 : from constitution
 			// hp3 : from champions level
@@ -2565,8 +2566,9 @@ namespace DOL.GS
 			if (ChampionLevel >= 1)
 				hp3 = ServerProperties.Properties.HPS_PER_CHAMPIONLEVEL * ChampionLevel;
 			double hp4 = 20 + hp1 / 50 + hp2 + hp3;
-			if (GetModified(eProperty.ExtraHP) > 0)
-				hp4 += Math.Round(hp4 * (double)GetModified(eProperty.ExtraHP) / 100);
+			var extra = GetModified(eProperty.ExtraHP);
+			if (extra > 0)
+				hp4 += Math.Round(hp4 * extra / 100);
 
 			return Math.Max(1, (int)hp4);
 		}

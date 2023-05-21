@@ -396,29 +396,14 @@ namespace DOL.GS
 		public override void AutoSetStats()
 		{
 			// Assign base values
-			Strength = Properties.PET_AUTOSET_STR_BASE;
-			if (Strength < 1)
-				Strength = 1;
-
-			Constitution = Properties.PET_AUTOSET_CON_BASE;
-			if (Constitution < 1)
-				Constitution = 1;
-
-			Quickness = Properties.PET_AUTOSET_QUI_BASE;
-			if (Quickness < 1)
-				Quickness = 1;
-
-			Dexterity = Properties.PET_AUTOSET_DEX_BASE;
-			if (Dexterity < 1)
-				Dexterity = 1;
-
-			Intelligence = Properties.PET_AUTOSET_INT_BASE;
-			if (Intelligence < 1)
-				Intelligence = 1;
-
-			Empathy = 30;
-			Piety = 30;
-			Charisma = 30;
+			Strength = Math.Max((short)1, Properties.PET_AUTOSET_STR_BASE);
+			Constitution = Math.Max((short)1, Properties.PET_AUTOSET_CON_BASE);
+			Quickness = Math.Max((short)1, Properties.PET_AUTOSET_QUI_BASE);
+			Dexterity = Math.Max((short)1, Properties.PET_AUTOSET_DEX_BASE);
+			Intelligence = Math.Max((short)1, Properties.PET_AUTOSET_INT_BASE);
+			Empathy = Math.Max((short)1, Properties.PET_AUTOSET_INT_BASE);
+			Piety = Math.Max((short)1, Properties.PET_AUTOSET_INT_BASE);
+			Charisma = Math.Max((short)1, Properties.PET_AUTOSET_INT_BASE);
 
 			if (Level > 1)
 			{
@@ -428,9 +413,9 @@ namespace DOL.GS
 				Quickness += (short)Math.Round((Level - 1) * Properties.PET_AUTOSET_QUI_MULTIPLIER);
 				Dexterity += (short)Math.Round((Level - 1) * Properties.PET_AUTOSET_DEX_MULTIPLIER);
 				Intelligence += (short)Math.Round((Level - 1) * Properties.PET_AUTOSET_INT_MULTIPLIER);
-				Empathy += (short)(Level - 1);
-				Piety += (short)(Level - 1);
-				Charisma += (short)(Level - 1);
+				Empathy += (short)Math.Round((Level - 1) * Properties.PET_AUTOSET_INT_MULTIPLIER);
+				Piety += (short)Math.Round((Level - 1) * Properties.PET_AUTOSET_INT_MULTIPLIER);
+				Charisma += (short)Math.Round((Level - 1) * Properties.PET_AUTOSET_INT_MULTIPLIER);
 				WeaponDps = (int)((1.4 + 0.3 * Level + Level * Level * 0.002) * 10);
 				WeaponSpd = 30;
 				ArmorFactor = (int)((1.0 + (Level / 100.0)) * Level * 1.8);
@@ -451,11 +436,11 @@ namespace DOL.GS
 				if (NPCTemplate.Intelligence > 0)
 					Intelligence = NPCTemplate.Intelligence;
 				if (NPCTemplate.Empathy > 0)
-					Empathy = (short)NPCTemplate.Empathy;
+					Empathy = NPCTemplate.Empathy;
 				if (NPCTemplate.Piety > 0)
-					Piety = (short)NPCTemplate.Piety;
+					Piety = NPCTemplate.Piety;
 				if (NPCTemplate.Charisma > 0)
-					Charisma = (short)NPCTemplate.Charisma;
+					Charisma = NPCTemplate.Charisma;
 				if (NPCTemplate.WeaponDps > 0)
 					WeaponDps = NPCTemplate.WeaponDps;
 				if (NPCTemplate.WeaponSpd > 0)
@@ -464,6 +449,32 @@ namespace DOL.GS
 					ArmorFactor = NPCTemplate.ArmorFactor;
 				if (NPCTemplate.ArmorAbsorb > 0)
 					ArmorAbsorb = NPCTemplate.ArmorAbsorb;
+
+				// scaling
+				if (NPCTemplate.Strength < 0)
+					Strength = (short)(NPCTemplate.Strength * -(Level + 1));
+				if (NPCTemplate.Constitution < 0)
+					Constitution = (short)(NPCTemplate.Constitution * -(Level + 1));
+				if (NPCTemplate.Quickness < 0)
+					Quickness = (short)(NPCTemplate.Quickness * -(Level + 1));
+				if (NPCTemplate.Dexterity < 0)
+					Dexterity = (short)(NPCTemplate.Dexterity * -(Level + 1));
+				if (NPCTemplate.Intelligence < 0)
+					Intelligence = (short)(NPCTemplate.Intelligence * -(Level + 1));
+				if (NPCTemplate.Empathy < 0)
+					Empathy = (short)(NPCTemplate.Empathy * -(Level + 1));
+				if (NPCTemplate.Piety < 0)
+					Piety = (short)(NPCTemplate.Piety * -(Level + 1));
+				if (NPCTemplate.Charisma < 0)
+					Charisma = (short)(NPCTemplate.Charisma * -(Level + 1));
+				if (NPCTemplate.WeaponDps < 0)
+					WeaponDps = NPCTemplate.WeaponDps * -(Level + 1);
+				if (NPCTemplate.WeaponSpd < 0)
+					WeaponSpd = NPCTemplate.WeaponSpd * -(Level + 1);
+				if (NPCTemplate.ArmorFactor < 0)
+					ArmorFactor = NPCTemplate.ArmorFactor * -(Level + 1);
+				if (NPCTemplate.ArmorAbsorb < 0)
+					ArmorAbsorb = NPCTemplate.ArmorAbsorb * -(Level + 1);
 
 			}
 		}
