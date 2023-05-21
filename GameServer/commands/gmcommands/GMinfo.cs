@@ -625,14 +625,6 @@ namespace DOL.GS.Commands
 				}
 				else // No target and not in a house
 				{
-					string realm = " other realm";
-					if(client.Player.CurrentZone.Realm == eRealm.Albion)
-						realm = " Albion";
-					if(client.Player.CurrentZone.Realm == eRealm.Midgard)
-						realm = " Midgard";
-					if(client.Player.CurrentZone.Realm == eRealm.Hibernia)
-						realm = " Hibernia";
-					
 					info.Add(" Game Time: \t"+ hour.ToString() + ":" + minute.ToString());
                     info.Add(" ");
 					info.Add(" Server Rules: " + GameServer.ServerRules.GetType().FullName);
@@ -676,7 +668,7 @@ namespace DOL.GS.Commands
 					info.Add(" Total objects in zone: " + client.Player.CurrentZone.TotalNumberOfObjects);
 					info.Add(" ");
 					info.Add(" Zone Description: "+ client.Player.CurrentZone.Description);
-					info.Add(" Zone Realm: "+ realm);
+					info.Add(" Zone Realm: "+ client.Player.CurrentZone.Realm.ToString());
 					info.Add(" Zone ID: "+ client.Player.CurrentZone.ID);
 					info.Add(" Zone IsDungeon: "+ client.Player.CurrentZone.IsDungeon);
 					info.Add(" Zone SkinID: "+ client.Player.CurrentZone.ZoneSkinID);
@@ -686,6 +678,7 @@ namespace DOL.GS.Commands
 					info.Add(" Zone Height: "+ client.Player.CurrentZone.Height);
 					info.Add(" Zone DivingEnabled: " + client.Player.CurrentZone.IsDivingEnabled);
 					info.Add(" Zone Waterlevel: " + client.Player.CurrentZone.Waterlevel);
+					info.Add(" Zone pathing: " + (PathingMgr.Instance.HasNavmesh(client.Player.CurrentZone) ? "enabled" : "disabled"));
 					info.Add(" ");
 					info.Add(" Region Name: "+ client.Player.CurrentRegion.Name);
                     info.Add(" Region Description: " + client.Player.CurrentRegion.Description);

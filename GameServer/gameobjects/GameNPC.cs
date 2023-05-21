@@ -1012,7 +1012,7 @@ namespace DOL.GS
 				if (!IsMoving || TargetPosition == Vector3.Zero)
 					return _basePosition;
 
-				if (MovementElapsedTicks > (Vector3.Distance(_basePosition, TargetPosition) * 1000 / CurrentSpeed))
+				if (MovementElapsedTicks > (Vector2.Distance(_basePosition.ToVector2(), TargetPosition.ToVector2()) * 1000 / CurrentSpeed))
 					return TargetPosition;
 				return _basePosition + MovementElapsedTicks * Velocity;
 			}
@@ -1232,7 +1232,7 @@ namespace DOL.GS
 		/// <returns></returns>
 		public int GetTicksToArriveAt(Vector3 target, short speed)
 		{
-			return (int)(Vector3.Distance(Position, target) * 1000 / speed);
+			return (int)(Vector2.Distance(Position.ToVector2(), target.ToVector2()) * 1000 / speed);
 		}
 
 		/// <summary>
@@ -1500,22 +1500,22 @@ namespace DOL.GS
 			BroadcastUpdate();
 		}
 
-		protected override void UpdateTickSpeed()
+		protected override void UpdateTickSpeed(Vector3? target = null)
 		{
 			if (CurrentSpeed == 0)
 			{
-				base.UpdateTickSpeed();
+				base.UpdateTickSpeed(target);
 				return;
 			}
 
-			if (TargetPosition == Vector3.Zero)
+			if ((target ?? TargetPosition) == Vector3.Zero)
 			{
 				CurrentSpeed = 0;
 				return;
 			}
 
-			Heading = GetHeading(TargetPosition);
-			base.UpdateTickSpeed();
+			Heading = GetHeading(target ?? TargetPosition);
+			base.UpdateTickSpeed(target ?? TargetPosition);
 		}
 
 		public override void UpdateMaxSpeed()

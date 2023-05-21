@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "DOLServer": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\prog\\amtenael\\amtenael\\Debug",
+      "nativeDebugging": false
+    }
+  }
+}

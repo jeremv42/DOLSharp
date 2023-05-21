@@ -5770,7 +5770,7 @@ namespace DOL.GS
 		/// <summary>
 		/// Updates tick speed for this living.
 		/// </summary>
-		protected virtual void UpdateTickSpeed()
+		protected virtual void UpdateTickSpeed(Vector3? target = null)
 		{
 			int speed = CurrentSpeed;
 
@@ -5782,6 +5782,8 @@ namespace DOL.GS
 
 				var heading = Heading * GameMath.HEADING_TO_RADIAN;
 				var v = new Vector3(-MathF.Sin(heading), MathF.Cos(heading), 0);
+				if (target.HasValue && target.Value.Z != 0 && target != Position)
+					v.Z = (target.Value.Z - Position.Z) / Math.Max(1, Vector2.Distance(target.Value.ToVector2(), Position.ToVector2()));
 				Debug.Assert(float.IsNormal(v.X) || float.IsNormal(v.Y));
 				Velocity = v * speed * 0.001f;
 			}
