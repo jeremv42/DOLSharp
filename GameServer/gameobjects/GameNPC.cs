@@ -4400,7 +4400,6 @@ namespace DOL.GS
 			ArrayList aplayer = new ArrayList();
 
 			var gainers = XPGainers.ToArray();
-			XPGainers.Clear();
 			if (gainers.Length == 0)
 				return;
 
