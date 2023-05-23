@@ -33,3 +33,13 @@ install(FILES ${INCLUDES} DESTINATION
 if(MSVC)
     install(FILES "$<TARGET_FILE_DIR:dol_detour>/dol_detour-d.pdb" CONFIGURATIONS "Debug" DESTINATION "lib")
 endif()
+
+# Tests
+file(GLOB TEST_SOURCES Test/*.cpp)
+file(GLOB NAVS Test/*.nav)
+add_executable(detour_test ${TEST_SOURCES})
+set(detour_test "${CMAKE_CURRENT_SOURCE_DIR}/Include")
+file(COPY ${NAVS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+target_compile_features(detour_test PRIVATE cxx_std_17)
+target_link_libraries(detour_test dol_detour)
+add_test(NAME detour_test COMMAND detour_test)

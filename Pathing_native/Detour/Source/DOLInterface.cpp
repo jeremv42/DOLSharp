@@ -4,28 +4,8 @@
 #include <functional>
 #include <iostream>
 #include <random>
-#include "DetourCommon.h"
-#include "DetourNavMesh.h"
-#include "DetourNavMeshQuery.h"
 
-#ifdef _WIN32
-#	define DLLEXPORT extern "C" __declspec(dllexport)
-#else
-#	define DLLEXPORT extern "C"
-#endif
-
-enum dtPolyFlags : unsigned short
-{
-	WALK = 0x01,    // Ability to walk (ground, grass, road)
-	SWIM = 0x02,    // Ability to swim (water).
-	DOOR = 0x04,    // Ability to move through doors.
-	JUMP = 0x08,    // Ability to jump.
-	DISABLED = 0x10,    // Disabled polygon
-	DOOR_ALB = 0x20,
-	DOOR_MID = 0x40,
-	DOOR_HIB = 0x80,
-	ALL = 0xffff      // All abilities.
-};
+#include "dol_detour.hpp"
 
 /*
 	[DllImport("dol_detour", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -192,8 +172,8 @@ DLLEXPORT dtStatus PathStraight(dtNavMeshQuery* query, float start[], float end[
 		&& dtStatusSucceed(status = query->findNearestPoly(end, polyPickExt, &filter, &endRef, nullptr)))
 	{
 		int npolys = 0;
-		dtPolyRef polys[256];
-		if (dtStatusSucceed(status = query->findPath(startRef, endRef, start, end, &filter, polys, &npolys, 256)))
+		dtPolyRef polys[MAX_POLY];
+		if (dtStatusSucceed(status = query->findPath(startRef, endRef, start, end, &filter, polys, &npolys, MAX_POLY)))
 		{
 			float epos[3];
 			epos[0] = end[0];
@@ -201,10 +181,10 @@ DLLEXPORT dtStatus PathStraight(dtNavMeshQuery* query, float start[], float end[
 			epos[2] = end[2];
 			if ((polys[npolys + -1] == endRef) || dtStatusSucceed(status = query->closestPointOnPoly(polys[npolys + -1], end, epos, nullptr)))
 			{
-				dtPolyRef straightPathPolys[256];
-				unsigned char straightPathFlags[256];
+				dtPolyRef straightPathPolys[MAX_POLY];
+				unsigned char straightPathFlags[MAX_POLY];
 				auto straightPathRefs = &straightPathPolys[0];
-				if (dtStatusSucceed(status = query->findStraightPath(start, epos, polys, npolys, pointBuffer, straightPathFlags, straightPathRefs, pointCount, 256, pathOptions)) && (0 < *pointCount))
+				if (dtStatusSucceed(status = query->findStraightPath(start, epos, polys, npolys, pointBuffer, straightPathFlags, straightPathRefs, pointCount, MAX_POLY, pathOptions)) && (0 < *pointCount))
 				{
 					PathOptimize(query, pointCount, pointBuffer, straightPathRefs);
 					int pointIdx = 0;

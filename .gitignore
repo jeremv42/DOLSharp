@@ -12,5 +12,7 @@
 /Pathing_native/Detour/.vs
 /Pathing_native/Detour/out
 /Pathing_native/Detour/build
+/Pathing_native/Detour/.build
+/Pathing_native/Detour/.build_debug
 /NetCore/.idea
 /.idea

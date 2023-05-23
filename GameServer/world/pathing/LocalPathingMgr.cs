@@ -179,12 +179,10 @@ namespace DOL.GS
 				var flags = new dtPolyFlags[MAX_POLY];
 				dtPolyFlags includeFilter = dtPolyFlags.ALL ^ dtPolyFlags.DISABLED;
 				dtPolyFlags excludeFilter = 0;
-				float polyExtX = 64.0f;
-				float polyExtY = 64.0f;
-				float polyExtZ = 256.0f;
+				var polyExt = new Vector3(64, 64, 256).ToRecastFloats()
 				dtStraightPathOptions options = dtStraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS;
 				var filter = new[] { includeFilter, excludeFilter };
-				var status = PathStraight(ptrs[1], startFloats, endFloats, new Vector3(polyExtX, polyExtY, polyExtZ).ToRecastFloats(), filter, options, ref numNodes, buffer, flags);
+				var status = PathStraight(ptrs[1], startFloats, endFloats, polyExt, filter, options, ref numNodes, buffer, flags);
 				if ((status & dtStatus.DT_SUCCESS) == 0)
 				{
 					return new WrappedPathingResult
