@@ -1434,8 +1434,9 @@ namespace DOL.GS
 		private void _StartArriveAtPathNodeAction(int requiredTicks)
 		{
 			CancelWalkToTimer();
-			_arriveAtPathNodeAction = new ArriveAtPathNodeAction(this);
-			_arriveAtPathNodeAction.Start(Math.Max(1,requiredTicks));
+			var action = new ArriveAtPathNodeAction(this);
+			action.Start(Math.Max(1,requiredTicks));
+			_arriveAtPathNodeAction = action;
 		}
 		private class ArriveAtPathNodeAction : RegionAction
 		{
