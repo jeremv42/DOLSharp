@@ -84,7 +84,14 @@ int main(int ac, char const *const *av)
     }
 
     std::cout << "Load nav mesh zone078.nav: ";
-    if (!LoadNavMesh("zone078.nav", &navMesh, &query))
+    if (!LoadNavMesh("zone078.nav", &navMesh))
+    {
+        std::cout << "KO" << std::endl;
+        return 1;
+    }
+    std::cout << "OK" << std::endl;
+    std::cout << "Create nav mesh query";
+    if (!CreateNavMeshQuery(navMesh, &query))
     {
         std::cout << "KO" << std::endl;
         return 1;
@@ -125,8 +132,8 @@ int main(int ac, char const *const *av)
             std::vector<dtNavMeshQuery *> queries;                                                                                                                \
             for (int i = 0; i < 16; ++i)                                                                                                                          \
             {                                                                                                                                                     \
-                auto query = dtAllocNavMeshQuery();                                                                                                               \
-                query->init(navMesh, 2048);                                                                                                                       \
+                dtNavMeshQuery *query;                                                                                                                            \
+                CreateNavMeshQuery(navMesh, &query);                                                                                                              \
                 queries.push_back(query);                                                                                                                         \
                 threads.emplace_back(func, query);                                                                                                                \
             }                                                                                                                                                     \
@@ -134,7 +141,7 @@ int main(int ac, char const *const *av)
                 t.join();                                                                                                                                         \
             std::cout << "OK (" << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << "ms)" << std::endl; \
             for (auto query : queries)                                                                                                                            \
-                dtFreeNavMeshQuery(query);                                                                                                                        \
+                FreeNavMeshQuery(query);                                                                                                                          \
         }                                                                                                                                                         \
         catch (...)                                                                                                                                               \
         {                                                                                                                                                         \
@@ -147,8 +154,15 @@ int main(int ac, char const *const *av)
     TEST_THREADED(test_PathStraight__AREA);
     TEST_THREADED(test_PathStraight__ALL);
 
+    std::cout << "Free nav mesh query: ";
+    if (!FreeNavMeshQuery(query))
+    {
+        std::cout << "KO" << std::endl;
+        return 1;
+    }
+    std::cout << "OK" << std::endl;
     std::cout << "Free nav mesh: ";
-    if (!FreeNavMesh(navMesh, query))
+    if (!FreeNavMesh(navMesh))
     {
         std::cout << "KO" << std::endl;
         return 1;

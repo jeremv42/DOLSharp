@@ -55,7 +55,7 @@ struct dtNavMeshTileHeader
 	std::int32_t size;
 };
 
-DLLEXPORT bool LoadNavMesh(char const* file, dtNavMesh** const mesh, dtNavMeshQuery** const query)
+DLLEXPORT bool LoadNavMesh(char const *file, dtNavMesh **const mesh)
 {
 	// load the file
 	auto fp = std::fopen(file, "rb");
@@ -64,7 +64,8 @@ DLLEXPORT bool LoadNavMesh(char const* file, dtNavMesh** const mesh, dtNavMeshQu
 
 	// scope for fp closing
 	{
-		auto _fpRAII = RAII([=] { std::fclose(fp); });
+		auto _fpRAII = RAII([=]
+							{ std::fclose(fp); });
 
 		dtNavMeshSetHeader header;
 		fread(&header, sizeof(header), 1, fp);
@@ -88,40 +89,47 @@ DLLEXPORT bool LoadNavMesh(char const* file, dtNavMesh** const mesh, dtNavMeshQu
 			{
 				dtNavMeshTileHeader tileHeader;
 				fread(&tileHeader, sizeof(tileHeader), 1, fp);
-				void* data;
+				void *data;
 				if (tileHeader.ref == 0 || tileHeader.size == 0 || (data = dtAlloc(tileHeader.size, DT_ALLOC_PERM)) == 0)
 					break;
 				memset(data, 0, tileHeader.size);
 				fread(data, tileHeader.size, 1, fp);
-				(*mesh)->addTile((unsigned char*)data, tileHeader.size, 1, tileHeader.ref, nullptr);
+				(*mesh)->addTile((unsigned char *)data, tileHeader.size, 1, tileHeader.ref, nullptr);
 				tileIdx += 1;
 			}
-		}
-
-		*query = dtAllocNavMeshQuery();
-		status = (*query)->init(*mesh, 2048);
-		if (dtStatusFailed(status))
-		{
-			dtFreeNavMeshQuery(*query);
-			*query = nullptr;
-			dtFreeNavMesh(*mesh);
-			*mesh = nullptr;
-			return false;
 		}
 	}
 	return true;
 }
 
-DLLEXPORT bool FreeNavMesh(dtNavMesh* meshPtr, dtNavMeshQuery* queryPtr)
+DLLEXPORT bool FreeNavMesh(dtNavMesh *meshPtr)
 {
-	if (queryPtr)
-		dtFreeNavMeshQuery(queryPtr);
 	if (meshPtr)
 		dtFreeNavMesh(meshPtr);
 	return true;
 }
 
-void PathOptimize(dtNavMeshQuery* query, int* pointCount, float* pointBuffer, dtPolyRef* refs)
+DLLEXPORT bool CreateNavMeshQuery(dtNavMesh *mesh, dtNavMeshQuery **const query)
+{
+
+	*query = dtAllocNavMeshQuery();
+	auto status = (*query)->init(mesh, 2048);
+	if (dtStatusFailed(status))
+	{
+		dtFreeNavMeshQuery(*query);
+		*query = nullptr;
+		return false;
+	}
+	return true;
+}
+DLLEXPORT bool FreeNavMeshQuery(dtNavMeshQuery *queryPtr)
+{
+	if (queryPtr)
+		dtFreeNavMeshQuery(queryPtr);
+	return true;
+}
+
+void PathOptimize(dtNavMeshQuery *query, int *pointCount, float *pointBuffer, dtPolyRef *refs)
 {
 	for (int i = 0; i < *pointCount - 2; ++i)
 	{
@@ -132,9 +140,9 @@ void PathOptimize(dtNavMeshQuery* query, int* pointCount, float* pointBuffer, dt
 			continue;
 
 		// we take 3 points: first --- mid --- last and check if mid is on the line, in this case, we remove mid
-		float const* A = &(pointBuffer[i * 3 + 0]);
-		float const* B = &(pointBuffer[(i + 1) * 3 + 0]); // mid, point to remove
-		float const* C = &(pointBuffer[(i + 2) * 3 + 0]);
+		float const *A = &(pointBuffer[i * 3 + 0]);
+		float const *B = &(pointBuffer[(i + 1) * 3 + 0]); // mid, point to remove
+		float const *C = &(pointBuffer[(i + 2) * 3 + 0]);
 
 		float vectAC[3];
 		dtVsub(vectAC, A, C);
@@ -158,7 +166,7 @@ void PathOptimize(dtNavMeshQuery* query, int* pointCount, float* pointBuffer, dt
 	}
 }
 
-DLLEXPORT dtStatus PathStraight(dtNavMeshQuery* query, float start[], float end[], float polyPickExt[], dtPolyFlags queryFilter[], dtStraightPathOptions pathOptions, int* pointCount, float* pointBuffer, dtPolyFlags* pointFlags)
+DLLEXPORT dtStatus PathStraight(dtNavMeshQuery *query, float start[], float end[], float polyPickExt[], dtPolyFlags queryFilter[], dtStraightPathOptions pathOptions, int *pointCount, float *pointBuffer, dtPolyFlags *pointFlags)
 {
 	dtStatus status;
 	*pointCount = 0;
@@ -168,8 +176,7 @@ DLLEXPORT dtStatus PathStraight(dtNavMeshQuery* query, float start[], float end[
 	dtQueryFilter filter;
 	filter.setIncludeFlags(queryFilter[0]);
 	filter.setExcludeFlags(queryFilter[1]);
-	if (dtStatusSucceed(status = query->findNearestPoly(start, polyPickExt, &filter, &startRef, nullptr))
-		&& dtStatusSucceed(status = query->findNearestPoly(end, polyPickExt, &filter, &endRef, nullptr)))
+	if (dtStatusSucceed(status = query->findNearestPoly(start, polyPickExt, &filter, &startRef, nullptr)) && dtStatusSucceed(status = query->findNearestPoly(end, polyPickExt, &filter, &endRef, nullptr)))
 	{
 		int npolys = 0;
 		dtPolyRef polys[MAX_POLY];
@@ -193,7 +200,7 @@ DLLEXPORT dtStatus PathStraight(dtNavMeshQuery* query, float start[], float end[
 						auto ref = *straightPathRefs;
 						pointIdx = pointIdx + 1;
 						straightPathRefs = straightPathRefs + 1;
-						query->getAttachedNavMesh()->getPolyFlags(ref, (unsigned short*)pointFlags);
+						query->getAttachedNavMesh()->getPolyFlags(ref, (unsigned short *)pointFlags);
 						pointFlags = pointFlags + 1;
 					}
 				}
@@ -211,7 +218,7 @@ float frand()
 	return rng(rngMt);
 }
 
-DLLEXPORT dtStatus FindRandomPointAroundCircle(dtNavMeshQuery* query, float center[], float radius, float polyPickExt[], dtPolyFlags queryFilter[], float* outputVector)
+DLLEXPORT dtStatus FindRandomPointAroundCircle(dtNavMeshQuery *query, float center[], float radius, float polyPickExt[], dtPolyFlags queryFilter[], float *outputVector)
 {
 	dtQueryFilter filter;
 	filter.setIncludeFlags(queryFilter[0]);
@@ -226,7 +233,7 @@ DLLEXPORT dtStatus FindRandomPointAroundCircle(dtNavMeshQuery* query, float cent
 	return status;
 }
 
-DLLEXPORT dtStatus FindClosestPoint(dtNavMeshQuery* query, float center[], float polyPickExt[], dtPolyFlags queryFilter[], float* outputVector)
+DLLEXPORT dtStatus FindClosestPoint(dtNavMeshQuery *query, float center[], float polyPickExt[], dtPolyFlags queryFilter[], float *outputVector)
 {
 	dtQueryFilter filter;
 	filter.setIncludeFlags(queryFilter[0]);
@@ -238,7 +245,7 @@ DLLEXPORT dtStatus FindClosestPoint(dtNavMeshQuery* query, float center[], float
 	return status;
 }
 
-DLLEXPORT dtStatus GetPolyAt(dtNavMeshQuery* query, float* center, float* extents, unsigned short* queryFilter, dtPolyRef* polyRef, float* point)
+DLLEXPORT dtStatus GetPolyAt(dtNavMeshQuery *query, float *center, float *extents, unsigned short *queryFilter, dtPolyRef *polyRef, float *point)
 {
 	dtQueryFilter filter;
 	filter.setIncludeFlags(queryFilter[0]);
@@ -246,12 +253,12 @@ DLLEXPORT dtStatus GetPolyAt(dtNavMeshQuery* query, float* center, float* extent
 	return query->findNearestPoly(center, extents, &filter, polyRef, point);
 }
 
-DLLEXPORT dtStatus SetPolyFlags(dtNavMesh* navMesh, dtPolyRef ref, unsigned short flags)
+DLLEXPORT dtStatus SetPolyFlags(dtNavMesh *navMesh, dtPolyRef ref, unsigned short flags)
 {
 	return navMesh->setPolyFlags(ref, flags);
 }
 
-DLLEXPORT dtStatus QueryPolygons(dtNavMeshQuery* query, float* center, float* polyPickExtents, unsigned short* queryFilter, dtPolyRef* polys, int* polyCount, int maxPolys)
+DLLEXPORT dtStatus QueryPolygons(dtNavMeshQuery *query, float *center, float *polyPickExtents, unsigned short *queryFilter, dtPolyRef *polys, int *polyCount, int maxPolys)
 {
 	dtQueryFilter filter;
 	filter.setIncludeFlags(queryFilter[0]);

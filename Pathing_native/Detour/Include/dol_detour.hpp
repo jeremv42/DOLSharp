@@ -25,8 +25,11 @@ enum dtPolyFlags : unsigned short
 	ALL = 0xffff        // All abilities.
 };
 
-DLLEXPORT bool LoadNavMesh(char const* file, dtNavMesh** const mesh, dtNavMeshQuery** const query);
-DLLEXPORT bool FreeNavMesh(dtNavMesh* meshPtr, dtNavMeshQuery* queryPtr);
+DLLEXPORT bool LoadNavMesh(char const* file, dtNavMesh** const mesh);
+DLLEXPORT bool FreeNavMesh(dtNavMesh* meshPtr);
+
+DLLEXPORT bool CreateNavMeshQuery(dtNavMesh* mesh, dtNavMeshQuery** const query);
+DLLEXPORT bool FreeNavMeshQuery(dtNavMeshQuery* query);
 
 DLLEXPORT dtStatus PathStraight(dtNavMeshQuery* query, float start[], float end[], float polyPickExt[], dtPolyFlags queryFilter[], dtStraightPathOptions pathOptions, int* pointCount, float* pointBuffer, dtPolyFlags* pointFlags);
 DLLEXPORT dtStatus FindRandomPointAroundCircle(dtNavMeshQuery* query, float center[], float radius, float polyPickExt[], dtPolyFlags queryFilter[], float* outputVector);
