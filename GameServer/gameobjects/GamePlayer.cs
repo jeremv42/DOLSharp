@@ -5420,6 +5420,8 @@ namespace DOL.GS
 		/// </summary>
 		public const int CRITICAL_SHOT_ENDURANCE = 10;
 
+		public bool CombatInfo = false;
+
 		/// <summary>
 		/// Holds the cancel style flag
 		/// </summary>
@@ -5839,16 +5841,15 @@ namespace DOL.GS
 			{
 				if (attackTarget == null)
 					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CombatNoTarget"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
+				else if (attackTarget is GameNPC)
+				{
+					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CombatTarget",
+						attackTarget.GetName(0, false, Client.Account.Language, (attackTarget as GameNPC))), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
+				}
 				else
-                    if (attackTarget is GameNPC)
-                    {
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CombatTarget",
-                            attackTarget.GetName(0, false, Client.Account.Language, (attackTarget as GameNPC))), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-                    }
-                    else
-                    {
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CombatTarget", attackTarget.GetName(0, false)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-                    }
+				{
+					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CombatTarget", attackTarget.GetName(0, false)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
+				}
 			}
 
 			if (CharacterClass is PlayerClass.ClassVampiir)
@@ -6334,13 +6335,16 @@ namespace DOL.GS
 		{
 			if (IsCrafting)
 			{
-                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.InterruptedCrafting"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
+				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.InterruptedCrafting"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 				CraftTimer.Stop();
 				CraftTimer = null;
 				Out.SendCloseTimerWindow();
 			}
 
 			AttackData ad = base.MakeAttack(target, weapon, style, effectiveness * Effectiveness, interruptDuration, dualWield, ignoreLOS);
+
+			if (CombatInfo)
+				Out.SendMessage($"CombatInfo: result:{ad.AttackResult} dmg={ad.Damage} crits={ad.CriticalDamage} style dmg={ad.StyleDamage} uncap dmg={ad.UncappedDamage} weapon dmg={ad.weaponDamage:F1} mod={ad.dmgMod:F1}", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 
 			//Clear the styles for the next round!
 			NextCombatStyle = null;

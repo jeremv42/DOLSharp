@@ -1016,7 +1016,7 @@ namespace DOL.GS
 		public virtual double GetArmorAF(eArmorSlot slot)
 		{
 			var af = (1.0 + (Level / 110.0)) * Level * 1.67;
-			return 5 + af + GetModified(eProperty.ArmorFactor) / 5;
+			return Math.Min(Level, (byte)5) + af + GetModified(eProperty.ArmorFactor) / 5;
 		}
 
 		/// <summary>
