@@ -168,7 +168,7 @@ namespace DOL.GS
 				};
 			//GSStatistics.Paths.Inc();
 
-			return await Task.Factory.StartNew(() =>
+			return await Task.Run(() =>
 			{
 				var ptrs = _navmeshPtrs[zone.ID];
 				var startFloats = (start + Vector3.UnitZ * 8).ToRecastFloats();
@@ -219,7 +219,7 @@ namespace DOL.GS
 						Points = points,
 					};
 				}
-			}, TaskCreationOptions.LongRunning);
+			});
 		}
 
 		/// <summary>
@@ -236,7 +236,7 @@ namespace DOL.GS
 
 			//GSStatistics.Paths.Inc();
 
-			return await Task.Factory.StartNew(() =>
+			return await Task.Run(() =>
 			{
 				var ptrs = _navmeshPtrs[zone.ID];
 				var center = (position + Vector3.UnitZ * 8).ToRecastFloats();
@@ -257,7 +257,7 @@ namespace DOL.GS
 				}
 
 				return new Vector3(outVec[0] * INV_FACTOR, outVec[2] * INV_FACTOR, outVec[1] * INV_FACTOR);
-			}, TaskCreationOptions.LongRunning);
+			});
 		}
 
 		/// <summary>
@@ -269,7 +269,7 @@ namespace DOL.GS
 				return Task.FromResult<Vector3?>(position); // Assume the point is safe if we don't have a navmesh
 			//GSStatistics.Paths.Inc();
 
-			return Task.Factory.StartNew(() =>
+			return Task.Run(() =>
 			{
 				var ptrs = _navmeshPtrs[zone.ID];
 				var center = (position + Vector3.UnitZ * 8).ToRecastFloats();
@@ -289,7 +289,7 @@ namespace DOL.GS
 				}
 
 				return new Vector3(outVec[0] * INV_FACTOR, outVec[2] * INV_FACTOR, outVec[1] * INV_FACTOR);
-			}, TaskCreationOptions.LongRunning);
+			});
 		}
 
 		private Vector3[] Vector3ArrayFromRecastFloats(float[] buffer, int numNodes)
