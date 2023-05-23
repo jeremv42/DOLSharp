@@ -103,6 +103,7 @@ namespace DOL.GS.PacketHandler
 		CharacterStatusUpdate = 0xAD,
 		PlayerDeath = 0xAE,
 		Message = 0xAF,
+		MessageHardcoded = 0x4D,
 		MaxSpeed = 0xB6,
 		RegionChanged = 0xB7,
 		PlayerHeading = 0xBA,
@@ -253,7 +254,7 @@ namespace DOL.GS.PacketHandler
 		AccountIsInLogoutProcedure = 0x11,
 		ExpansionPacketNotAllowed = 0x12, // "You have not been invited to join this server type." (1.98 US)
 		AccountIsBannedFromThisServerType = 0x13,
-		CafeIsOutOfPlayingTime = 0x14,
+		AccountBanned = 0x14,
 		PersonalAccountIsOutOfTime = 0x15,
 		CafesAccountIsSuspended = 0x16,
 		NotAuthorizedToUseExpansionVersion = 0x17, // "You are not authorized to use the expansion version!" (1.98 US)
