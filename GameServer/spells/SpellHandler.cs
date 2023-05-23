@@ -3465,55 +3465,53 @@ namespace DOL.GS.Spells
 				return;
 			}
 
-			int speclevel = m_caster.Level;
-
-			if (m_caster is GamePet)
+			int speclevel = 1;
+			var level = Caster.Level;
+			
+			if (Caster is NecromancerPet pet)
 			{
-				IControlledBrain brain = (m_caster as GameNPC).Brain as IControlledBrain;
-				speclevel = brain.GetLivingOwner().Level;
-			}
-			else if (m_caster is GamePlayer)
-			{
-				speclevel = ((GamePlayer)m_caster).GetModifiedSpecLevel(m_spellLine.Spec);
-			}
-			min = 1.25;
-			max = 1.25;
-
-			if (target.Level > 0)
-			{
-				min = 0.25 + (speclevel - 1) / (double)target.Level;
-			}
-
-			if (speclevel - 1 > target.Level)
-			{
-				double overspecBonus = (speclevel - 1 - target.Level) * 0.005;
-				min += overspecBonus;
-				max += overspecBonus;
-			}
-
-			// add level mod
-			if (m_caster is GamePlayer)
-			{
-				min += (GetLevelModFactor() * (m_caster.Level - target.Level)).Clamp(-0.6, 0.6);
-				max += (GetLevelModFactor() * (m_caster.Level - target.Level)).Clamp(-0.6, 0.6);
-			}
-			else if (m_caster is GameNPC && ((GameNPC)m_caster).Brain is IControlledBrain)
-			{
-				//Get the root owner
-				GameLiving owner = ((IControlledBrain)((GameNPC)m_caster).Brain).GetLivingOwner();
+				var owner = (pet.Brain as IControlledBrain)?.GetLivingOwner();
 				if (owner != null)
 				{
-					min += (GetLevelModFactor() * (owner.Level - target.Level)).Clamp(-0.6, 0.6);
-					max += (GetLevelModFactor() * (owner.Level - target.Level)).Clamp(-0.6, 0.6);
+					if (!string.IsNullOrWhiteSpace(SpellLine.Spec))
+						speclevel = owner.GetModifiedSpecLevel(SpellLine.Spec);
+					else
+						speclevel = pet.GetModifiedSpecLevel(SpellLine.KeyName);
+
+					if (speclevel <= 1)
+						speclevel = owner.Level;
+
+					if (owner is GamePlayer gp)
+						level = gp.Level;
 				}
 			}
+			else if (Caster is GameNPC npc)
+				speclevel = npc.Level  * 2 / 3; // divide for variance
+			else if (Caster is GamePlayer p)
+				speclevel = Math.Max(Caster.GetModifiedSpecLevel(SpellLine.Spec), Caster.GetModifiedSpecLevel(SpellLine.KeyName));
 
-			if (max < 0.25)
-				max = 0.25;
-			if (min > max)
-				min = max;
+			min = 1;
+			max = 1;
+
+			if (m_spellLine.IsBaseLine)
+			{
+				if (speclevel >= level)
+					min = 1;
+				else if (target.Level == 0 || level == 0)
+					min = 1;
+				else 
+					min = 0.25 + Math.Min(.75, .75 * ((double)speclevel / level));
+			}
+			else
+			{
+				min = 1;
+			}
+
 			if (min < 0)
 				min = 0;
+			
+			if (min > max)
+				min = max;
 		}
 
 		/// <summary>
@@ -3588,12 +3586,16 @@ namespace DOL.GS.Spells
 
 				if (SpellLine.KeyName == GlobalSpellsLines.Combat_Styles_Effect)
 				{
-					double WeaponSkill = player.GetWeaponSkill(player.AttackWeapon);
-					WeaponSkill /= 5;
-					spellDamage *= (WeaponSkill + 200) / 275.0;
+					double stats = Caster.GetModified(eProperty.Strength);
+					if (player.CharacterClass.ID == (int) eCharacterClass.Reaver)
+					{
+						stats += Caster.GetModified(eProperty.Dexterity);
+						stats /= 2d;
+					}
+					spellDamage *= (stats + 225) / 225d;
+					spellDamage *= 0.9;
 				}
-
-				if (player.CharacterClass.ManaStat != eStat.UNDEFINED
+				else if (player.CharacterClass.ManaStat != eStat.UNDEFINED
 				    && SpellLine.KeyName != GlobalSpellsLines.Combat_Styles_Effect
 				    && m_spellLine.KeyName != GlobalSpellsLines.Mundane_Poisons
 				    && SpellLine.KeyName != GlobalSpellsLines.Item_Effects
@@ -3604,13 +3606,22 @@ namespace DOL.GS.Spells
 				{
 					int manaStatValue = player.GetModified((eProperty)player.CharacterClass.ManaStat);
 					spellDamage *= (manaStatValue + 200) / 275.0;
+					spellDamage *= 0.9;
 				}
 			}
 			else if (Caster is GameNPC)
 			{
-				var npc = (GameNPC) Caster;
-				int manaStatValue = npc.GetModified(eProperty.Intelligence);
-				spellDamage = CapNPCSpellDamage(spellDamage, npc)*(manaStatValue + 200)/275.0;
+				if (SpellLine.KeyName == GlobalSpellsLines.Combat_Styles_Effect)
+				{
+					var stats = Caster.GetModified(eProperty.Dexterity) + Caster.GetModified(eProperty.Strength);
+					spellDamage *= (stats / 2d + 150) / 225d;
+				}
+				else
+				{
+					int manaStatValue = Caster.GetModified(eProperty.Intelligence);
+					spellDamage = CapNPCSpellDamage(spellDamage, (GameNPC)Caster)*(manaStatValue + 200)/275.0;
+				}
+				spellDamage *= 0.9;
 			}
 
 			if (spellDamage < 0)
@@ -3760,13 +3771,11 @@ namespace DOL.GS.Spells
 			CalculateDamageVariance(target, out minVariance, out maxVariance);
 			double spellDamage = CalculateDamageBase(target);
 
+			effectiveness += m_caster.GetModified(eProperty.SpellDamage) * 0.01;
 			if (m_caster is GamePlayer)
 			{
-				effectiveness += m_caster.GetModified(eProperty.SpellDamage) * 0.01;
-
 				// Relic bonus applied to damage, does not alter effectiveness or increase cap
 				spellDamage *= (1.0 + RelicMgr.GetRelicBonusModifier(m_caster.Realm, eRelicType.Magic));
-
 			}
 
 			// Apply casters effectiveness
