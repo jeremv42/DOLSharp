@@ -24,47 +24,51 @@ using DOL.Database;
 
 namespace DOL.GS
 {
-	/// <summary>
-	/// MoneyLootGenerator
-	/// At the moment this generaotr only adds money to the loot
-	/// </summary>
-	public class LootGeneratorGems : LootGeneratorBase
-	{
-		private static readonly string[] _gemTemplateIds = new string[] { "Lo_gem", "Um_gem", "On_gem", "Ee_gem", "Pal_gem", "Mon_gem", "Ros_gem", "Zo_gem", "Kath_gem", "Ra_gem" };
-		private static readonly Dictionary<string, float> _gemValue = new Dictionary<string, float> {
-			{ "Lo_gem", 5},
-			{ "Um_gem", 8},
-			{ "On_gem", 12},
-			{ "Ee_gem", 20},
-			{ "Pal_gem", 25},
-			{ "Mon_gem", 30},
-			{ "Ros_gem", 35},
-			{ "Zo_gem", 38},
-			{ "Kath_gem", 42},
-			{ "Ra_gem", 45},
-		};
-		private readonly ItemTemplate[] _gems = GameServer.Database.SelectObjects<ItemTemplate>(it => _gemTemplateIds.Contains(it.Name)).ToArray();
+    /// <summary>
+    /// MoneyLootGenerator
+    /// At the moment this generaotr only adds money to the loot
+    /// </summary>
+    public class LootGeneratorGems : LootGeneratorBase
+    {
+        private static readonly List<string> _gemTemplateIds = new List<string> { "Lo_gem", "Um_gem", "On_gem", "Ee_gem", "Pal_gem", "Mon_gem", "Ros_gem", "Zo_gem", "Kath_gem", "Ra_gem" };
+        private static readonly Dictionary<string, float> _gemValue = new Dictionary<string, float> {
+            { "Lo_gem", 5},
+            { "Um_gem", 8},
+            { "On_gem", 12},
+            { "Ee_gem", 20},
+            { "Pal_gem", 25},
+            { "Mon_gem", 30},
+            { "Ros_gem", 35},
+            { "Zo_gem", 38},
+            { "Kath_gem", 42},
+            { "Ra_gem", 45},
+        };
+        private readonly ItemTemplate[] _gems;
 
-		private int Chance(int mobLevel, string gem)
-		{
-			if (!_gemValue.TryGetValue(gem, out float value))
-				return 0;
-			return (int)(MathF.Sin((mobLevel + (50 - value)) / 45 * ((50 - value) / 50)) * 1000);
-		}
+        public LootGeneratorGems() : base()
+        {
+            this._gems = GameServer.Database.SelectObjects<ItemTemplate>(it => _gemTemplateIds.Contains(it.Id_nb)).ToArray();
+        }
+        private int Chance(int mobLevel, string gem)
+        {
+            if (!_gemValue.TryGetValue(gem, out float value))
+                return 0;
+            return (int)(MathF.Sin((mobLevel + (50 - value)) / 45 * ((50 - value) / 50)) * 1000);
+        }
 
-		public override LootList GenerateLoot(GameNPC mob, GameObject killer)
-		{
-			LootList loot = base.GenerateLoot(mob, killer);
-			if (Util.Chance(90))
-				return loot;
+        public override LootList GenerateLoot(GameNPC mob, GameObject killer)
+        {
+            LootList loot = base.GenerateLoot(mob, killer);
+            if (Util.Chance(90))
+                return loot;
 
-			var gems = new LootList(1);
-			foreach (var item in _gems)
-				gems.AddRandom(Chance(mob.Level, item.Id_nb), item, 1);
+            var gems = new LootList(1);
+            foreach (var item in _gems)
+                gems.AddRandom(Chance(mob.Level, item.Id_nb), item, 1);
 
-			foreach (var item in gems.GetLoot())
-				loot.AddFixed(item, 1);
-			return loot;
-		}
-	}
+            foreach (var item in gems.GetLoot())
+                loot.AddFixed(item, 1);
+            return loot;
+        }
+    }
 }
