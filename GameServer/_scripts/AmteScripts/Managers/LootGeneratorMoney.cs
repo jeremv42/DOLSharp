@@ -28,18 +28,18 @@ namespace DOL.GS
             LootList loot = base.GenerateLoot(mob, killer);
 
             int lvl = (mob.Level < 0 ? 1 : mob.Level);
-            int minLoot = (int)(2 + lvl*lvl*Math.Log(lvl + 1, 3)*2.6);
+            int minLoot = (int)(2 + lvl * lvl * MathF.Log(lvl + 1, 3) * 2.6f);
 
-            long moneyCount = minLoot + Util.Random(minLoot >> 1);
-            moneyCount = (long) (moneyCount*ServerProperties.Properties.MONEY_DROP);
+            long moneyCount = minLoot + Util.Random(minLoot / 2);
+            moneyCount = (long)(moneyCount * ServerProperties.Properties.MONEY_DROP);
 
             var money = new ItemTemplate
-                            {
-                                Model = 488,
-                                Name = "bag of coins",
-                                Level = 0,
-                                Price = moneyCount
-                            };
+            {
+                Model = 488,
+                Name = "bag of coins",
+                Level = 0,
+                Price = moneyCount
+            };
 
             loot.AddFixed(money, 1);
             return loot;
