@@ -61,6 +61,9 @@ namespace DOL.GS
 			var gems = new LootList(1);
 			foreach (var item in _gems)
 				gems.AddRandom(Chance(mob.Level, item.Id_nb), item, 1);
+
+			foreach (var item in gems.GetLoot())
+				loot.AddFixed(item, 1);
 			return loot;
 		}
 	}
