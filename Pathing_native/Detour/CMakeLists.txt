@@ -13,6 +13,9 @@ target_include_directories(dol_detour PUBLIC
     "$<BUILD_INTERFACE:${dol_detour_INCLUDE_DIR}>"
 )
 
+find_package(Threads)
+target_link_libraries(dol_detour ${CMAKE_THREAD_LIBS_INIT})
+
 set_target_properties(dol_detour PROPERTIES
         SOVERSION ${SOVERSION}
         VERSION ${LIB_VERSION}
@@ -41,5 +44,5 @@ add_executable(detour_test ${TEST_SOURCES})
 set(detour_test "${CMAKE_CURRENT_SOURCE_DIR}/Include")
 file(COPY ${NAVS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_features(detour_test PRIVATE cxx_std_17)
-target_link_libraries(detour_test dol_detour)
+target_link_libraries(detour_test dol_detour ${CMAKE_THREAD_LIBS_INIT})
 add_test(NAME detour_test COMMAND detour_test)
