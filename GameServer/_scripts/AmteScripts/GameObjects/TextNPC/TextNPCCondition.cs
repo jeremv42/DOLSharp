@@ -44,8 +44,6 @@ namespace DOL.GS.Scripts
         public int Heure_max = 24;
 
         public eQuestIndicator CanGiveQuest = eQuestIndicator.None;
-        public float Reput_min = BlacklistMgr.MinReputation;
-        public float Reput_max = BlacklistMgr.MaxReputation;
 
 
         /// <summary>
@@ -83,7 +81,6 @@ namespace DOL.GS.Scripts
                                 Level_min = 0;
                                 Level_max = 50;
                             }
-
                             break;
 
                         case "guild":
@@ -95,7 +92,6 @@ namespace DOL.GS.Scripts
                                 else
                                     GuildNames.Add(name);
                             }
-
                             break;
 
                         case "guildA":
@@ -117,7 +113,6 @@ namespace DOL.GS.Scripts
                                 else
                                     Races.Add(name);
                             }
-
                             break;
 
                         case "class":
@@ -129,7 +124,6 @@ namespace DOL.GS.Scripts
                                 else
                                     Classes.Add(name);
                             }
-
                             break;
 
                         case "heure":
@@ -143,21 +137,6 @@ namespace DOL.GS.Scripts
                                 Heure_min = 0;
                                 Heure_max = 24;
                             }
-
-                            break;
-
-                        case "reput":
-                            try
-                            {
-                                Reput_min = float.Parse(condition[1]);
-                                Reput_max = float.Parse(condition[2]);
-                            }
-                            catch
-                            {
-                                Reput_min = -5;
-                                Reput_max = 20;
-                            }
-
                             break;
 
                         case "quest":
@@ -186,7 +165,7 @@ namespace DOL.GS.Scripts
                 txt.Append("guild");
                 foreach (string guild in GuildNames)
                     txt.Append("/" + guild);
-                txt.Append("\n");
+                txt.Append('\n');
             }
 
             if (GuildNamesA.Count >= 1)
@@ -194,7 +173,7 @@ namespace DOL.GS.Scripts
                 txt.Append("guildA");
                 foreach (string guild in GuildNamesA)
                     txt.Append("/" + guild);
-                txt.Append("\n");
+                txt.Append('\n');
             }
 
             if (Races.Count >= 1)
@@ -202,7 +181,7 @@ namespace DOL.GS.Scripts
                 txt.Append("race");
                 foreach (string race in Races)
                     txt.Append("/" + race);
-                txt.Append("\n");
+                txt.Append('\n');
             }
 
             if (Classes.Count >= 1)
@@ -210,13 +189,11 @@ namespace DOL.GS.Scripts
                 txt.Append("class");
                 foreach (string classe in Classes)
                     txt.Append("/" + classe);
-                txt.Append("\n");
+                txt.Append('\n');
             }
 
             if (Heure_min > 0 || Heure_max < 24)
                 txt.Append("hour/").Append(Heure_min).Append('/').Append(Heure_max).Append('\n');
-            if (Reput_min > BlacklistMgr.MinReputation || Reput_max < BlacklistMgr.MaxReputation)
-                txt.Append("reput/").Append(Reput_min).Append('/').Append(Reput_max).Append('\n');
 
             if (CanGiveQuest != eQuestIndicator.None)
                 txt.Append($"quest/{CanGiveQuest}\n");
@@ -229,10 +206,6 @@ namespace DOL.GS.Scripts
             //level
             if (Level_min > player.Level || player.Level > Level_max)
                 return false;
-            //Karma
-            //			if(!KarmaScriptMgr.Instance().CheckTextNPCAcces(player, Karma_min, Karma_max))
-            //				return false;
-
             //Guilde
             if (GuildNames.Contains(player.GuildName) || (player.GuildName == "" && GuildNames.Contains("NO GUILD")))
                 return false;
@@ -254,12 +227,6 @@ namespace DOL.GS.Scripts
                 return false;
             if (Heure_max == Heure_min && heure != Heure_min)
                 return false;
-            if (player is AmtePlayer)
-            {
-                var p = (AmtePlayer) player;
-                if (p.Blacklist.Reputation < Reput_min || p.Blacklist.Reputation > Reput_max)
-                    return false;
-            }
 
             return true;
         }

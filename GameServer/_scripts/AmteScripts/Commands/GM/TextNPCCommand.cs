@@ -638,28 +638,6 @@ namespace DOL.GS.Scripts
 					}
 					player.Out.SendMessage("L'heure est maintenant comprise entre "+npc.TextNPCData.Condition.Heure_min+"h et "+npc.TextNPCData.Condition.Heure_max+"h.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 					break;
-
-				case "reputation":
-				case "reput":
-					if (npc == null || args.Length < 4)
-					{
-						DisplaySyntax(client);
-						return;
-					}
-					try
-					{
-						var min = float.Parse(args[2].Replace('.', ','));
-						var max = float.Parse(args[3].Replace('.', ','));
-						npc.TextNPCData.Condition.Reput_min = min;
-						npc.TextNPCData.Condition.Reput_max = max;
-						npc.TextNPCData.SaveIntoDatabase();
-					}
-					catch
-					{
-						player.Out.SendMessage("La réputation max ou min n'est pas valide.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-					}
-					player.Out.SendMessage("La réputation est maintenant comprise entre " + npc.TextNPCData.Condition.Reput_min + " et " + npc.TextNPCData.Condition.Reput_max + ".", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-					break;
 					#endregion
 
 					#region condition list/help
@@ -672,13 +650,10 @@ namespace DOL.GS.Scripts
 					if(args[2].ToLower() == "list" && npc != null)
 					{
 						lines = new List<string>
-						        {
-						        	"Conditions du pnj " + ((GameNPC) npc).Name + ":",
-						        	"+ Heure      min: " + npc.TextNPCData.Condition.Heure_min + " max:" +
-						        	npc.TextNPCData.Condition.Heure_max,
-						        	"+ Réputation min: " + npc.TextNPCData.Condition.Reput_min + " max:" +
-						        	npc.TextNPCData.Condition.Reput_max
-						        };
+							{
+								"Conditions du pnj " + ((GameNPC) npc).Name + ":",
+								"+ Heure      min: " + npc.TextNPCData.Condition.Heure_min + " max:" + npc.TextNPCData.Condition.Heure_max,
+							};
 						if (npc.TextNPCData.Condition.Level_min != 1 || npc.TextNPCData.Condition.Level_max != 50)
                             lines.Add("+ Level      min: " + npc.TextNPCData.Condition.Level_min + " max: " + npc.TextNPCData.Condition.Level_max);
 						if(npc.TextNPCData.Condition.GuildNames != null && npc.TextNPCData.Condition.GuildNames.Count > 0)

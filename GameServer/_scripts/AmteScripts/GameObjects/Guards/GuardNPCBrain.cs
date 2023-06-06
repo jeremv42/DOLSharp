@@ -49,18 +49,18 @@ namespace DOL.AI.Brain
                 return;
             foreach (GameNPC npc in Body.GetNPCsInRadius((ushort)AggroRange, Body.CurrentRegion.IsDungeon ? false : true))
             {
-				if (npc.Realm != 0 || (npc.Flags & GameNPC.eFlags.PEACE) != 0 ||
-					!npc.IsAlive || npc.ObjectState != GameObject.eObjectState.Active ||
-					npc is GameTaxi ||
-					m_aggroTable.ContainsKey(npc) ||
-					!GameServer.ServerRules.IsAllowedToAttack(Body, npc, true))
-					continue;
+                if (npc.Realm != 0 || (npc.Flags & GameNPC.eFlags.PEACE) != 0 ||
+                    !npc.IsAlive || npc.ObjectState != GameObject.eObjectState.Active ||
+                    npc is GameTaxi ||
+                    m_aggroTable.ContainsKey(npc) ||
+                    !GameServer.ServerRules.IsAllowedToAttack(Body, npc, true))
+                    continue;
 
                 int aggro = CalculateAggroLevelToTarget(npc);
-            	    if (aggro <= 0)
-            		    continue;
-            	    AddToAggroList(npc, aggro);
-            	    if (npc.Level > Body.Level)
+                if (aggro <= 0)
+                    continue;
+                AddToAggroList(npc, aggro);
+                if (npc.Level > Body.Level)
                     BringFriends(npc);
             }
         }
@@ -82,13 +82,8 @@ namespace DOL.AI.Brain
 
         public override int CalculateAggroLevelToTarget(GameLiving target)
         {
-			if (target is AmtePlayer)
-			{
-				var player = (AmtePlayer)target;
-				if (BlacklistMgr.IsBlacklisted(player))
-					return 100;
+			if (target is AmtePlayer player)
 				return GuardsMgr.CalculateAggro(player);
-			}
         	if (target.Realm == 0)
                 return Math.Max(100, 200 - target.Level);
             return base.CalculateAggroLevelToTarget(target);

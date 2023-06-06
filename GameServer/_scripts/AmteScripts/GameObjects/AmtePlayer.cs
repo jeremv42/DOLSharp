@@ -10,8 +10,6 @@ namespace DOL.GS
 	public class AmtePlayer : GamePlayer
 	{
 		public DateTime LastDeath = DateTime.MinValue;
-		public string LastKillerID;
-		public BlacklistPlayer Blacklist;
 
 		public DateTime LastActivity = DateTime.Now;
 		public Vector3 LastPosition = Vector3.Zero;
@@ -36,46 +34,12 @@ namespace DOL.GS
 				return;
 
 			LastDeath = DateTime.Now;
-			// BlacklistMgr
-			if (killer is AmtePlayer)
-			{
-				LastKillerID = killer.InternalID;
-				BlacklistMgr.PlayerKilledByPlayer(this, (AmtePlayer)killer);
-			}
-			else
-				LastKillerID = null;
 		}
 
 		public void SendMessage(string message, eChatType type = eChatType.CT_System, eChatLoc loc = eChatLoc.CL_SystemWindow)
 		{
 			Out.SendMessage(message, type, loc);
 		}
-
-		#region DB
-		public override void LoadFromDatabase(DataObject obj)
-		{
-			base.LoadFromDatabase(obj);
-
-			Blacklist = GameServer.Database.FindObjectByKey<BlacklistPlayer>(InternalID) ?? new BlacklistPlayer(this);
-		}
-
-		public override void SaveIntoDatabase()
-		{
-			base.SaveIntoDatabase();
-
-			if (Blacklist.IsPersisted)
-				GameServer.Database.SaveObject(Blacklist);
-			else
-				GameServer.Database.AddObject(Blacklist);
-		}
-
-		public override void DeleteFromDatabase()
-		{
-			base.DeleteFromDatabase();
-
-			GameServer.Database.DeleteObject(Blacklist);
-		}
-		#endregion
 
 		public override void CraftItem(ushort itemID)
 		{

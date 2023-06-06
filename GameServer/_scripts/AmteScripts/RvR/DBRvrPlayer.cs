@@ -7,9 +7,6 @@ using log4net;
 
 namespace DOL.Database
 {
-	/// <summary>
-	/// Prison
-	/// </summary>
 	[DataTable(TableName="RvrPlayer")]
 	public class RvrPlayer : DataObject
 	{
