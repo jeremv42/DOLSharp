@@ -66,7 +66,7 @@ namespace DOL.GS.Quests
 		{
 			return data.GoalStates
 				.Where(gs => gs.Value.IsActive)
-				.Select(gs => Goals[gs.Key].ToQuestGoal(data, gs.Value))
+				.Select(gs => Goals.TryGetValue(gs.Key, out var goal) ? goal.ToQuestGoal(data, gs.Value) : null)
 				.Where(g => g is not DataQuestJsonGoal.GenericDataQuestGoal gen || gen.Goal.Visible)
 				.ToList();
 		}
