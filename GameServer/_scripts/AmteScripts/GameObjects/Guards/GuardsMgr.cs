@@ -40,7 +40,7 @@ namespace AmteScripts.Managers
 			return true;
 		}
 
-		public static int CalculateAggro(AmtePlayer player)
+		public static int CalculateAggro(GamePlayer player)
 		{
 			int aggro = 0;
 			if (!string.IsNullOrWhiteSpace(player.GuildID))
@@ -149,13 +149,12 @@ namespace DOL.GS.Commands
 				DisplaySyntax(client);
 				return;
 			}
-			if (!(client.Player.TargetObject is AmtePlayer) || ((AmtePlayer)client.Player.TargetObject).Guild == null)
+			if (!(client.Player.TargetObject is GamePlayer player) || player.Guild == null)
 			{
 				client.Out.SendMessage("Vous devez cibler un joueur avec une guilde.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 				return;
 			}
 
-			var target = (AmtePlayer)client.Player.TargetObject;
 			var amount = int.Parse(args[3]);
 			switch (args[2].ToLower())
 			{
@@ -164,7 +163,7 @@ namespace DOL.GS.Commands
 				case "substract":
 				case "remove": amount = -amount; break;
 			}
-			GuardsMgr.AddAggro(target.Guild, amount);
+			GuardsMgr.AddAggro(player.Guild, amount);
 		}
 
 		public void _listaggro(GameClient client)

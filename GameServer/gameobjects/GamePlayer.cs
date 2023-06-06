@@ -24,7 +24,7 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Text;
-
+using AmteScripts.Managers;
 using DOL.AI;
 using DOL.AI.Brain;
 using DOL.Database;
@@ -38,6 +38,7 @@ using DOL.GS.PlayerTitles;
 using DOL.GS.PropertyCalc;
 using DOL.GS.Quests;
 using DOL.GS.RealmAbilities;
+using DOL.GS.Scripts;
 using DOL.GS.ServerProperties;
 using DOL.GS.SkillHandler;
 using DOL.GS.Spells;
@@ -4664,7 +4665,12 @@ namespace DOL.GS
 		public override int BountyPointsValue
 		{
 			// TODO: correct formula!
-			get { return (int)(1 + Level * 0.6); }
+			get
+			{
+				if (RvrManager.Instance.IsInRvr(this))
+					return (int)(1 + Level * 0.6);
+				return 0;
+			}
 		}
 
 		/// <summary>
@@ -8750,6 +8756,8 @@ namespace DOL.GS
 				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.UseSlot.CantFire"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 				return;
 			}
+			if (JailMgr.IsPrisoner(this))
+				return;
 
 			lock (Inventory)
 			{
@@ -9811,11 +9819,15 @@ namespace DOL.GS
 		/// <param name="message"></param>
 		/// <param name="chatType"></param>
 		/// <param name="chatLocation"></param>
-		public virtual void MessageFromArea(GameObject source, string message, eChatType chatType, eChatLoc chatLocation)
+		public void MessageFromArea(GameObject source, string message, eChatType chatType, eChatLoc chatLocation)
 		{
 			Out.SendMessage(message, chatType, chatLocation);
 		}
 
+		public void SendMessage(string message, eChatType type = eChatType.CT_System, eChatLoc loc = eChatLoc.CL_SystemWindow)
+		{
+			Out.SendMessage(message, type, loc);
+		}
 		#endregion
 
 		#region Steed
@@ -13856,6 +13868,9 @@ namespace DOL.GS
 		/// </summary>
 		public virtual void CraftItem(ushort itemID)
 		{
+			if (JailMgr.IsPrisoner(this))
+				return;
+
 			var recipe = RecipeDB.FindBy(itemID);
 
 			AbstractCraftingSkill skill = CraftingMgr.getSkillbyEnum(recipe.RequiredCraftingSkill);

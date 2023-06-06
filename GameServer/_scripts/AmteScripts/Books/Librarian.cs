@@ -12,7 +12,7 @@ namespace DOL.GS.Scripts
 			if (!base.Interact(player))
 				return false;
 
-			player.Client.Out.SendMessage("Bonjour et bienvenue à la bibliothèque d'Amtenaël !\n" +
+			player.Client.Out.SendMessage("Bonjour et bienvenue à la bibliothèque !\n" +
 										  "Que voulez-vous ?\n\n" +
 										  "[Voir les livres]\n[Ajouter un livre]",
 										  eChatType.CT_Say, eChatLoc.CL_PopupWindow);
@@ -21,7 +21,7 @@ namespace DOL.GS.Scripts
 
 		public override bool WhisperReceive(GameLiving source, string text)
 		{
-			var player = source as AmtePlayer;
+			var player = source as GamePlayer;
 			if (!base.WhisperReceive(source, text) || player == null)
 				return false;
 
@@ -33,7 +33,7 @@ namespace DOL.GS.Scripts
 					GameServer.Database.SelectObjects<DBBook>(b => b.IsInLibrary).OrderBy(b => b.Title).Foreach(
 						b =>
 						{
-							sb.Append("\n[").AppendLine(b.Title).Append("] de ").Append(b.Author);
+							sb.Append("\n[").AppendLine(b.Title).Append("], ").Append(b.Author);
 							if (sb.Length > 1900)
 							{
 								player.SendMessage(sb.ToString(), eChatType.CT_System, eChatLoc.CL_PopupWindow);
@@ -44,7 +44,7 @@ namespace DOL.GS.Scripts
 					break;
 
 				case "Ajouter un livre":
-					player.SendMessage("Donnez moi votre livre et je l'ajouterais.", eChatType.CT_System, eChatLoc.CL_PopupWindow);
+					player.SendMessage("Donnez-moi votre livre et je l'ajouterai.", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 					break;
 
 				default:
@@ -80,12 +80,12 @@ namespace DOL.GS.Scripts
 					book.Save();
 					p.Out.SendMessage(
 						book.IsInLibrary
-							? "Votre livre fait maintenant partit de la bibliothèque."
+							? "Votre livre fait maintenant partie de la bibliothèque."
 							: "Vous avez retiré votre livre de la bibliothèque.", eChatType.CT_System,
 						eChatLoc.CL_PopupWindow);
 				}
 				else
-					p.Out.SendMessage("Désolé, ce livre n'existe plus.", eChatType.CT_System, eChatLoc.CL_PopupWindow);
+					p.Out.SendMessage("Désolé, ce livre est introuvable.", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 
 			}
 			else

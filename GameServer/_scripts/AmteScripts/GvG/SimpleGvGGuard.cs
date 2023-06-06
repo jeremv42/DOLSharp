@@ -236,7 +236,7 @@ namespace DOL.AI.Brain
 
 		public override int CalculateAggroLevelToTarget(GameLiving target)
 		{
-			if (target is AmtePlayer player)
+			if (target is GamePlayer player)
 			{
 				if (Captain != null)
 				{
