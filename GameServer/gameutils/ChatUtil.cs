@@ -27,112 +27,133 @@ using DOL.Language;
 
 namespace DOL.GS
 {
-	/// <summary>
-	/// ChatUtil for Sending Message to Players
-	/// </summary>
-	public static class ChatUtil
-	{
-		public static void SendSystemMessage(GamePlayer target, string message)
-		{
-			target.Out.SendMessage(message, eChatType.CT_System, eChatLoc.CL_SystemWindow);
-		}
+    /// <summary>
+    /// ChatUtil for Sending Message to Players
+    /// </summary>
+    public static class ChatUtil
+    {
+        public static void SendSystemMessage(GamePlayer target, string message)
+        {
+            if (target != null)
+                target.Out.SendMessage(message, eChatType.CT_System, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendSystemMessage(GamePlayer target, string translationID, params object[] args)
-		{
-			var translatedMsg = LanguageMgr.GetTranslation(target.Client, translationID, args);
+        public static void SendSystemMessage(GamePlayer target, string translationID, params object[] args)
+        {
+            if (target == null)
+                return;
+            var translatedMsg = LanguageMgr.GetTranslation(target.Client, translationID, args);
 
-			target.Out.SendMessage(translatedMsg, eChatType.CT_System, eChatLoc.CL_SystemWindow);
-		}
+            target.Out.SendMessage(translatedMsg, eChatType.CT_System, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendSystemMessage(GameClient target, string message)
-		{
-			target.Out.SendMessage(message, eChatType.CT_System, eChatLoc.CL_SystemWindow);
-		}
+        public static void SendSystemMessage(GameClient target, string message)
+        {
+            if (target != null)
+                target.Out.SendMessage(message, eChatType.CT_System, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendSystemMessage(GameClient target, string translationID, params object[] args)
-		{
-			var translatedMsg = LanguageMgr.GetTranslation(target, translationID, args);
+        public static void SendSystemMessage(GameClient target, string translationID, params object[] args)
+        {
+            if (target == null)
+                return;
+            var translatedMsg = LanguageMgr.GetTranslation(target, translationID, args);
 
-			target.Out.SendMessage(translatedMsg, eChatType.CT_System, eChatLoc.CL_SystemWindow);
-		}
+            target.Out.SendMessage(translatedMsg, eChatType.CT_System, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendMerchantMessage(GamePlayer target, string message)
-		{
-			target.Out.SendMessage(message, eChatType.CT_Merchant, eChatLoc.CL_SystemWindow);
-		}
+        public static void SendMerchantMessage(GamePlayer target, string message)
+        {
+            if (target != null)
+                target.Out.SendMessage(message, eChatType.CT_Merchant, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendMerchantMessage(GamePlayer target, string translationID, params object[] args)
-		{
-			var translatedMsg = LanguageMgr.GetTranslation(target.Client, translationID, args);
+        public static void SendMerchantMessage(GamePlayer target, string translationID, params object[] args)
+        {
+            if (target == null)
+                return;
+            var translatedMsg = LanguageMgr.GetTranslation(target.Client, translationID, args);
 
-			target.Out.SendMessage(translatedMsg, eChatType.CT_Merchant, eChatLoc.CL_SystemWindow);
-		}
+            target.Out.SendMessage(translatedMsg, eChatType.CT_Merchant, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendMerchantMessage(GameClient target, string message)
-		{
-			target.Out.SendMessage(message, eChatType.CT_Merchant, eChatLoc.CL_SystemWindow);
-		}
+        public static void SendMerchantMessage(GameClient target, string message)
+        {
+            if (target != null)
+                target.Out.SendMessage(message, eChatType.CT_Merchant, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendMerchantMessage(GameClient target, string translationID, params object[] args)
-		{
-			var translatedMsg = LanguageMgr.GetTranslation(target, translationID, args);
+        public static void SendMerchantMessage(GameClient target, string translationID, params object[] args)
+        {
+            if (target == null)
+                return;
+            var translatedMsg = LanguageMgr.GetTranslation(target, translationID, args);
 
-			target.Out.SendMessage(translatedMsg, eChatType.CT_Merchant, eChatLoc.CL_SystemWindow);
-		}
+            target.Out.SendMessage(translatedMsg, eChatType.CT_Merchant, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendHelpMessage(GamePlayer target, string message)
-		{
-			target.Out.SendMessage(message, eChatType.CT_Help, eChatLoc.CL_SystemWindow);
-		}
+        public static void SendHelpMessage(GamePlayer target, string message)
+        {
+            if (target != null)
+                target.Out.SendMessage(message, eChatType.CT_Help, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendHelpMessage(GamePlayer target, string translationID, params object[] args)
-		{
-			var translatedMsg = LanguageMgr.GetTranslation(target.Client, translationID, args);
+        public static void SendHelpMessage(GamePlayer target, string translationID, params object[] args)
+        {
+            if (target == null)
+                return;
+            var translatedMsg = LanguageMgr.GetTranslation(target.Client, translationID, args);
 
-			target.Out.SendMessage(translatedMsg, eChatType.CT_Help, eChatLoc.CL_SystemWindow);
-		}
+            target.Out.SendMessage(translatedMsg, eChatType.CT_Help, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendHelpMessage(GameClient target, string message)
-		{
-			target.Out.SendMessage(message, eChatType.CT_Help, eChatLoc.CL_SystemWindow);
-		}
+        public static void SendHelpMessage(GameClient target, string message)
+        {
+            if (target != null)
+                target.Out.SendMessage(message, eChatType.CT_Help, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendHelpMessage(GameClient target, string translationID, params object[] args)
-		{
-			var translatedMsg = LanguageMgr.GetTranslation(target, translationID, args);
+        public static void SendHelpMessage(GameClient target, string translationID, params object[] args)
+        {
+            if (target == null)
+                return;
+            var translatedMsg = LanguageMgr.GetTranslation(target, translationID, args);
 
-			target.Out.SendMessage(translatedMsg, eChatType.CT_Help, eChatLoc.CL_SystemWindow);
-		}
+            target.Out.SendMessage(translatedMsg, eChatType.CT_Help, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendErrorMessage(GamePlayer target, string message)
-		{
-			SendErrorMessage(target.Client, message);
-		}
+        public static void SendErrorMessage(GamePlayer target, string message)
+        {
+            if (target != null)
+                SendErrorMessage(target.Client, message);
+        }
 
-		public static void SendErrorMessage(GameClient target, string message)
-		{
-			target.Out.SendMessage(message, eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-		}
+        public static void SendErrorMessage(GameClient target, string message)
+        {
+            if (target != null)
+                target.Out.SendMessage(message, eChatType.CT_Important, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendDebugMessage(GamePlayer target, string message)
-		{
-			SendDebugMessage(target.Client, message);
-		}
+        public static void SendDebugMessage(GamePlayer target, string message)
+        {
+            if (target != null)
+                SendDebugMessage(target.Client, message);
+        }
 
-		public static void SendDebugMessage(GameClient target, string message)
-		{
-			if (target.Account.PrivLevel > (int)ePrivLevel.Player)
-				target.Out.SendMessage(message, eChatType.CT_Staff, eChatLoc.CL_SystemWindow);
-		}
+        public static void SendDebugMessage(GameClient target, string message)
+        {
+            if (target != null && target.Account.PrivLevel > (int)ePrivLevel.Player)
+                target.Out.SendMessage(message, eChatType.CT_Staff, eChatLoc.CL_SystemWindow);
+        }
 
-		public static void SendPopup(GamePlayer target, string message) => target.Out.SendMessage(message, eChatType.CT_System, eChatLoc.CL_PopupWindow);
-		public static void SendSystem(GamePlayer target, string message) => target.Out.SendMessage(message, eChatType.CT_System, eChatLoc.CL_SystemWindow);
-		public static void SendImportant(GamePlayer target, string message) => target.Out.SendMessage(message, eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-		public static void SendScreenCenter(GamePlayer target, string message) => target.Out.SendMessage(message, eChatType.CT_ScreenCenter, eChatLoc.CL_SystemWindow);
+        public static void SendPopup(GamePlayer target, string message) => target?.Out?.SendMessage(message, eChatType.CT_System, eChatLoc.CL_PopupWindow);
+        public static void SendSystem(GamePlayer target, string message) => target?.Out?.SendMessage(message, eChatType.CT_System, eChatLoc.CL_SystemWindow);
+        public static void SendImportant(GamePlayer target, string message) => target?.Out?.SendMessage(message, eChatType.CT_Important, eChatLoc.CL_SystemWindow);
+        public static void SendScreenCenter(GamePlayer target, string message) => target?.Out?.SendMessage(message, eChatType.CT_ScreenCenter, eChatLoc.CL_SystemWindow);
 
-		public static void SendPopup(GameClient target, string message) => target.Out.SendMessage(message, eChatType.CT_System, eChatLoc.CL_PopupWindow);
-		public static void SendSystem(GameClient target, string message) => target.Out.SendMessage(message, eChatType.CT_System, eChatLoc.CL_SystemWindow);
-		public static void SendImportant(GameClient target, string message) => target.Out.SendMessage(message, eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-		public static void SendScreenCenter(GameClient target, string message) => target.Out.SendMessage(message, eChatType.CT_ScreenCenter, eChatLoc.CL_SystemWindow);
-	}
+        public static void SendPopup(GameClient target, string message) => target?.Out?.SendMessage(message, eChatType.CT_System, eChatLoc.CL_PopupWindow);
+        public static void SendSystem(GameClient target, string message) => target?.Out?.SendMessage(message, eChatType.CT_System, eChatLoc.CL_SystemWindow);
+        public static void SendImportant(GameClient target, string message) => target?.Out?.SendMessage(message, eChatType.CT_Important, eChatLoc.CL_SystemWindow);
+        public static void SendScreenCenter(GameClient target, string message) => target?.Out?.SendMessage(message, eChatType.CT_ScreenCenter, eChatLoc.CL_SystemWindow);
+    }
 }

@@ -46,9 +46,13 @@ namespace DOL.GS.PacketHandler.Client.v168
 				var x = packet.ReadFloatLowEndian();
 				var y = packet.ReadFloatLowEndian();
 				var z = packet.ReadFloatLowEndian();
+				var speed = packet.ReadFloatLowEndian();
+				var heading = packet.ReadShort();
+
 				client.Player.Position = new Vector3(x, y, z);
-				client.Player.SetCurrentSpeed((short)packet.ReadFloatLowEndian());
-				client.Player.Heading = packet.ReadShort();
+				client.Player.SetCurrentSpeed((short)speed);
+				client.Player.Heading = heading;
+
 				flagSpeedData = packet.ReadShort(); // target visible ? 0xA000 : 0x0000
 				spellLevel = packet.ReadByte();
 				spellLineIndex = packet.ReadByte();

@@ -227,6 +227,8 @@ namespace DOL.GS.PacketHandler
 
 		protected override void SendQuestPacket(IQuestPlayerData data, int index)
 		{
+			if (data?.Quest == null)
+				return;
 			using (GSTCPPacketOut pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.QuestEntry)))
 			{
 				var name = $"{data.Quest.Name} (Level {data.Quest.MinLevel})";

@@ -34,9 +34,12 @@ namespace DOL.GS.PacketHandler.Client.v168
 				var x = packet.ReadFloatLowEndian();
 				var y = packet.ReadFloatLowEndian();
 				var z = packet.ReadFloatLowEndian();
+				var speed = packet.ReadFloatLowEndian();
+				var heading = packet.ReadShort();
+
 				client.Player.Position = new Vector3(x, y, z);
-				client.Player.SetCurrentSpeed((short)packet.ReadFloatLowEndian());
-				client.Player.Heading = packet.ReadShort();
+				client.Player.SetCurrentSpeed((short)speed);
+				client.Player.Heading = heading;
 			}
 			int flagSpeedData = packet.ReadShort();
 			int slot = packet.ReadByte();
