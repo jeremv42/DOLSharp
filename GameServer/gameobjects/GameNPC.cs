@@ -1212,16 +1212,10 @@ namespace DOL.GS
 
 		public void CancelWalkToTimer()
 		{
-			if (_arriveAtPathNodeAction != null)
-			{
-				_arriveAtPathNodeAction.Stop();
-				_arriveAtPathNodeAction = null;
-			}
-			if (m_arriveAtTargetAction != null)
-			{
-				m_arriveAtTargetAction.Stop();
-				m_arriveAtTargetAction = null;
-			}
+			_arriveAtPathNodeAction?.Stop();
+			_arriveAtPathNodeAction = null;
+			m_arriveAtTargetAction?.Stop();
+			m_arriveAtTargetAction = null;
 		}
 
 		/// <summary>
