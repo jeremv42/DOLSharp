@@ -1577,7 +1577,7 @@ namespace DOL.AI.Brain
 		{
 			if (Body.CurrentZone.IsPathingEnabled)
 			{
-				var pt = PathingMgr.Instance.GetRandomPointAsync(Body.CurrentZone, Body.SpawnPoint, Body.RoamingRange > 0 ? Body.RoamingRange : 200).Result;
+				var pt = PathingMgr.Instance.GetRandomPoint(Body.CurrentZone, Body.SpawnPoint, Body.RoamingRange > 0 ? Body.RoamingRange : 200);
 				if (pt.HasValue)
 					return pt.Value;
 			}

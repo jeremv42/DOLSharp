@@ -146,7 +146,7 @@ namespace DOL.GS
 			REPLOTTING = 1,
 		}
 
-		private async Task ReplotPathAsync(Vector3 target)
+		private void ReplotPath(Vector3 target)
 		{
 			lock (_pathNodes)
 				_lastTarget = target;
@@ -159,7 +159,7 @@ namespace DOL.GS
 
 			try
 			{
-				while (!await CalculatePathAsync(target))
+				while (!CalculatePath(target))
 					target = _lastTarget;
 			}
 			finally
@@ -169,12 +169,11 @@ namespace DOL.GS
 			}
 		}
 
-		private async Task<bool> CalculatePathAsync(Vector3 target)
+		private bool CalculatePath(Vector3 target)
 		{
 			var currentZone = Owner.CurrentZone;
 			var currentPos = Owner.Position;
-			// we make a blocking call here because we are already in a worker thread and inside a lock
-			var pathingResult = await PathingMgr.Instance.GetPathStraightAsync(currentZone, currentPos, target).ConfigureAwait(false);
+			var pathingResult = PathingMgr.Instance.GetPathStraight(currentZone, currentPos, target);
 
 			lock (_pathNodes)
 			{
@@ -254,7 +253,7 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="destination"></param>
 		/// <returns>Next path node, or null if target reached. Throws a NoPathToTargetException if path is blocked/returns>
-		public async Task<Tuple<Vector3?, NoPathReason>> CalculateNextTargetAsync(Vector3? destination = null)
+		public Tuple<Vector3?, NoPathReason> CalculateNextTarget(Vector3? destination = null)
 		{
 			var target = destination ?? _lastTarget;
 
@@ -272,7 +271,7 @@ namespace DOL.GS
 			if (ForceReplot || !_lastTarget.IsInRange(target, MIN_TARGET_DIFF_REPLOT_DISTANCE))
 			{
 				Owner.DebugSend("Target moved too far from original target or forced replot; replotting path");
-				await ReplotPathAsync(target).ConfigureAwait(false);
+				ReplotPath(target);
 			}
 
 			// Find the next node in the path to the target, but skip points that are too close

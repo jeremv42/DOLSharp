@@ -21,17 +21,10 @@ namespace DOL.GS
 		/// </summary>
 		public static readonly LocalPathingMgr LocalPathingMgr = new LocalPathingMgr();
 
-		/// <summary>
-		/// Calculates paths via a different RPC server
-		/// </summary>
-		public static readonly RpcPathingMgr RpcPathingMgr = new RpcPathingMgr();
-
 		public static bool Init()
 		{
 			log.Info("Starting PathingMgr");
-			if (RpcPathingMgr.Init())
-				SetPathingMgr(RpcPathingMgr);
-			else if (LocalPathingMgr.Init())
+			if (LocalPathingMgr.Init())
 				SetPathingMgr(LocalPathingMgr);
 			else
 				SetPathingMgr(NullPathingMgr);
@@ -45,14 +38,13 @@ namespace DOL.GS
 		public static void SetPathingMgr(IPathingMgr mgr)
 		{
 			log.Info($"Setting PathingMgr to {mgr}");
-			Instance = (mgr == null) ? NullPathingMgr : new FailureTolerantPathingMgr(mgr);
+			Instance = (mgr == null) ? NullPathingMgr : mgr;
 		}
 
 		public static void Stop()
 		{
 			log.Info("Stopping PathingMgr");
 			LocalPathingMgr.Stop();
-			RpcPathingMgr.Stop();
 		}
 
 		/// <summary>

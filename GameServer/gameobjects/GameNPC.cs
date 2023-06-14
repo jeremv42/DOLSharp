@@ -1372,23 +1372,20 @@ namespace DOL.GS
 			Interlocked.Increment(ref Statistics.PathToCalls);
 
 			// Pick the next pathing node, and walk towards it
-			PathCalculator.CalculateNextTargetAsync(dest).ContinueWith(res =>
+			var (nextNode, reason) = PathCalculator.CalculateNextTarget(dest);
+			var shouldUseAirPath = reason == NoPathReason.RECAST_FOUND_NO_PATH;
+
+			if (!nextNode.HasValue)
 			{
-				var nextNode = res.Result.Item1;
-				var shouldUseAirPath = res.Result.Item2 == NoPathReason.RECAST_FOUND_NO_PATH;
+				// Directly walk towards the target (or call the customly provided action)
+				if (shouldUseAirPath)
+					WalkTo(dest, walkSpeed);
+				return;
+			}
 
-				if (!nextNode.HasValue)
-				{
-					// Directly walk towards the target (or call the customly provided action)
-					if (shouldUseAirPath)
-						WalkTo(dest, walkSpeed);
-					return;
-				}
-
-				Notify(GameNPCEvent.WalkTo, this, new WalkToEventArgs(dest, walkSpeed));
-				// Do the actual pathing bit: Walk towards the next pathing node
-				_WalkToPathNode(nextNode.Value, walkSpeed);
-			});
+			Notify(GameNPCEvent.WalkTo, this, new WalkToEventArgs(dest, walkSpeed));
+			// Do the actual pathing bit: Walk towards the next pathing node
+			_WalkToPathNode(nextNode.Value, walkSpeed);
 		}
 
 		private void _WalkToPathNode(Vector3 node, short speed)
@@ -1442,20 +1439,17 @@ namespace DOL.GS
 				var npc = (GameNPC)m_actionSource;
 				npc.DebugSend("calculate next node..." + npc.MovementElapsedTicks + " / " + (uint)(Vector3.Distance(npc._basePosition, npc.TargetPosition) * 1000 / npc.CurrentSpeed));
 				// Pick the next pathing node, and walk towards it
-				npc.PathCalculator.CalculateNextTargetAsync().ContinueWith(res =>
+				var (nextNode, _reason) = npc.PathCalculator.CalculateNextTarget();
+				if (!nextNode.HasValue)
 				{
-					var nextNode = res.Result.Item1;
-					if (!nextNode.HasValue)
-					{
-						// Directly walk towards the target (or call the customly provided action)
-						npc.WalkTo(npc.TargetPosition, npc.CurrentSpeed);
-						return;
-					}
+					// Directly walk towards the target (or call the customly provided action)
+					npc.WalkTo(npc.TargetPosition, npc.CurrentSpeed);
+					return;
+				}
 
-					npc.DebugSend("Next target for {0} is {1}", npc.TargetPosition, nextNode.Value);
-					// Do the actual pathing bit: Walk towards the next pathing node
-					npc._WalkToPathNode(nextNode.Value, npc.CurrentSpeed);
-				});
+				npc.DebugSend("Next target for {0} is {1}", npc.TargetPosition, nextNode.Value);
+				// Do the actual pathing bit: Walk towards the next pathing node
+				npc._WalkToPathNode(nextNode.Value, npc.CurrentSpeed);
 			}
 		}
 

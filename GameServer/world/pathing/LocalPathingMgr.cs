@@ -180,7 +180,7 @@ namespace DOL.GS
         /// <param name="start">Start in GlobalXYZ</param>
         /// <param name="end">End in GlobalXYZ</param>
         /// <returns></returns>
-        public async Task<WrappedPathingResult> GetPathStraightAsync(Zone zone, Vector3 start, Vector3 end)
+        public WrappedPathingResult GetPathStraight(Zone zone, Vector3 start, Vector3 end)
         {
             if (!_navmeshPtrs.ContainsKey(zone.ID))
                 return new WrappedPathingResult
@@ -191,56 +191,46 @@ namespace DOL.GS
             //GSStatistics.Paths.Inc();
 
             var result = new WrappedPathingResult();
-            var semaphore = new SemaphoreSlim(0, 1);
-            ThreadPool.QueueUserWorkItem((_obj) =>
+            NavMeshQuery query;
+            if (!_navmeshQueries.Value.TryGetValue(zone.ID, out query))
             {
-                lock (_navmeshQueries.Value)
-                {
-                    NavMeshQuery query;
-                    if (!_navmeshQueries.Value.TryGetValue(zone.ID, out query))
-                    {
-                        query = new NavMeshQuery(_navmeshPtrs[zone.ID]);
-                        _navmeshQueries.Value.Add(zone.ID, query);
-                    }
-                    var startFloats = (start + Vector3.UnitZ * 8).ToRecastFloats();
-                    var endFloats = (end + Vector3.UnitZ * 8).ToRecastFloats();
+                query = new NavMeshQuery(_navmeshPtrs[zone.ID]);
+                _navmeshQueries.Value.Add(zone.ID, query);
+            }
+            var startFloats = (start + Vector3.UnitZ * 8).ToRecastFloats();
+            var endFloats = (end + Vector3.UnitZ * 8).ToRecastFloats();
 
-                    var numNodes = 0;
-                    var buffer = new float[MAX_POLY * 3];
-                    var flags = new dtPolyFlags[MAX_POLY];
-                    dtPolyFlags includeFilter = dtPolyFlags.ALL ^ dtPolyFlags.DISABLED;
-                    dtPolyFlags excludeFilter = 0;
-                    var polyExt = new Vector3(64, 64, 256).ToRecastFloats();
-                    dtStraightPathOptions options = dtStraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS;
-                    var filter = new[] { includeFilter, excludeFilter };
-                    var status = PathStraight(query, startFloats, endFloats, polyExt, filter, options, ref numNodes, buffer, flags);
-                    if ((status & dtStatus.DT_SUCCESS) == 0)
-                    {
-                        result.Error = PathingError.NoPathFound;
-                        result.Points = null;
-                        semaphore.Release();
-                        return;
-                    }
+            var numNodes = 0;
+            var buffer = new float[MAX_POLY * 3];
+            var flags = new dtPolyFlags[MAX_POLY];
+            dtPolyFlags includeFilter = dtPolyFlags.ALL ^ dtPolyFlags.DISABLED;
+            dtPolyFlags excludeFilter = 0;
+            var polyExt = new Vector3(64, 64, 256).ToRecastFloats();
+            dtStraightPathOptions options = dtStraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS;
+            var filter = new[] { includeFilter, excludeFilter };
+            var status = PathStraight(query, startFloats, endFloats, polyExt, filter, options, ref numNodes, buffer, flags);
+            if ((status & dtStatus.DT_SUCCESS) == 0)
+            {
+                result.Error = PathingError.NoPathFound;
+                result.Points = null;
+                return result;
+            }
 
-                    var points = new WrappedPathPoint[numNodes];
-                    var positions = Vector3ArrayFromRecastFloats(buffer, numNodes);
+            var points = new WrappedPathPoint[numNodes];
+            var positions = Vector3ArrayFromRecastFloats(buffer, numNodes);
 
-                    for (var i = 0; i < numNodes; i++)
-                    {
-                        points[i].Position = positions[i];
-                        points[i].Flags = flags[i];
-                    }
+            for (var i = 0; i < numNodes; i++)
+            {
+                points[i].Position = positions[i];
+                points[i].Flags = flags[i];
+            }
 
-                    if ((status & dtStatus.DT_PARTIAL_RESULT) == 0)
-                        result.Error = PathingError.PathFound;
-                    else
-                        result.Error = PathingError.PathFound;
-                    result.Points = points;
-                    semaphore.Release();
-                }
-            });
+            if ((status & dtStatus.DT_PARTIAL_RESULT) == 0)
+                result.Error = PathingError.PathFound;
+            else
+                result.Error = PathingError.PathFound;
+            result.Points = points;
 
-            await semaphore.WaitAsync();
             return result;
         }
 
@@ -251,7 +241,7 @@ namespace DOL.GS
         /// <param name="position">Start in GlobalXYZ</param>
         /// <param name="radius">End in GlobalXYZ</param>
         /// <returns>null if no point found, Vector3 with point otherwise</returns>
-        public async Task<Vector3?> GetRandomPointAsync(Zone zone, Vector3 position, float radius)
+        public Vector3? GetRandomPoint(Zone zone, Vector3 position, float radius)
         {
             if (!_navmeshPtrs.ContainsKey(zone.ID))
                 return null;
@@ -259,80 +249,62 @@ namespace DOL.GS
             //GSStatistics.Paths.Inc();
 
             Vector3? result = null;
-            var semaphore = new SemaphoreSlim(0, 1);
-            ThreadPool.QueueUserWorkItem((_obj) =>
+            NavMeshQuery query;
+            if (!_navmeshQueries.Value.TryGetValue(zone.ID, out query))
             {
-                lock (_navmeshQueries.Value)
-                {
-                    NavMeshQuery query;
-                    if (!_navmeshQueries.Value.TryGetValue(zone.ID, out query))
-                    {
-                        query = new NavMeshQuery(_navmeshPtrs[zone.ID]);
-                        _navmeshQueries.Value.Add(zone.ID, query);
-                    }
-                    var ptrs = _navmeshPtrs[zone.ID];
-                    var center = (position + Vector3.UnitZ * 8).ToRecastFloats();
-                    var cradius = (radius * CONVERSION_FACTOR);
-                    var outVec = new float[3];
+                query = new NavMeshQuery(_navmeshPtrs[zone.ID]);
+                _navmeshQueries.Value.Add(zone.ID, query);
+            }
+            var ptrs = _navmeshPtrs[zone.ID];
+            var center = (position + Vector3.UnitZ * 8).ToRecastFloats();
+            var cradius = (radius * CONVERSION_FACTOR);
+            var outVec = new float[3];
 
-                    var defaultInclude = (dtPolyFlags.ALL ^ dtPolyFlags.DISABLED);
-                    var defaultExclude = (dtPolyFlags)0;
-                    var filter = new dtPolyFlags[] { defaultInclude, defaultExclude };
+            var defaultInclude = (dtPolyFlags.ALL ^ dtPolyFlags.DISABLED);
+            var defaultExclude = (dtPolyFlags)0;
+            var filter = new dtPolyFlags[] { defaultInclude, defaultExclude };
 
-                    var polyPickEx = new float[3] { 2.0f, 4.0f, 2.0f };
+            var polyPickEx = new float[3] { 2.0f, 4.0f, 2.0f };
 
-                    var status = FindRandomPointAroundCircle(query, center, cradius, polyPickEx, filter, outVec);
+            var status = FindRandomPointAroundCircle(query, center, cradius, polyPickEx, filter, outVec);
 
-                    if ((status & dtStatus.DT_SUCCESS) != 0)
-                        result = new Vector3(outVec[0] * INV_FACTOR, outVec[2] * INV_FACTOR, outVec[1] * INV_FACTOR);
-                    semaphore.Release();
-                }
-            });
+            if ((status & dtStatus.DT_SUCCESS) != 0)
+                result = new Vector3(outVec[0] * INV_FACTOR, outVec[2] * INV_FACTOR, outVec[1] * INV_FACTOR);
 
-            await semaphore.WaitAsync();
             return result;
         }
 
         /// <summary>
         /// Returns the closest point on the navmesh (UNTESTED! EXPERIMENTAL! WILL GO SUPERNOVA ON USE! MAYBE!?)
         /// </summary>
-        public async Task<Vector3?> GetClosestPointAsync(Zone zone, Vector3 position, float xRange = 256f, float yRange = 256f, float zRange = 256f)
+        public Vector3? GetClosestPoint(Zone zone, Vector3 position, float xRange = 256f, float yRange = 256f, float zRange = 256f)
         {
             if (!_navmeshPtrs.ContainsKey(zone.ID))
                 return position; // Assume the point is safe if we don't have a navmesh
                                  //GSStatistics.Paths.Inc();
 
             Vector3? result = null;
-            var semaphore = new SemaphoreSlim(0, 1);
-            ThreadPool.QueueUserWorkItem((_obj) =>
+            NavMeshQuery query;
+            if (!_navmeshQueries.Value.TryGetValue(zone.ID, out query))
             {
-                lock (_navmeshQueries.Value)
-                {
-                    NavMeshQuery query;
-                    if (!_navmeshQueries.Value.TryGetValue(zone.ID, out query))
-                    {
-                        query = new NavMeshQuery(_navmeshPtrs[zone.ID]);
-                        _navmeshQueries.Value.Add(zone.ID, query);
-                    }
-                    var ptrs = _navmeshPtrs[zone.ID];
-                    var center = (position + Vector3.UnitZ * 8).ToRecastFloats();
-                    var outVec = new float[3];
+                query = new NavMeshQuery(_navmeshPtrs[zone.ID]);
+                _navmeshQueries.Value.Add(zone.ID, query);
+            }
+            var ptrs = _navmeshPtrs[zone.ID];
+            var center = (position + Vector3.UnitZ * 8).ToRecastFloats();
+            var outVec = new float[3];
 
-                    var defaultInclude = (dtPolyFlags.ALL ^ dtPolyFlags.DISABLED);
-                    var defaultExclude = (dtPolyFlags)0;
-                    var filter = new dtPolyFlags[] { defaultInclude, defaultExclude };
+            var defaultInclude = (dtPolyFlags.ALL ^ dtPolyFlags.DISABLED);
+            var defaultExclude = (dtPolyFlags)0;
+            var filter = new dtPolyFlags[] { defaultInclude, defaultExclude };
 
-                    var polyPickEx = new Vector3(xRange, yRange, zRange).ToRecastFloats();
+            var polyPickEx = new Vector3(xRange, yRange, zRange).ToRecastFloats();
 
-                    var status = FindClosestPoint(query, center, polyPickEx, filter, outVec);
+            var status = FindClosestPoint(query, center, polyPickEx, filter, outVec);
 
-                    if ((status & dtStatus.DT_SUCCESS) != 0)
-                        result = new Vector3(outVec[0] * INV_FACTOR, outVec[2] * INV_FACTOR, outVec[1] * INV_FACTOR);
-                    semaphore.Release();
-                }
-            });
+            if ((status & dtStatus.DT_SUCCESS) != 0)
+                result = new Vector3(outVec[0] * INV_FACTOR, outVec[2] * INV_FACTOR, outVec[1] * INV_FACTOR);
 
-            await semaphore.WaitAsync();
             return result;
         }
 

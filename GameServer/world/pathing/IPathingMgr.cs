@@ -23,7 +23,7 @@ namespace DOL.GS
 		/// <param name="start">Start in GlobalXYZ</param>
 		/// <param name="end">End in GlobalXYZ</param>
 		/// <returns></returns>
-		Task<WrappedPathingResult> GetPathStraightAsync(Zone zone, Vector3 start, Vector3 end);
+		WrappedPathingResult GetPathStraight(Zone zone, Vector3 start, Vector3 end);
 
 		/// <summary>
 		///   Returns a random point on the navmesh around the given position
@@ -32,13 +32,13 @@ namespace DOL.GS
 		/// <param name="position">Start in GlobalXYZ</param>
 		/// <param name="radius">End in GlobalXYZ</param>
 		/// <returns>null if no point found, Vector3 with point otherwise</returns>
-		Task<Vector3?> GetRandomPointAsync(Zone zone, Vector3 position, float radius);
+		Vector3? GetRandomPoint(Zone zone, Vector3 position, float radius);
 
 		/// <summary>
 		///   Returns the closest point on the navmesh, if available, or no point found.
 		///   Returns the input position if no navmesh is available
 		/// </summary>
-		Task<Vector3?> GetClosestPointAsync(Zone zone, Vector3 position, float xRange = 256f, float yRange = 256f, float zRange = 256f);
+		Vector3? GetClosestPoint(Zone zone, Vector3 position, float xRange = 256f, float yRange = 256f, float zRange = 256f);
 
 		/// <summary>
 		///   True if pathing is enabled for the specified zone

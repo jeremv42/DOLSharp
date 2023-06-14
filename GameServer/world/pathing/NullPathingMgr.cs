@@ -17,19 +17,19 @@ namespace DOL.GS
 		{
 		}
 
-		public Task<WrappedPathingResult> GetPathStraightAsync(Zone zone, Vector3 start, Vector3 end)
+		public WrappedPathingResult GetPathStraight(Zone zone, Vector3 start, Vector3 end)
 		{
-			return Task.FromResult(new WrappedPathingResult() { Error = PathingError.NavmeshUnavailable });
+			return new WrappedPathingResult() { Error = PathingError.NavmeshUnavailable };
 		}
 
-		public Task<Vector3?> GetRandomPointAsync(Zone zone, Vector3 position, float radius)
+		public Vector3? GetRandomPoint(Zone zone, Vector3 position, float radius)
 		{
-			return Task.FromResult<Vector3?>(null);
+			return null;
 		}
 
-		public Task<Vector3?> GetClosestPointAsync(Zone zone, Vector3 position, float xRange = 256, float yRange = 256, float zRange = 256)
+		public Vector3? GetClosestPoint(Zone zone, Vector3 position, float xRange = 256, float yRange = 256, float zRange = 256)
 		{
-			return Task.FromResult<Vector3?>(position);
+			return position;
 		}
 
 		public bool HasNavmesh(Zone zone)
