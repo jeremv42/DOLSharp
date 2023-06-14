@@ -129,34 +129,35 @@ DLLEXPORT bool FreeNavMeshQuery(dtNavMeshQuery *queryPtr)
 	return true;
 }
 
+DLLEXPORT inline bool IsMidPointAligned(float const* A, float const* B, float const* C)
+{
+	float vectAC[3];
+	dtVsub(vectAC, C, A);
+	dtVnormalize(vectAC);
+	float vectAB[3];
+	dtVsub(vectAB, B, A);
+	float cross[3];
+	dtVcross(cross, vectAB, vectAC);
+	float len = dtVlen(cross);
+	return len <= 1;
+}
+
 void PathOptimize(dtNavMeshQuery *query, int *pointCount, float *pointBuffer, dtPolyRef *refs)
 {
 	for (int i = 0; i < *pointCount - 2; ++i)
 	{
 		unsigned short flags[2];
-		query->getAttachedNavMesh()->getPolyFlags(refs[i], flags + 0);
+		query->getAttachedNavMesh()->getPolyFlags(refs[i + 0], flags + 0);
 		query->getAttachedNavMesh()->getPolyFlags(refs[i + 1], flags + 1);
 		if (flags[0] != flags[1]) // we can't merge 2 different points
 			continue;
 
 		// we take 3 points: first --- mid --- last and check if mid is on the line, in this case, we remove mid
-		float const *A = &(pointBuffer[i * 3 + 0]);
-		float const *B = &(pointBuffer[(i + 1) * 3 + 0]); // mid, point to remove
-		float const *C = &(pointBuffer[(i + 2) * 3 + 0]);
+		float const *A = &(pointBuffer[(i + 0) * 3]);
+		float const *B = &(pointBuffer[(i + 1) * 3]); // mid, point to remove
+		float const *C = &(pointBuffer[(i + 2) * 3]);
 
-		float vectAC[3];
-		dtVsub(vectAC, A, C);
-		float len = dtVlen(vectAC);
-		dtVnormalize(vectAC);
-		float vectAB[3];
-		dtVsub(vectAB, B, A);
-		float distPt = dtClamp(dtVdot(vectAB, vectAC), 0.0f, len);
-		float pt[3];
-		dtVscale(pt, vectAC, distPt);
-		dtVadd(pt, A, pt);
-		float distAC = dtVdist(pt, B);
-
-		if (distAC < 2.0f)
+		if (IsMidPointAligned(A, B, C))
 		{
 			std::copy(pointBuffer + (i + 2) * 3, pointBuffer + (*pointCount) * 3, pointBuffer + (i + 1) * 3);
 			std::copy(refs + i + 2, refs + *pointCount, refs + i + 1);
@@ -166,7 +167,7 @@ void PathOptimize(dtNavMeshQuery *query, int *pointCount, float *pointBuffer, dt
 	}
 }
 
-DLLEXPORT dtStatus PathStraight(dtNavMeshQuery *query, float start[], float end[], float polyPickExt[], dtPolyFlags queryFilter[], dtStraightPathOptions pathOptions, int *pointCount, float *pointBuffer, dtPolyFlags *pointFlags)
+DLLEXPORT dtStatus PathStraight(dtNavMeshQuery *query, float start[], float end[], float polyPickExt[], dtPolyFlags queryFilter[], dtStraightPathOptions pathOptions, int *pointCount, float *pointBuffer, dtPolyFlags *pointFlags, dtPolyRef *polys)
 {
 	dtStatus status;
 	*pointCount = 0;
@@ -176,36 +177,39 @@ DLLEXPORT dtStatus PathStraight(dtNavMeshQuery *query, float start[], float end[
 	dtQueryFilter filter;
 	filter.setIncludeFlags(queryFilter[0]);
 	filter.setExcludeFlags(queryFilter[1]);
-	if (dtStatusSucceed(status = query->findNearestPoly(start, polyPickExt, &filter, &startRef, nullptr)) && dtStatusSucceed(status = query->findNearestPoly(end, polyPickExt, &filter, &endRef, nullptr)))
+	if (!dtStatusSucceed(status = query->findNearestPoly(start, polyPickExt, &filter, &startRef, nullptr)) || !dtStatusSucceed(status = query->findNearestPoly(end, polyPickExt, &filter, &endRef, nullptr)))
+		return status;
+
+	int npolys = 0;
+	dtPolyRef stack_polys[MAX_POLY];
+	if (polys == nullptr)
+		polys = stack_polys;
+
+	if (!dtStatusSucceed(status = query->findPath(startRef, endRef, start, end, &filter, polys, &npolys, MAX_POLY)))
+		return status;
+
+	float epos[3];
+	epos[0] = end[0];
+	epos[1] = end[1];
+	epos[2] = end[2];
+	if ((polys[npolys + -1] != endRef) && !dtStatusSucceed(status = query->closestPointOnPoly(polys[npolys + -1], end, epos, nullptr)))
+		return status;
+
+	dtPolyRef straightPathPolys[MAX_POLY];
+	unsigned char straightPathFlags[MAX_POLY];
+	auto straightPathRefs = &straightPathPolys[0];
+	if (!dtStatusSucceed(status = query->findStraightPath(start, epos, polys, npolys, pointBuffer, straightPathFlags, straightPathRefs, pointCount, MAX_POLY, pathOptions)) || (*pointCount <= 0))
+		return status;
+
+	PathOptimize(query, pointCount, pointBuffer, straightPathRefs);
+	int pointIdx = 0;
+	while (*pointCount != pointIdx && pointIdx <= *pointCount)
 	{
-		int npolys = 0;
-		dtPolyRef polys[MAX_POLY];
-		if (dtStatusSucceed(status = query->findPath(startRef, endRef, start, end, &filter, polys, &npolys, MAX_POLY)))
-		{
-			float epos[3];
-			epos[0] = end[0];
-			epos[1] = end[1];
-			epos[2] = end[2];
-			if ((polys[npolys + -1] == endRef) || dtStatusSucceed(status = query->closestPointOnPoly(polys[npolys + -1], end, epos, nullptr)))
-			{
-				dtPolyRef straightPathPolys[MAX_POLY];
-				unsigned char straightPathFlags[MAX_POLY];
-				auto straightPathRefs = &straightPathPolys[0];
-				if (dtStatusSucceed(status = query->findStraightPath(start, epos, polys, npolys, pointBuffer, straightPathFlags, straightPathRefs, pointCount, MAX_POLY, pathOptions)) && (0 < *pointCount))
-				{
-					PathOptimize(query, pointCount, pointBuffer, straightPathRefs);
-					int pointIdx = 0;
-					while (*pointCount != pointIdx && pointIdx <= *pointCount)
-					{
-						auto ref = *straightPathRefs;
-						pointIdx = pointIdx + 1;
-						straightPathRefs = straightPathRefs + 1;
-						query->getAttachedNavMesh()->getPolyFlags(ref, (unsigned short *)pointFlags);
-						pointFlags = pointFlags + 1;
-					}
-				}
-			}
-		}
+		auto ref = *straightPathRefs;
+		pointIdx = pointIdx + 1;
+		straightPathRefs = straightPathRefs + 1;
+		query->getAttachedNavMesh()->getPolyFlags(ref, (unsigned short *)pointFlags);
+		pointFlags = pointFlags + 1;
 	}
 	return status;
 }

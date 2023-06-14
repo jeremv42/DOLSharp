@@ -15,6 +15,37 @@ static auto defaultInclude = (dtPolyFlags)(dtPolyFlags::ALL ^ dtPolyFlags::DISAB
 static auto defaultExclude = (dtPolyFlags)0;
 static dtPolyFlags filter[] = {defaultInclude, defaultExclude};
 
+void test_IsMidPointAligned(dtNavMeshQuery*)
+{
+#define ARR(...) { __VA_ARGS__ }
+#define STR(a) #a
+#define TEST(Acoords, Bcoords, Ccoords, expected) do {                                                                                              \
+        float A[] = Acoords;                                                                                                                        \
+        float B[] = Bcoords;                                                                                                                        \
+        float C[] = Ccoords;                                                                                                                        \
+        if (IsMidPointAligned(A, B, C) != (expected)) {                                                                                             \
+            std::cerr << "IsMidPointAligned(" STR(Acoords) ", " STR(Bcoords) ", " STR(Ccoords) ") expected to equals " STR(expected) << std::endl;  \
+            /*throw 0;*/                                                                                                                                \
+        }                                                                                                                                           \
+    } while (0)
+
+    TEST(ARR(0, 0, 0), ARR(1, 1, 1), ARR(2, 2, 2), true);
+    TEST(ARR(0, 0, 0), ARR(1, 0, 0), ARR(2, 0, 0), true);
+    TEST(ARR(0, 0, 0), ARR(1.1, 0, 0), ARR(2, 0, 0), true);
+    TEST(ARR(0, 0, 0), ARR(15, 0, 0), ARR(20, 0, 0), true);
+
+    TEST(ARR(0, 0, 0), ARR(40, 1, 0), ARR(80, 0, 0), true);
+    TEST(ARR(0, 0, 0), ARR(10, 1, 0), ARR(40, 0, 0), false);
+    TEST(ARR(0, 5, 0), ARR(5, 5, 0), ARR(40, 0, 0), true);
+
+    // aligned but mid point is outside the vector
+    TEST(ARR(3, 0, 0), ARR(1, 0, 0), ARR(2, 0, 0), false);
+
+#undef TEST
+#undef STR
+#undef ARR
+}
+
 void test_FindRandomPointAroundCircle(dtNavMeshQuery *query)
 {
     for (int i = 0; i < 1000; ++i)
@@ -51,7 +82,7 @@ void test_PathStraight__AREA(dtNavMeshQuery *query)
         int pointCount;
         float pointBuffer[MAX_POLY];
         dtPolyFlags pointFlags[MAX_POLY];
-        auto status = PathStraight(query, start, end, polyPick, filter, dtStraightPathOptions::DT_STRAIGHTPATH_AREA_CROSSINGS, &pointCount, pointBuffer, pointFlags);
+        auto status = PathStraight(query, start, end, polyPick, filter, dtStraightPathOptions::DT_STRAIGHTPATH_AREA_CROSSINGS, &pointCount, pointBuffer, pointFlags, nullptr);
         if (!dtStatusSucceed(status))
             throw i;
     }
@@ -67,7 +98,7 @@ void test_PathStraight__ALL(dtNavMeshQuery *query)
         int pointCount;
         float pointBuffer[MAX_POLY];
         dtPolyFlags pointFlags[MAX_POLY];
-        auto status = PathStraight(query, start, end, polyPick, filter, dtStraightPathOptions::DT_STRAIGHTPATH_ALL_CROSSINGS, &pointCount, pointBuffer, pointFlags);
+        auto status = PathStraight(query, start, end, polyPick, filter, dtStraightPathOptions::DT_STRAIGHTPATH_ALL_CROSSINGS, &pointCount, pointBuffer, pointFlags, nullptr);
         if (!dtStatusSucceed(status))
             throw i;
     }
@@ -113,6 +144,9 @@ int main(int ac, char const *const *av)
             std::cout << "KO" << std::endl;                                                                                                                       \
         }                                                                                                                                                         \
     } while (0)
+
+    TEST(test_IsMidPointAligned);
+    return 0;
 
     TEST(test_FindRandomPointAroundCircle);
     TEST(test_FindClosestPoint);

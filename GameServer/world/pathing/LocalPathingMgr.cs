@@ -54,7 +54,7 @@ namespace DOL.GS
 
 
         [DllImport("dol_detour", CallingConvention = CallingConvention.Cdecl)]
-        private static extern dtStatus PathStraight(IntPtr queryPtr, float[] start, float[] end, float[] polyPickExt, dtPolyFlags[] queryFilter, dtStraightPathOptions pathOptions, ref int pointCount, float[] pointBuffer, dtPolyFlags[] pointFlags);
+        private static extern dtStatus PathStraight(IntPtr queryPtr, float[] start, float[] end, float[] polyPickExt, dtPolyFlags[] queryFilter, dtStraightPathOptions pathOptions, ref int pointCount, float[] pointBuffer, dtPolyFlags[] pointFlags, int[] polyRefs);
 
         [DllImport("dol_detour", CallingConvention = CallingConvention.Cdecl)]
         private static extern dtStatus FindRandomPointAroundCircle(IntPtr queryPtr, float[] center, float radius, float[] polyPickExt, dtPolyFlags[] queryFilter, float[] outputVector);
@@ -208,7 +208,7 @@ namespace DOL.GS
             var polyExt = new Vector3(64, 64, 256).ToRecastFloats();
             dtStraightPathOptions options = dtStraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS;
             var filter = new[] { includeFilter, excludeFilter };
-            var status = PathStraight(query, startFloats, endFloats, polyExt, filter, options, ref numNodes, buffer, flags);
+            var status = PathStraight(query, startFloats, endFloats, polyExt, filter, options, ref numNodes, buffer, flags, null);
             if ((status & dtStatus.DT_SUCCESS) == 0)
             {
                 result.Error = PathingError.NoPathFound;
