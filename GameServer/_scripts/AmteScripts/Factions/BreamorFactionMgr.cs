@@ -8,10 +8,37 @@ namespace DOL.GS
 {
 	public class BreamorFactionMgr
 	{
-		public const int Zone_Min = -1000000;
-		public const int Zone_Neutral_Min = -10000;
-		public const int Zone_Neutral_Max = 10000;
-		public const int Zone_Max = 1000000;
+		public const int Zone_Min = -10_000_000;
+		public const int Zone_Neutral_Min = -100_000;
+		public const int Zone_Neutral_Max = 100_000;
+		public const int Zone_Max = 10_000_000;
+
+		public static readonly Dictionary<int, (string, string)> Zone_Ranks = new Dictionary<int, (string, string)>
+		{
+			{ -8_500_000, ("Ard-Rioga", "Grand Roi") },
+			{ -6_000_000, ("Hersir", "Chef Militaire") },
+			{ -4_000_000, ("Jarl", "Chef de Clan") },
+			{ -2_500_000, ("Tánaiste", "Héritier") },
+			{ -1_500_000, ("Huskarl", "Homme de confiance") },
+			{ -1_000_000, ("Ollamh", "Érudit") },
+			{ -0_650_000, ("Gaíoch", "Guerrier") },
+			{ -0_400_000, ("Brughaid", "Fermier") },
+			{ -0_200_000, ("Faoileán", "Cerf") },
+			{ -0_100_000, ("Trall", "Esclave") },
+
+			{ +0_100_000, ("Coigreach", "Neutre") },
+
+			{ +0_200_000, ("Puer", "Serviteur") },
+			{ +0_400_000, ("Discipulus", "Apprenti") },
+			{ +0_650_000, ("Miles", "Soldat") },
+			{ +1_000_000, ("Centurio", "Centurion") },
+			{ +1_500_000, ("Praefectus", "Préfet") },
+			{ +2_500_000, ("Marchog", "Chevalier") },
+			{ +4_000_000, ("Legatus", "Légat") },
+			{ +6_000_000, ("Consul", "Consul") },
+			{ +8_500_000, ("Seithfed", "Seigneur") },
+			{ +10_000_000, ("Pendragon", "Chef Suprême") },
+		};
 
 		public static bool IsNeutral(GameLiving living)
 		{
@@ -26,6 +53,14 @@ namespace DOL.GS
 		public static bool IsAverne(GameLiving living)
 		{
 			return living.BreamorFaction > Zone_Neutral_Max;
+		}
+
+		public static (string, string) GetRank(GameLiving living)
+		{
+			foreach (var (key, rank) in Zone_Ranks)
+				if (living.BreamorFaction <= key)
+					return rank;
+			return Zone_Ranks.Last().Value;
 		}
 
 		public static void UpdateFromKill(GamePlayer killer, GameLiving killed, float damageRatio)
