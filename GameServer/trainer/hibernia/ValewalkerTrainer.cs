@@ -87,7 +87,7 @@ namespace DOL.GS.Trainer
 					// promote player to other class
 					if (CanPromotePlayer(player)) {
 						PromotePlayer(player, (int)eCharacterClass.Valewalker, "Welcome, then, to the Path of Affinity. Here is a gift. Consider it a welcoming gesture. Welcome, " + source.GetName(0, false) + ".", null);
-						player.ReceiveItem(this,WEAPON_ID1);
+						player.ReceiveItem(this, WEAPON_ID1, eInventoryActionType.Other);
 					}
 					break;
 			}

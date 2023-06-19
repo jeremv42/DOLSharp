@@ -97,12 +97,12 @@ namespace DOL.GS.Trainer
 			{
 				if (lowerCase == LanguageMgr.GetTranslation(player.Client.Account.Language, "ValkyrieTrainer.WhisperReceiveCase.Text2"))
 				{
-					player.ReceiveItem(this, WEAPON_ID1);
+					player.ReceiveItem(this, WEAPON_ID1, eInventoryActionType.Other);
 					player.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language, "ValkyrieTrainer.WhisperReceive.Text2"), eChatType.CT_Say, eChatLoc.CL_PopupWindow);
 				}
 				else if (lowerCase == LanguageMgr.GetTranslation(player.Client.Account.Language, "ValkyrieTrainer.WhisperReceiveCase.Text3"))
 				{
-					player.ReceiveItem(this, WEAPON_ID2);
+					player.ReceiveItem(this, WEAPON_ID2, eInventoryActionType.Other);
 					player.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language, "ValkyrieTrainer.WhisperReceive.Text2"), eChatType.CT_Say, eChatLoc.CL_PopupWindow);
 				}
 			}

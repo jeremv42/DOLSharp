@@ -46,7 +46,7 @@ namespace DOL.GS.Scripts
 
 			    if (!player.Inventory.RemoveCountFromStack(item, 1))
 			        return;
-                InventoryLogging.LogInventoryAction(player, "(feu artifice)", eInventoryActionType.Other, item.Template);
+                InventoryLogging.LogInventoryAction(player, "", "(feu artifice)", eInventoryActionType.Other, item, 1);
 
                 Dictionary<int, GameNPC> mobs = CreateMobs(player);
 			    RegionTimer timer = new RegionTimer(mobs[0], FeuCallback);

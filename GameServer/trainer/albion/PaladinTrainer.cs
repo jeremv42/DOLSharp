@@ -96,19 +96,19 @@ namespace DOL.GS.Trainer
 						break;
 					case "slashing":
 						PromotePlayer(player, (int)eCharacterClass.Paladin, "Here is your Sword of the Initiate. Welcome to the Church of Albion.", null);
-						player.ReceiveItem(this,WEAPON_ID1);
+						player.ReceiveItem(this, WEAPON_ID1, eInventoryActionType.Other);
 						break;
 					case "crushing":
 						PromotePlayer(player, (int)eCharacterClass.Paladin, "Here is your Mace of the Initiate. Welcome to the Church of Albion.", null);
-						player.ReceiveItem(this,WEAPON_ID2);
+						player.ReceiveItem(this, WEAPON_ID2, eInventoryActionType.Other);
 						break;
 					case "thrusting":
 						PromotePlayer(player, (int)eCharacterClass.Paladin, "Here is your Rapier of the Initiate. Welcome to the Church of Albion.", null);
-						player.ReceiveItem(this,WEAPON_ID3);
+						player.ReceiveItem(this, WEAPON_ID3, eInventoryActionType.Other);
 						break;
 					case "two handed":
 						PromotePlayer(player, (int)eCharacterClass.Paladin, "Here is your Great Sword of the Initiate. Welcome to the Church of Albion.", null);
-						player.ReceiveItem(this,WEAPON_ID4);
+						player.ReceiveItem(this, WEAPON_ID4, eInventoryActionType.Other);
 						break;
 				}
 			}

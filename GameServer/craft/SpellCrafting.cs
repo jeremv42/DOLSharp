@@ -312,7 +312,7 @@ namespace DOL.GS
 
 					}
 					player.Inventory.RemoveCountFromStack(gemme, 1);
-					InventoryLogging.LogInventoryAction(player, "(craft)", eInventoryActionType.Craft, gemme.Template);
+					InventoryLogging.LogInventoryAction(player, "", "(craft)", eInventoryActionType.Craft, gemme, 1);
 				}
 			}
 
@@ -367,7 +367,7 @@ namespace DOL.GS
 							item.Bonus4 = gem.Bonus1;
 						}
 						player.Inventory.RemoveCountFromStack(gem, 1);
-						InventoryLogging.LogInventoryAction(player, "(craft)", eInventoryActionType.Craft, gem.Template);
+						InventoryLogging.LogInventoryAction(player, "", "(craft)", eInventoryActionType.Craft, gem, 1);
 					}
 					player.Inventory.CommitChanges();
 				}
@@ -392,7 +392,7 @@ namespace DOL.GS
                         if (gem.Object_Type == (int)eObjectType.SpellcraftGem)
 						{
                             player.Inventory.RemoveCountFromStack(gem, 1);
-							InventoryLogging.LogInventoryAction(player, "(craft)", eInventoryActionType.Craft, gem.Template);
+							InventoryLogging.LogInventoryAction(player, "", "(craft)", eInventoryActionType.Craft, gem, 1);
 						}
                     }
                     player.Inventory.CommitChanges();

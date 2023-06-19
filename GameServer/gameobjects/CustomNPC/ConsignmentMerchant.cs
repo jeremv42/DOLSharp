@@ -142,7 +142,7 @@ namespace DOL.GS
                 {
                     player.MoveTo(destination);
                     player.Inventory.RemoveItem(item);
-                    InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Merchant, item.Template, item.Count);
+                    InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Merchant, item, item.Count);
                     player.SaveIntoDatabase();
                     return true;
                 }

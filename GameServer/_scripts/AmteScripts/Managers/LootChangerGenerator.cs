@@ -191,12 +191,12 @@ namespace DOL.GS
             {
                 if (!pl.Inventory.RemoveCountFromStack(tmp.Value, 1))
                     continue;
-                InventoryLogging.LogInventoryAction(pl, mob, eInventoryActionType.Loot, tmp.Value.Template);
+                InventoryLogging.LogInventoryAction(pl, mob, eInventoryActionType.Loot, tmp.Value, 1);
                 var item = GameServer.Database.FindObjectByKey<ItemTemplate>(tmp.Key.ItemsTemplatesGives);
                 if (!pl.Inventory.AddTemplate(GameInventoryItem.Create(item), 1, eInventorySlot.FirstBackpack, eInventorySlot.LastBackpack))
                     loots.AddFixed(item, 1);
                 else
-                    InventoryLogging.LogInventoryAction(mob, pl, eInventoryActionType.Loot, item);
+                    InventoryLogging.LogInventoryAction(mob, pl, eInventoryActionType.Loot, item, 1);
             }
 
             return loots;

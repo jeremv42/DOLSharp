@@ -88,7 +88,7 @@ namespace DOL.GS.Trainer
 					// promote player to other class
 					if (CanPromotePlayer(player)) {
 						PromotePlayer(player, (int)eCharacterClass.Eldritch, "I can give you the gift of knowledge, but wisdom you must seek on your own. I welcome you, " + source.GetName(0, false) + ". Here, take this welcoming gift. Use it wisely.", null);
-						player.ReceiveItem(this,WEAPON_ID1);
+						player.ReceiveItem(this, WEAPON_ID1, eInventoryActionType.Other);
 					}
 					break;
 			}

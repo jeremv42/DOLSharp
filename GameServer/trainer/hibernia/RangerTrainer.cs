@@ -88,7 +88,7 @@ namespace DOL.GS.Trainer
 					// promote player to other class
 					if (CanPromotePlayer(player)) {
 						PromotePlayer(player, (int)eCharacterClass.Ranger, "Good then. Your path as a Ranger is before you. Walk it with care, friend. Take these, " + source.GetName(0, false) + ", to help make walking the path a bit easier.", null);
-						player.ReceiveItem(this,WEAPON_ID1);
+						player.ReceiveItem(this, WEAPON_ID1, eInventoryActionType.Other);
 					}
 					break;
 			}

@@ -1,4 +1,4 @@
-using DOL.Database;
+﻿using DOL.Database;
 using DOL.Events;
 using DOL.GS.PacketHandler;
 using log4net;
@@ -108,6 +108,7 @@ namespace DOL.GS.Quests
 			player.Out.SendSoundEffect(11, 0, 0, 0, 0, 0);
 			player.GainExperience(GameLiving.eXPSource.Quest, RewardXP);
 			player.AddMoney(RewardMoney);
+			InventoryLogging.LogInventoryAction(_db.ObjectId, "(QUEST;" + Name + ")", player, eInventoryActionType.Quest, RewardMoney);
 			if (RewardRP > 0)
 				player.GainRealmPoints(RewardRP);
 			if (RewardBP > 0)
@@ -116,22 +117,25 @@ namespace DOL.GS.Quests
 				BreamorFactionMgr.Gain(player, RewardBreamorFaction);
 
 			foreach (var item in FinalRewardItemTemplates)
-				GiveItem(player, item);
+				GiveItem(this, player, item);
 			foreach (var item in chosenItems)
-				GiveItem(player, item);
+				GiveItem(this, player, item);
 
 			data.FinishQuest();
 			player.Out.SendNPCsQuestEffect(Npc, Npc.GetQuestIndicator(player));
 		}
 
-		private static void GiveItem(GamePlayer player, ItemTemplate itemTemplate)
+		private static void GiveItem(DataQuestJson quest, GamePlayer player, ItemTemplate itemTemplate)
 		{
 			var item = GameInventoryItem.Create(itemTemplate);
 			if (!player.ReceiveItem(null, item))
 			{
+				InventoryLogging.LogInventoryAction(quest._db.ObjectId, $"(QUEST;{quest.Name})", "", $"(ground;{player.InternalID};{player.Name})", eInventoryActionType.Quest, item, item.Count);
 				player.CreateItemOnTheGround(item);
 				player.Out.SendMessage(string.Format("Your backpack is full, {0} is dropped on the ground.", itemTemplate.Name), eChatType.CT_Important, eChatLoc.CL_PopupWindow);
 			}
+			else
+				InventoryLogging.LogInventoryAction(quest._db.ObjectId, $"(QUEST;{quest.Name})", player, eInventoryActionType.Quest, item, item.Count);
 		}
 
 		public void OnQuestAssigned(GamePlayer player)

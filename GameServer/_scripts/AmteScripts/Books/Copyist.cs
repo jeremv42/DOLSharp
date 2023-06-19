@@ -41,7 +41,9 @@ namespace DOL.GS.Scripts
 					//p.Inventory.AddItem(eInventorySlot.FirstEmptyBackpack, GameInventoryItem.Create(item.Template));
 					var iu = new ItemUnique(item.ITWrapper) {Id_nb = "scroll" + Guid.NewGuid()};
 					GameServer.Database.AddObject(iu);
-					p.Inventory.AddItem(eInventorySlot.FirstEmptyBackpack, GameInventoryItem.Create(iu));
+					var invItem = GameInventoryItem.Create(iu);
+					p.Inventory.AddItem(eInventorySlot.FirstEmptyBackpack, invItem);
+					InventoryLogging.LogInventoryAction(this, p, eInventoryActionType.Merchant, invItem, invItem.Count);
 					p.Out.SendMessage("\"Voilà la copie de votre livre sir " + p.Name + ".\"", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 				}
 				else

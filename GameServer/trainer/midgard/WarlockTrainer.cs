@@ -86,7 +86,7 @@ namespace DOL.GS.Trainer
 					if (CanPromotePlayer(player))
 					{
 						PromotePlayer(player, (int)eCharacterClass.Warlock, "Welcome young Warlock! May your time in Midgard army be rewarding!", null);
-						player.ReceiveItem(this, WEAPON_ID);
+						player.ReceiveItem(this, WEAPON_ID, eInventoryActionType.Other);
 					}
 					break;
 			}

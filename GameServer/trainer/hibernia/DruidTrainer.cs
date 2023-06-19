@@ -88,7 +88,7 @@ namespace DOL.GS.Trainer
 					// promote player to other class
 					if (CanPromotePlayer(player)) {
 						PromotePlayer(player, (int)eCharacterClass.Druid, "The path of the Druid suits you, " + source.GetName(0, false) + ". Welcome. Take this, " + source.GetName(0, false) + ". You are a Druid now. Stick to our ways, and you shall go far.", null);
-						player.ReceiveItem(this,ARMOR_ID1);
+						player.ReceiveItem(this, ARMOR_ID1, eInventoryActionType.Other);
 					}
 					break;
 			}

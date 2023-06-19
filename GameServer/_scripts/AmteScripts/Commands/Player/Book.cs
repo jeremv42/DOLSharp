@@ -120,7 +120,7 @@ namespace DOL.GS.Scripts
 							if (itm != null && itm.Name == theScroll.Name)
 							{
 								player.Inventory.RemoveCountFromStack(itm, itm.Count);
-								InventoryLogging.LogInventoryAction(player, "(null)", eInventoryActionType.Other, itm.Template, itm.Count);
+								InventoryLogging.LogInventoryAction(player, "", "(destroy)", eInventoryActionType.Other, itm, itm.Count);
 							}
 						}
 						GameServer.Database.DeleteObject(theScroll);
@@ -207,7 +207,7 @@ namespace DOL.GS.Scripts
 					if (item.Condition <= 0)
 					{
 						player.Inventory.RemoveCountFromStack(item, item.Count);
-						InventoryLogging.LogInventoryAction(player, "(null)", eInventoryActionType.Other, item.Template, item.Count);
+						InventoryLogging.LogInventoryAction(player, "", "(amte;writing)", eInventoryActionType.Other, item, item.Count);
 					}
 					else
 						player.Client.Out.SendInventoryItemsUpdate(new[] { item });

@@ -467,11 +467,6 @@ namespace DOL.GS
 		}
 		#endregion
 		#region override function
-		public override bool ReceiveItem(GameLiving source, DOL.Database.InventoryItem item)
-		{
-			//todo check if bullet
-			return base.ReceiveItem(source, item);
-		}
 		public override void TakeDamage(GameObject source, eDamageType damageType, int damageAmount, int criticalAmount)
 		{
 			if (source is GamePlayer)

@@ -90,7 +90,7 @@ namespace DOL.GS.Trainer
 				if (CanPromotePlayer(player))
 				{
 					PromotePlayer(player, (int)eCharacterClass.Hero, LanguageMgr.GetTranslation(player.Client.Account.Language, "HeroTrainer.WhisperReceive.Text1", player.GetName(0, false)), null);
-					player.ReceiveItem(this, ARMOR_ID1);
+					player.ReceiveItem(this, ARMOR_ID1, eInventoryActionType.Other);
 				}
 			}
 			return true;

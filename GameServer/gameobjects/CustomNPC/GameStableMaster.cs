@@ -129,7 +129,7 @@ namespace DOL.GS
 					if ((path != null) && IsWithinRadius2D(path.Position, 500))
 					{
 						player.Inventory.RemoveCountFromStack(item, 1);
-                        InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Merchant, item.Template);
+                        InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Merchant, item, 1);
 
 						GameTaxi mount;
 						

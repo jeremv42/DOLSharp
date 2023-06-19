@@ -88,7 +88,7 @@ namespace DOL.GS.Trainer
 					// promote player to other class
 					if (CanPromotePlayer(player)) {
 						PromotePlayer(player, (int)eCharacterClass.Blademaster, "Very well, " + source.GetName(0, false) + ". I gladly take your training into my hands. Congratulations, from this day forth, you are a Blademaster. Here, take this gift to aid you.", null);
-						player.ReceiveItem(this,ARMOR_ID1);
+						player.ReceiveItem(this, ARMOR_ID1, eInventoryActionType.Other);
 					}
 					break;
 			}

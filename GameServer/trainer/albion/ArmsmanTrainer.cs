@@ -105,25 +105,25 @@ namespace DOL.GS.Trainer
 					case "slashing":
 						
 						PromotePlayer(player, (int)eCharacterClass.Armsman, "Here is your Sword of the Initiate. Welcome to the Defenders of Albion.", null);
-						player.ReceiveItem(this,WEAPON_ID1);
+						player.ReceiveItem(this, WEAPON_ID1, eInventoryActionType.Other);
 						
 						break;
 					case "crushing":
 						
 						PromotePlayer(player, (int)eCharacterClass.Armsman, "Here is your Mace of the Initiate. Welcome to the Defenders of Albion.", null);
-						player.ReceiveItem(this,WEAPON_ID2);
+						player.ReceiveItem(this, WEAPON_ID2, eInventoryActionType.Other);
 						
 						break;
 					case "thrusting":
 						
 						PromotePlayer(player, (int)eCharacterClass.Armsman, "Here is your Rapier of the Initiate. Welcome to the Defenders of Albion.", null);
-						player.ReceiveItem(this,WEAPON_ID3);
+						player.ReceiveItem(this, WEAPON_ID3, eInventoryActionType.Other);
 						
 						break;
 					case "polearms":
 						
 						PromotePlayer(player, (int)eCharacterClass.Armsman, "Here is your Pike of the Initiate. Welcome to the Defenders of Albion.", null);
-						player.ReceiveItem(this,WEAPON_ID4);
+						player.ReceiveItem(this, WEAPON_ID4, eInventoryActionType.Other);
 						
 						break;
 				}

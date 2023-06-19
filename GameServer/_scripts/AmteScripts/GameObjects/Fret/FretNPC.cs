@@ -265,7 +265,7 @@ namespace DOL.GS.Scripts
 										  + ")");
 						//string objectid = (item.Id_nb == "BANQUE_CHEQUE" ? Money.GetMoney(0, item.MaxDurability, item.MaxCondition, 0, item.Condition).ToString() : item.ObjectId);
 						//GameServer.Instance.LogTradeAction("[FRET] " + IP.Player.Name + " (" + IP.Player.Client.Account.Name + ") -> " + IP.ToPlayerName + " (" + IP.ToPlayerAccountName + "): [ITEM] " + item.Count + " '" + item.Id_nb + "' (" + objectid + ")", 1);
-						InventoryLogging.LogInventoryAction(player, "(FRET;" + IP.ToPlayerName + ")", eInventoryActionType.Trade, item.Template, item.Count);
+						InventoryLogging.LogInventoryAction(player, IP.ToPlayerID, "(FRET;" + IP.ToPlayerName + ")", eInventoryActionType.Trade, item, item.Count);
 					}
 					catch (Exception e)
 					{

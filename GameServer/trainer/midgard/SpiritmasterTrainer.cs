@@ -87,7 +87,7 @@ namespace DOL.GS.Trainer
 				if (CanPromotePlayer(player))
 				{
 					PromotePlayer(player, (int)eCharacterClass.Spiritmaster, LanguageMgr.GetTranslation(player.Client.Account.Language, "SpiritmasterTrainer.WhisperReceive.Text1"), null);
-					player.ReceiveItem(this, WEAPON_ID);
+					player.ReceiveItem(this, WEAPON_ID, eInventoryActionType.Other);
 				}
 			}
 

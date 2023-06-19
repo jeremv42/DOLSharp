@@ -88,7 +88,7 @@ namespace DOL.GS.Trainer
 					// promote player to other class
 					if (CanPromotePlayer(player)) {
 						PromotePlayer(player, (int)eCharacterClass.Sorcerer, "You are now part of our shadow! You shall forever have a place among us! Here too is your guild weapon, a Staff of Focus!", null);
-						player.ReceiveItem(this,WEAPON_ID);
+						player.ReceiveItem(this, WEAPON_ID, eInventoryActionType.Other);
 					}
 					break;
 			}

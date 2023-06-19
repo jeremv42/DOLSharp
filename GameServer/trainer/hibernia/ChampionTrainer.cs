@@ -88,7 +88,7 @@ namespace DOL.GS.Trainer
 					// promote player to other class
 					if (CanPromotePlayer(player)) {
 						PromotePlayer(player, (int)eCharacterClass.Champion, "Welcome " + source.GetName(0, false) + ". Let us see if you will become a worthy Champion. Take this gift, " + source.GetName(0, false) + ". It is to aid you while you grow into a true Champion.", null);
-						player.ReceiveItem(this,ARMOR_ID1);
+						player.ReceiveItem(this, ARMOR_ID1, eInventoryActionType.Other);
 					}
 					break;
 			}

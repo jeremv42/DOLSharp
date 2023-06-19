@@ -178,7 +178,7 @@ namespace DOL.GS.Scripts
             if (item.Charges <= 0)
             {
                 ((GamePlayerInventory)player.Inventory).RemoveCountFromStack(item, 1);
-                InventoryLogging.LogInventoryAction(player, "(drink)", eInventoryActionType.Other, item.Template);
+                InventoryLogging.LogInventoryAction(player, "", "(drink)", eInventoryActionType.Other, item, 1);
             }
             else
             {

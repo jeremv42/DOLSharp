@@ -141,7 +141,7 @@ namespace DOL.GS.Scripts
 			    player.Out.SendMessage("Un problème est survenue.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 				return;
 			}
-		    InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Other, it.Template);
+		    InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Loot, it, 1);
 			InteractEnd(player);
 		}
 
@@ -164,7 +164,7 @@ namespace DOL.GS.Scripts
                     {
                         player.Out.SendMessage("Vous récupérez un objet!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
                         //GameServer.Instance.LogTradeAction("[COFFRE] "+Name+" ("+ToString()+") -> " + player.Name + " (" + player.Client.Account.Name + "): [ITEM] 1 '" + item.Id_nb + "' (" + item.ObjectId + ")", 2);
-                        InventoryLogging.LogInventoryAction(this, player, eInventoryActionType.Loot, item);
+                        InventoryLogging.LogInventoryAction(this, player, eInventoryActionType.Loot, item, 1);
                     }
 					else
 						player.Out.SendMessage("Vous récupérez un objet mais votre sac-à-dos est plein.", eChatType.CT_Important, eChatLoc.CL_SystemWindow);

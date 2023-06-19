@@ -53,10 +53,12 @@ namespace DOL.GS
                 };
 
 		public static Func<GameObject, string> GetGameObjectString = obj =>
-			obj == null ? "(null)" : ($"({obj.Name};{obj.GetType()};{obj.Position.X:F0};{obj.Position.Y:F0};{obj.Position.Z:F0};{obj.CurrentRegionID})");
+			obj == null ? null : ($"({obj.Name};{obj.GetType()};{obj.Position.X:F0};{obj.Position.Y:F0};{obj.Position.Z:F0};{obj.CurrentRegionID})");
 
-		public static Func<ItemTemplate, int, string> GetItemString = (item, count) =>
-			item == null ? "(null)" : ("(" + count + ";" + item.Name + ";" + item.Id_nb + ")");
+		public static Func<ItemTemplate, int, string> GetItemTemplateString = (item, count) =>
+			item == null ? null : ("(" + count + ";" + item.Name + ";" + item.Id_nb + ")");
+		public static Func<InventoryItem, int, string> GetInventoryItemString = (item, count) =>
+			item == null ? null : ("(" + count + ";" + item.Name + ";" + item.ITemplate_Id + ";" + item.UTemplate_Id + ")");
 
 		public static Func<long, string> GetMoneyString = amount =>
 			"(MONEY;" + amount + ")";
@@ -70,19 +72,11 @@ namespace DOL.GS
 		/// <param name="item">The item or money account traded</param>
 		public static void LogInventoryAction(GameObject source, GameObject destination, eInventoryActionType type, ItemTemplate item, int count = 1)
 		{
-			LogInventoryAction(GetGameObjectString(source), GetGameObjectString(destination), type, item, count);
+			LogInventoryAction(source?.InternalID, GetGameObjectString(source), destination?.InternalID, GetGameObjectString(destination), type, item, count);
 		}
-
-		/// <summary>
-		/// Log an action of player's inventory (loot, buy, trade, etc...)
-		/// </summary>
-		/// <param name="source">Source of the item</param>
-		/// <param name="destination">Destination of the item</param>
-		/// <param name="type">Type of action (trade, loot, quest, ...)</param>
-		/// <param name="item">The item or money account traded</param>
-		public static void LogInventoryAction(string source, GameObject destination, eInventoryActionType type, ItemTemplate item, int count = 1)
+		public static void LogInventoryAction(GameObject source, GameObject destination, eInventoryActionType type, InventoryItem item, int count = 1)
 		{
-			LogInventoryAction(source, GetGameObjectString(destination), type, item, count);
+			LogInventoryAction(source?.InternalID, GetGameObjectString(source), destination?.InternalID, GetGameObjectString(destination), type, item, count);
 		}
 
 		/// <summary>
@@ -92,9 +86,13 @@ namespace DOL.GS
 		/// <param name="destination">Destination of the item</param>
 		/// <param name="type">Type of action (trade, loot, quest, ...)</param>
 		/// <param name="item">The item or money account traded</param>
-		public static void LogInventoryAction(GameObject source, string destination, eInventoryActionType type, ItemTemplate item, int count = 1)
+		public static void LogInventoryAction(string sourceId, string source, GameObject destination, eInventoryActionType type, ItemTemplate item, int count = 1)
 		{
-			LogInventoryAction(GetGameObjectString(source), destination, type, item, count);
+			LogInventoryAction(sourceId, source, destination?.InternalID, GetGameObjectString(destination), type, item, count);
+		}
+		public static void LogInventoryAction(string sourceId, string source, GameObject destination, eInventoryActionType type, InventoryItem item, int count = 1)
+		{
+			LogInventoryAction(sourceId, source, destination?.InternalID, GetGameObjectString(destination), type, item, count);
 		}
 
 		/// <summary>
@@ -104,7 +102,23 @@ namespace DOL.GS
 		/// <param name="destination">Destination of the item</param>
 		/// <param name="type">Type of action (trade, loot, quest, ...)</param>
 		/// <param name="item">The item or money account traded</param>
-		public static void LogInventoryAction(string source, string destination, eInventoryActionType type, ItemTemplate item, int count = 1)
+		public static void LogInventoryAction(GameObject source, string destinationId, string destination, eInventoryActionType type, ItemTemplate item, int count = 1)
+		{
+			LogInventoryAction(source?.InternalID, GetGameObjectString(source), destinationId, destination, type, item, count);
+		}
+		public static void LogInventoryAction(GameObject source, string destinationId, string destination, eInventoryActionType type, InventoryItem item, int count = 1)
+		{
+			LogInventoryAction(source?.InternalID, GetGameObjectString(source), destinationId, destination, type, item, count);
+		}
+
+		/// <summary>
+		/// Log an action of player's inventory (loot, buy, trade, etc...)
+		/// </summary>
+		/// <param name="source">Source of the item</param>
+		/// <param name="destination">Destination of the item</param>
+		/// <param name="type">Type of action (trade, loot, quest, ...)</param>
+		/// <param name="item">The item or money account traded</param>
+		public static void LogInventoryAction(string sourceId, string source, string destinationId, string destination, eInventoryActionType type, ItemTemplate item, int count = 1)
 		{
 			// Check if you can log this action
 			if (!_IsLoggingEnabled(type))
@@ -116,7 +130,49 @@ namespace DOL.GS
 
 			try
 			{
-				GameServer.Instance.LogInventoryAction(string.Format(format, source ?? "(null)", destination ?? "(null)", GetItemString(item, count)));
+				GameServer.Instance.LogInventoryAction(string.Format(format, source ?? "(null)", destination ?? "(null)", GetItemTemplateString(item, count)));
+				GameServer.Database.AddObject(new InventoryLog
+				{
+					Source = source,
+					SourceId = sourceId,
+					Destination = destination,
+					DestinationId = destinationId,
+					ItemTemplate = item.Id_nb,
+					ItemUnique = null,
+					Money = 0,
+					ItemCount = count,
+				});
+			}
+			catch (Exception e)
+			{
+				if (log.IsErrorEnabled)
+					log.Error("Log inventory error", e);
+			}
+		}
+		public static void LogInventoryAction(string sourceId, string source, string destinationId, string destination, eInventoryActionType type, InventoryItem item, int count = 1)
+		{
+			// Check if you can log this action
+			if (!_IsLoggingEnabled(type))
+				return;
+
+			string format;
+			if (!ActionXformat.TryGetValue(type, out format))
+				return; // Error, this format does not exists ?!
+
+			try
+			{
+				GameServer.Instance.LogInventoryAction(string.Format(format, source ?? "(null)", destination ?? "(null)", GetInventoryItemString(item, count)));
+				GameServer.Database.AddObject(new InventoryLog
+				{
+					Source = source,
+					SourceId = sourceId,
+					Destination = destination,
+					DestinationId = destinationId,
+					ItemTemplate = item.ITemplate_Id,
+					ItemUnique = item.UTemplate_Id,
+					Money = 0,
+					ItemCount = count,
+				});
 			}
 			catch (Exception e)
 			{
@@ -134,7 +190,7 @@ namespace DOL.GS
 		/// <param name="item">The item or money account traded</param>
 		public static void LogInventoryAction(GameObject source, GameObject destination, eInventoryActionType type, long money)
 		{
-			LogInventoryAction(GetGameObjectString(source), GetGameObjectString(destination), type, money);
+			LogInventoryAction(source?.InternalID, GetGameObjectString(source), destination?.InternalID, GetGameObjectString(destination), type, money);
 		}
 
 		/// <summary>
@@ -144,9 +200,9 @@ namespace DOL.GS
 		/// <param name="destination">Destination of the item</param>
 		/// <param name="type">Type of action (trade, loot, quest, ...)</param>
 		/// <param name="item">The item or money account traded</param>
-		public static void LogInventoryAction(string source, GameObject destination, eInventoryActionType type, long money)
+		public static void LogInventoryAction(string sourceId, string source, GameObject destination, eInventoryActionType type, long money)
 		{
-			LogInventoryAction(source, GetGameObjectString(destination), type, money);
+			LogInventoryAction(sourceId, source, destination?.InternalID, GetGameObjectString(destination), type, money);
 		}
 
 		/// <summary>
@@ -156,9 +212,9 @@ namespace DOL.GS
 		/// <param name="destination">Destination of the item</param>
 		/// <param name="type">Type of action (trade, loot, quest, ...)</param>
 		/// <param name="item">The item or money account traded</param>
-		public static void LogInventoryAction(GameObject source, string destination, eInventoryActionType type, long money)
+		public static void LogInventoryAction(GameObject source, string destinationId, string destination, eInventoryActionType type, long money)
 		{
-			LogInventoryAction(GetGameObjectString(source), destination, type, money);
+			LogInventoryAction(source?.InternalID, GetGameObjectString(source), destinationId, destination, type, money);
 		}
 
 		/// <summary>
@@ -168,7 +224,7 @@ namespace DOL.GS
 		/// <param name="destination">Destination of the item</param>
 		/// <param name="type">Type of action (trade, loot, quest, ...)</param>
 		/// <param name="item">The item or money account traded</param>
-		public static void LogInventoryAction(string source, string destination, eInventoryActionType type, long money)
+		public static void LogInventoryAction(string sourceId, string source, string destinationId, string destination, eInventoryActionType type, long money)
 		{
 			// Check if you can log this action
 			if (!_IsLoggingEnabled(type))
@@ -181,6 +237,17 @@ namespace DOL.GS
 			try
 			{
 				GameServer.Instance.LogInventoryAction(string.Format(format, source ?? "(null)", destination ?? "(null)", GetMoneyString(money)));
+				GameServer.Database.AddObject(new InventoryLog
+				{
+					Source = source,
+					SourceId = sourceId,
+					Destination = destination,
+					DestinationId = destinationId,
+					ItemTemplate = null,
+					ItemUnique = null,
+					Money = money,
+					ItemCount = 0,
+				});
 			}
 			catch (Exception e)
 			{

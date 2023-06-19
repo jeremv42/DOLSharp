@@ -58,7 +58,7 @@ namespace DOL.GS.Behaviour.Actions
                 else
                 {
                     player.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language, "Behaviour.GiveItemAction.YouReceiveItem", inventoryItem.GetName(0, false)), eChatType.CT_Loot, eChatLoc.CL_SystemWindow);
-                    InventoryLogging.LogInventoryAction(Q, player, eInventoryActionType.Quest, inventoryItem.Template, inventoryItem.Count);
+                    InventoryLogging.LogInventoryAction(Q, player, eInventoryActionType.Quest, inventoryItem, inventoryItem.Count);
                 }
             }
             else

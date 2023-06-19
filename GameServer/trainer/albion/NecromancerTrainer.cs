@@ -104,7 +104,7 @@ namespace DOL.GS.Trainer
 					{
 						PromotePlayer(player, (int)eCharacterClass.Necromancer,
 						              "Lord Arawn has accepted you into his Temple. Here is his gift to you. Use it well, Disciple.", null);
-						player.ReceiveItem(this, WEAPON_ID);
+						player.ReceiveItem(this, WEAPON_ID, eInventoryActionType.Other);
 					}
 					break;
 			}

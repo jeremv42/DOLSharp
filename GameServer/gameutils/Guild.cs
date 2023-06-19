@@ -265,7 +265,7 @@ namespace DOL.GS
 			donating.Guild.UpdateGuildWindow();
 			m_DBguild.Bank += amount;
 
-            InventoryLogging.LogInventoryAction(donating, "(GUILD;" + Name + ")", eInventoryActionType.Other, long.Parse(amount.ToString()));
+            InventoryLogging.LogInventoryAction(donating, "", "(GUILD;" + Name + ")", eInventoryActionType.Other, (long)amount);
             donating.Out.SendUpdatePlayer();
 			return;
 		}
@@ -288,7 +288,7 @@ namespace DOL.GS
 
 		    var amt = long.Parse(amount.ToString());
             withdraw.AddMoney(amt);
-            InventoryLogging.LogInventoryAction("(GUILD;" + Name + ")", withdraw, eInventoryActionType.Other, amt);
+            InventoryLogging.LogInventoryAction("", "(GUILD;" + Name + ")", withdraw, eInventoryActionType.Other, amt);
             withdraw.Out.SendUpdatePlayer();
             withdraw.SaveIntoDatabase();
             withdraw.Guild.SaveIntoDatabase();

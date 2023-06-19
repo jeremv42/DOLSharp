@@ -631,7 +631,7 @@ namespace DOL.GS
 						}
 						else
 						{
-                            InventoryLogging.LogInventoryAction(m_owner, partner, eInventoryActionType.Trade, item.Template, item.Count);
+                            InventoryLogging.LogInventoryAction(m_owner, partner, eInventoryActionType.Trade, item, item.Count);
 						    if (logTrade)
 						    {
 						        GameServer.Instance.LogGMAction("   Item: " + m_owner.Name + "(" + m_owner.Client.Account.Name + ") -> " + partner.Name + "(" + partner.Client.Account.Name + ") : " + item.Name + "(" + item.Id_nb + ")");
@@ -663,7 +663,7 @@ namespace DOL.GS
 						}
 						else
 						{
-                            InventoryLogging.LogInventoryAction(partner, m_owner, eInventoryActionType.Trade, item.Template, item.Count);
+                            InventoryLogging.LogInventoryAction(partner, m_owner, eInventoryActionType.Trade, item, item.Count);
 						    if (logTrade)
 						    {
 						        GameServer.Instance.LogGMAction("   Item: " + partner.Name + "(" + partner.Client.Account.Name + ") -> " + m_owner.Name + "(" + m_owner.Client.Account.Name + ") : " + item.Name + "(" + item.Id_nb + ")");

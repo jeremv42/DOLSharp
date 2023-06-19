@@ -215,7 +215,7 @@ namespace DOL.GS
 					error = true;
 					break;
 				}
-				InventoryLogging.LogInventoryAction("(salvage)", player, eInventoryActionType.Craft, item.Template, item.Count);
+				InventoryLogging.LogInventoryAction("", "(salvage)", player, eInventoryActionType.Craft, item, item.Count);
 			}
 
 			if (error)
@@ -266,7 +266,7 @@ namespace DOL.GS
 				return 0;
 			}
 
-			InventoryLogging.LogInventoryAction(player, "(salvage)", eInventoryActionType.Craft, itemToSalvage.Template, itemToSalvage.Count);
+			InventoryLogging.LogInventoryAction(player, "", "(salvage)", eInventoryActionType.Craft, itemToSalvage, itemToSalvage.Count);
 
 			Dictionary<int, int> changedSlots = new Dictionary<int, int>(5); // value: < 0 = new item count; > 0 = add to old
 			lock(player.Inventory)
@@ -312,14 +312,14 @@ namespace DOL.GS
 				{
 					newItem = player.Inventory.GetItem((eInventorySlot)de.Key);
 					player.Inventory.AddCountToStack(newItem, countToAdd);
-					InventoryLogging.LogInventoryAction("(salvage)", player, eInventoryActionType.Craft, newItem.Template, countToAdd);
+					InventoryLogging.LogInventoryAction("", "(salvage)", player, eInventoryActionType.Craft, newItem, countToAdd);
 				}
 				else
 				{
 					newItem = GameInventoryItem.Create(rawMaterial);
 					newItem.Count = -countToAdd;
 					player.Inventory.AddItem((eInventorySlot)de.Key, newItem);
-					InventoryLogging.LogInventoryAction("(salvage)", player, eInventoryActionType.Craft, newItem.Template, newItem.Count);
+					InventoryLogging.LogInventoryAction("", "(salvage)", player, eInventoryActionType.Craft, newItem, newItem.Count);
 				}
 			}
 

@@ -1232,7 +1232,7 @@ namespace DOL.GS
 		/// <param name="source">Source from where to get the item</param>
 		/// <param name="templateID">templateID for item to add</param>
 		/// <returns>true if the item was successfully received</returns>
-		public virtual bool ReceiveItem(GameLiving source, string templateID)
+		public virtual bool ReceiveItem(GameLiving source, string templateID, eInventoryActionType type)
 		{
 			ItemTemplate template = GameServer.Database.FindObjectByKey<ItemTemplate>(templateID);
 			if (template == null)

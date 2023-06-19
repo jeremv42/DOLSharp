@@ -54,7 +54,7 @@ namespace DOL.GS.Behaviour.Actions
                 InventoryLogging.LogInventoryAction(player, NPC, eInventoryActionType.Quest, oldItem, 1);
 				InventoryItem inventoryItem = GameInventoryItem.Create(newItem);
                 if (player.Inventory.AddItem(eInventorySlot.FirstEmptyBackpack, inventoryItem))
-                    InventoryLogging.LogInventoryAction(NPC, player, eInventoryActionType.Quest, newItem, 1);
+                    InventoryLogging.LogInventoryAction(NPC, player, eInventoryActionType.Quest, inventoryItem, inventoryItem.Count);
             }
         }
     }

@@ -204,7 +204,7 @@ namespace DOL.GS
 					player.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language, "GameMerchant.OnPlayerBuy.NotInventorySpace"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 					return;
 				}
-				InventoryLogging.LogInventoryAction("(TRADEITEMS;" + TradeItems.ItemsListID + ")", player, eInventoryActionType.Merchant, template, amountToBuy);
+				InventoryLogging.LogInventoryAction(TradeItems.ItemsListID, $"(TRADEITEMS;{TradeItems.ItemsListID})", player, eInventoryActionType.Merchant, template, amountToBuy);
 				//Generate the buy message
 				string message;
 				if (amountToBuy > 1)
@@ -217,7 +217,7 @@ namespace DOL.GS
 				{
 					throw new Exception("Money amount changed while adding items.");
 				}
-				InventoryLogging.LogInventoryAction(player, "(TRADEITEMS;" + TradeItems.ItemsListID + ")", eInventoryActionType.Merchant, totalValue);
+				InventoryLogging.LogInventoryAction(player, TradeItems.ItemsListID, $"(TRADEITEMS;{TradeItems.ItemsListID})", eInventoryActionType.Merchant, totalValue);
 			}
 		}
 		
@@ -254,7 +254,7 @@ namespace DOL.GS
 			{
 				string message = LanguageMgr.GetTranslation(player.Client.Account.Language, "GameMerchant.OnPlayerSell.GivesYou", GetName(0, true), Money.GetString(itemValue), item.GetName(0, false));
 				player.AddMoney(itemValue, message, eChatType.CT_Merchant, eChatLoc.CL_SystemWindow);
-				InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Merchant, item.Template, item.Count);
+				InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Merchant, item, item.Count);
 				InventoryLogging.LogInventoryAction(this, player, eInventoryActionType.Merchant, itemValue);
 				return;
 			}
@@ -448,6 +448,7 @@ namespace DOL.GS
 			{
 				player.GainBountyPoints(item.Count * value);
 				player.Inventory.RemoveItem(item);
+				InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Merchant, item, item.Count);
 				return true;
 			}
 
@@ -676,7 +677,7 @@ namespace DOL.GS
 						continue;
 					int remFromStack = Math.Min(item.Count, (int)(totalValue - removed));
 					player.Inventory.RemoveCountFromStack(item, remFromStack);
-					InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Merchant, item.Template, remFromStack);
+					InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Merchant, item, remFromStack);
 					removed += remFromStack;
 					if (removed == totalValue)
 						break;
@@ -703,6 +704,14 @@ namespace DOL.GS
 
 				if (giveCount > 0)
 				{
+					// Remove received items
+					InventoryItem playerItem = player.Inventory.GetItem((eInventorySlot)item.SlotPosition);
+					var count = giveCount * giveCost;
+
+					if (!player.Inventory.RemoveCountFromStack(item, count))
+						return false;
+					InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Merchant, item, count);
+
 					// Create and give new item to player
 					InventoryItem newItem = GameInventoryItem.Create(m_itemTemplate);
 					newItem.OwnerID = player.InternalID;
@@ -710,13 +719,8 @@ namespace DOL.GS
 
 					if (!player.Inventory.AddTemplate(newItem, newItem.Count, eInventorySlot.FirstBackpack, eInventorySlot.LastBackpack))
 						player.CreateItemOnTheGround(newItem);
-
-					// Remove received items
-					InventoryItem playerItem = player.Inventory.GetItem((eInventorySlot)item.SlotPosition);
-					playerItem.Count -= giveCount * giveCost;
-
-					if (playerItem.Count < 1)
-						player.Inventory.RemoveItem(item);
+					else
+						InventoryLogging.LogInventoryAction(this, player, eInventoryActionType.Merchant, newItem, giveCount);
 
 					return true;
 				}

@@ -84,7 +84,7 @@ namespace DOL.GS.Trainer
 					// promote player to other class
 					if (CanPromotePlayer(player)) {
 						PromotePlayer(player, (int)eCharacterClass.Hunter, "Welcome young Hunter! May your time in Midgard army be rewarding!", null);
-						player.ReceiveItem(this, WEAPON_ID);
+						player.ReceiveItem(this, WEAPON_ID, eInventoryActionType.Other);
 					}
 					break;
 			}

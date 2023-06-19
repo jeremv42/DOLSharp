@@ -76,8 +76,9 @@ namespace DOL.GS.Scripts
             if (player.Inventory.RemoveCountFromStack(item, item.Count))
             {
                 ReceiveMoney(player, item.Price, false);
-                InventoryLogging.LogInventoryAction(source, this, eInventoryActionType.Other, item.Template, item.Count);
-            }
+                InventoryLogging.LogInventoryAction(source, this, eInventoryActionType.Other, item, item.Count);
+				InventoryLogging.LogInventoryAction(this, source, eInventoryActionType.Other, item.Price);
+			}
 		    return true;
 		}
 

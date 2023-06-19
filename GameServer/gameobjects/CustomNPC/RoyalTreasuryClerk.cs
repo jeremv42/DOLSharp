@@ -73,7 +73,7 @@ namespace DOL.GS
 				if (player.Inventory.CountItemTemplate("Personal_Bind_Recall_Stone", eInventorySlot.Min_Inv, eInventorySlot.Max_Inv) == 0)
 				{
 					SayTo(player, "Very well then, here's your Personal Bind Recall Stone, may it serve you well.");
-					player.ReceiveItem(this, "Personal_Bind_Recall_Stone");
+					player.ReceiveItem(this, "Personal_Bind_Recall_Stone", eInventoryActionType.Other);
 				}
 				return true;
 			}

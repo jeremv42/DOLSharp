@@ -760,8 +760,9 @@ namespace DOL.GS.Housing
 				var template = GameServer.Database.FindObjectByKey<ItemTemplate>(obj.OwnerID);
 				if (template != null)
 				{
-                    if (player.Inventory.AddItem(eInventorySlot.FirstEmptyBackpack, GameInventoryItem.Create(template)))
-                        InventoryLogging.LogInventoryAction("(HOUSE;" + HouseNumber + ")", player, eInventoryActionType.Loot, template);
+					var item = GameInventoryItem.Create(template);
+					if (player.Inventory.AddItem(eInventorySlot.FirstEmptyBackpack, item))
+                        InventoryLogging.LogInventoryAction(player.CurrentHouse.DatabaseItem.ObjectId, "(HOUSE;" + HouseNumber + ")", player, eInventoryActionType.Loot, item, item.Count);
 				}
 			}
 		}
@@ -967,7 +968,7 @@ namespace DOL.GS.Housing
 			// make sure player has enough money to cover the changes
 			if (!player.RemoveMoney(price))
 			{
-                InventoryLogging.LogInventoryAction(player, "(HOUSE;" + HouseNumber + ")", eInventoryActionType.Merchant, price);
+                InventoryLogging.LogInventoryAction(player, player.CurrentHouse.DatabaseItem.ObjectId, $"(HOUSE;{HouseNumber})", eInventoryActionType.Merchant, price);
 				ChatUtil.SendMerchantMessage(player, "House.Edit.NotEnoughMoney", null);
 				return;
 			}

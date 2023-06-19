@@ -170,6 +170,7 @@ namespace DOL.GS
                     if (rpMultiplier > 0)
                         player.GainRealmPoints((int)(item.Count * levelMultiplier * rpMultiplier));
 
+                    InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Merchant, item, item.Count);
                     player.Inventory.RemoveItem(item);
                     player.Out.SendUpdatePoints();
 

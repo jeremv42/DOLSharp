@@ -239,7 +239,7 @@ namespace DOL.GS
 			{
 				if (m_item == null)
 					log.Warn("GameRelic: Could not retrive " + Name + " as InventoryItem on player " + player.Name);
-				InventoryLogging.LogInventoryAction(this, player, eInventoryActionType.Other, m_item.Template, m_item.Count);
+				InventoryLogging.LogInventoryAction(this, player, eInventoryActionType.Other, m_item, m_item.Count);
 
 
 				m_currentCarrier = player;
@@ -296,7 +296,7 @@ namespace DOL.GS
 				lock (player.Inventory)
 				{
 					bool success = player.Inventory.RemoveItem(m_item);
-					InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Other, m_item.Template, m_item.Count);
+					InventoryLogging.LogInventoryAction(player, this, eInventoryActionType.Other, m_item, m_item.Count);
 					log.Debug("Remove " + m_item.Name + " from " + player.Name + "'s Inventory " + ((success) ? "successfully." : "with errors."));
 				}
 

@@ -1032,6 +1032,7 @@ namespace DOL.GS
 					//BuffPlayer(t, MerchHealBuff, MerchSpecSpellLine);
 					#endregion Non-live (commented out)
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 				}
@@ -1052,6 +1053,7 @@ namespace DOL.GS
 						BuffPlayer(t, MerchAcuityBuff, MerchSpecSpellLine);
 					}
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 
@@ -1073,6 +1075,7 @@ namespace DOL.GS
 						BuffPlayer(t, MerchConBuff, MerchBaseSpellLine);
 					}
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 				}
@@ -1087,6 +1090,7 @@ namespace DOL.GS
 						BuffPlayer(t, MerchStrBuff, MerchBaseSpellLine);
 					}
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 				}
@@ -1101,6 +1105,7 @@ namespace DOL.GS
 						BuffPlayer(t, MerchConBuff, MerchBaseSpellLine);
 					}
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 				}
@@ -1115,6 +1120,7 @@ namespace DOL.GS
 						BuffPlayer(t, MerchDexBuff, MerchBaseSpellLine);
 					}
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 				}
@@ -1129,6 +1135,7 @@ namespace DOL.GS
 						BuffPlayer(t, MerchBaseAFBuff, MerchBaseSpellLine);
 					}
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 				}
@@ -1143,6 +1150,7 @@ namespace DOL.GS
 						BuffPlayer(t, MerchStrConBuff, MerchSpecSpellLine);
 					}
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 				}
@@ -1157,6 +1165,7 @@ namespace DOL.GS
 						BuffPlayer(t, MerchDexQuiBuff, MerchSpecSpellLine);
 					}
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 				}
@@ -1171,6 +1180,7 @@ namespace DOL.GS
 						BuffPlayer(t, MerchAcuityBuff, MerchSpecSpellLine);
 					}
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 				}
@@ -1185,6 +1195,7 @@ namespace DOL.GS
 						BuffPlayer(t, MerchSpecAFBuff, MerchSpecSpellLine);
 					}
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 				}
@@ -1192,6 +1203,7 @@ namespace DOL.GS
 				{
 					BuffPlayer(t, MerchHasteBuff, MerchSpecSpellLine);
 					t.Out.SendMessage("Fight well, " + t.RaceName + ".", eChatType.CT_Say, eChatLoc.CL_PopupWindow);
+					InventoryLogging.LogInventoryAction(t, this, eInventoryActionType.Merchant, item, item.Count);
 					t.Inventory.RemoveItem(item);
 					return true;
 				}

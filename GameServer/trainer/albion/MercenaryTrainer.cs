@@ -96,19 +96,19 @@ namespace DOL.GS.Trainer
 					case "slashing":
 					
 						PromotePlayer(player, (int)eCharacterClass.Mercenary, "Here is your Sword of the Initiate. Welcome to the Guild of Shadows.", null);
-						player.ReceiveItem(this,WEAPON_ID1);
+						player.ReceiveItem(this, WEAPON_ID1, eInventoryActionType.Other);
 					
 						break;
 					case "crushing":
 					
 						PromotePlayer(player, (int)eCharacterClass.Mercenary, "Here is your Mace of the Initiate. Welcome to the Guild of Shadows.", null);
-						player.ReceiveItem(this,WEAPON_ID2);
+						player.ReceiveItem(this, WEAPON_ID2, eInventoryActionType.Other);
 					
 						break;
 					case "thrusting":
 					
 						PromotePlayer(player, (int)eCharacterClass.Mercenary, "Here is your Rapier of the Initiate. Welcome to the Guild of Shadows.", null);
-						player.ReceiveItem(this,WEAPON_ID3);
+						player.ReceiveItem(this, WEAPON_ID3, eInventoryActionType.Other);
 					
 						break;
 				}

@@ -279,13 +279,13 @@ namespace DOL.GS.Commands
 								int removecount = Math.Min(1, removeamount / woodvalue);
 								removeamount -= removecount * woodvalue;
 								player.Inventory.RemoveCountFromStack(item, removecount);
-                                InventoryLogging.LogInventoryAction(player, "(craft)", eInventoryActionType.Craft, item.Template, removecount);
+                                InventoryLogging.LogInventoryAction(player, "", "(craft)", eInventoryActionType.Craft, item, removecount);
 							}
 							else
 							{
 								removeamount -= item.Count * woodvalue;
 								player.Inventory.RemoveItem(item);
-                                InventoryLogging.LogInventoryAction(player, "(craft)", eInventoryActionType.Craft, item.Template, item.Count);
+                                InventoryLogging.LogInventoryAction(player, "", "(craft)", eInventoryActionType.Craft, item, item.Count);
 							}
 						}
 						break;

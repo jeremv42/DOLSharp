@@ -70,7 +70,7 @@ namespace DOL.GS.Commands
 									playerBoat.OwnerID = client.Player.InternalID;
 									playerBoat.MaxSpeedBase = 500;
 									client.Player.Inventory.RemoveItem(item);
-									InventoryLogging.LogInventoryAction(client.Player, "(ground)", eInventoryActionType.Other, item.Template, item.Count);
+									InventoryLogging.LogInventoryAction(client.Player, "", "(ground)", eInventoryActionType.Other, item, item.Count);
 									playerBoat.Riders = new GamePlayer[8];
 									BlankBrain brain = new BlankBrain();
 									playerBoat.SetOwnBrain(brain);
@@ -100,7 +100,7 @@ namespace DOL.GS.Commands
 									playerBoat.OwnerID = client.Player.InternalID;
 									playerBoat.MaxSpeedBase = 400;
 									client.Player.Inventory.RemoveItem(item);
-									InventoryLogging.LogInventoryAction(client.Player, "(ground)", eInventoryActionType.Other, item.Template, item.Count);
+									InventoryLogging.LogInventoryAction(client.Player, "", "(ground)", eInventoryActionType.Other, item, item.Count);
 									playerBoat.Riders = new GamePlayer[32];
 									BlankBrain brain = new BlankBrain();
 									playerBoat.SetOwnBrain(brain);
@@ -130,7 +130,7 @@ namespace DOL.GS.Commands
 									playerBoat.OwnerID = client.Player.InternalID;
 									playerBoat.MaxSpeedBase = 300;
 									client.Player.Inventory.RemoveItem(item);
-									InventoryLogging.LogInventoryAction(client.Player, "(ground)", eInventoryActionType.Other, item.Template, item.Count);
+									InventoryLogging.LogInventoryAction(client.Player, "", "(ground)", eInventoryActionType.Other, item, item.Count);
 									playerBoat.Riders = new GamePlayer[16];
 									BlankBrain brain = new BlankBrain();
 									playerBoat.SetOwnBrain(brain);
@@ -160,7 +160,7 @@ namespace DOL.GS.Commands
 									playerBoat.OwnerID = client.Player.InternalID;
 									playerBoat.MaxSpeedBase = 250;
 									client.Player.Inventory.RemoveItem(item);
-									InventoryLogging.LogInventoryAction(client.Player, "(ground)", eInventoryActionType.Other, item.Template, item.Count);
+									InventoryLogging.LogInventoryAction(client.Player, "", "(ground)", eInventoryActionType.Other, item, item.Count);
 									playerBoat.Riders = new GamePlayer[8];
 									BlankBrain brain = new BlankBrain();
 									playerBoat.SetOwnBrain(brain);
@@ -190,7 +190,7 @@ namespace DOL.GS.Commands
 									playerBoat.OwnerID = client.Player.InternalID;
 									playerBoat.MaxSpeedBase = 500;
 									client.Player.Inventory.RemoveItem(item);
-									InventoryLogging.LogInventoryAction(client.Player, "(ground)", eInventoryActionType.Other, item.Template, item.Count);
+									InventoryLogging.LogInventoryAction(client.Player, "", "(ground)", eInventoryActionType.Other, item, item.Count);
 									playerBoat.Riders = new GamePlayer[32];
 									BlankBrain brain = new BlankBrain();
 									playerBoat.SetOwnBrain(brain);
@@ -220,7 +220,7 @@ namespace DOL.GS.Commands
 									playerBoat.OwnerID = client.Player.InternalID;
 									playerBoat.MaxSpeedBase = 600;
 									client.Player.Inventory.RemoveItem(item);
-									InventoryLogging.LogInventoryAction(client.Player, "(ground)", eInventoryActionType.Other, item.Template, item.Count);
+									InventoryLogging.LogInventoryAction(client.Player, "", "(ground)", eInventoryActionType.Other, item, item.Count);
 									playerBoat.Riders = new GamePlayer[31];
 									BlankBrain brain = new BlankBrain();
 									playerBoat.SetOwnBrain(brain);
@@ -250,7 +250,7 @@ namespace DOL.GS.Commands
 									playerBoat.OwnerID = client.Player.InternalID;
 									playerBoat.MaxSpeedBase = 500;
 									client.Player.Inventory.RemoveItem(item);
-									InventoryLogging.LogInventoryAction(client.Player, "(ground)", eInventoryActionType.Other, item.Template, item.Count);
+									InventoryLogging.LogInventoryAction(client.Player, "", "(ground)", eInventoryActionType.Other, item, item.Count);
 									playerBoat.Riders = new GamePlayer[24];
 									BlankBrain brain = new BlankBrain();
 									playerBoat.SetOwnBrain(brain);
@@ -280,7 +280,7 @@ namespace DOL.GS.Commands
 									playerBoat.OwnerID = client.Player.InternalID;
 									playerBoat.MaxSpeedBase = 800;
 									client.Player.Inventory.RemoveItem(item);
-									InventoryLogging.LogInventoryAction(client.Player, "(ground)", eInventoryActionType.Other, item.Template, item.Count);
+									InventoryLogging.LogInventoryAction(client.Player, "", "(ground)", eInventoryActionType.Other, item, item.Count);
 									playerBoat.Riders = new GamePlayer[64];
 									BlankBrain brain = new BlankBrain();
 									playerBoat.SetOwnBrain(brain);
@@ -310,7 +310,7 @@ namespace DOL.GS.Commands
 									playerBoat.OwnerID = client.Player.InternalID;
 									playerBoat.MaxSpeedBase = 700;
 									client.Player.Inventory.RemoveItem(item);
-									InventoryLogging.LogInventoryAction(client.Player, "(ground)", eInventoryActionType.Other, item.Template, item.Count);
+									InventoryLogging.LogInventoryAction(client.Player, "", "(ground)", eInventoryActionType.Other, item, item.Count);
 									playerBoat.Riders = new GamePlayer[33];
 									BlankBrain brain = new BlankBrain();
 									playerBoat.SetOwnBrain(brain);

@@ -184,7 +184,7 @@ namespace DOL.GS.Housing
 				player.Inventory.RemoveItem(item);
 
 				// Tolakram:  Is this always null when purchasing a house?
-				InventoryLogging.LogInventoryAction(player, "(HOUSE;" + (CurrentHouse == null ? DatabaseItem.HouseNumber : CurrentHouse.HouseNumber) + ")", eInventoryActionType.Other, item.Template, item.Count);
+				InventoryLogging.LogInventoryAction(player, CurrentHouse?.DatabaseItem?.ObjectId ?? DatabaseItem.ObjectId, "(HOUSE;" + (CurrentHouse == null ? DatabaseItem.HouseNumber : CurrentHouse.HouseNumber) + ")", eInventoryActionType.Other, item, item.Count);
 
 				return true;
 			}
