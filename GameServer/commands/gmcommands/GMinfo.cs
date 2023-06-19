@@ -104,6 +104,7 @@ namespace DOL.GS.Commands
 						info.Add(" + Guild: " + target.GuildName);
 					info.Add(" + Level: " + target.Level);
 					info.Add(" + Realm: " + GlobalConstants.RealmToName(target.Realm));
+					info.Add(" + Faction value: " + target.BreamorFaction);
 					info.Add(" + Model:  " + target.Model);
 					info.Add(" + Size " + target.Size);
 					info.Add(string.Format(" + Flags: {0} (0x{1})", ((GameNPC.eFlags)target.Flags).ToString("G"), target.Flags.ToString("X")));
@@ -318,6 +319,7 @@ namespace DOL.GS.Commands
 					info.Add("  - Name : " + target.Name);
 					info.Add("  - Lastname : " + target.LastName);
 					info.Add("  - Realm : " + GlobalConstants.RealmToName(target.Realm));
+					info.Add("  - Faction value: " + target.BreamorFaction);
 					info.Add("  - Level : " + target.Level);
 					info.Add("  - Class : " + target.CharacterClass.Name);
 					info.Add("  - Guild : " + target.GuildName);

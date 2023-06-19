@@ -1,4 +1,4 @@
-﻿using DOL.Database;
+using DOL.Database;
 using DOL.Events;
 using DOL.GS.PacketHandler;
 using log4net;
@@ -40,6 +40,7 @@ namespace DOL.GS.Quests
 		public int RewardCLXP;
 		public int RewardRP;
 		public int RewardBP;
+		public int RewardBreamorFaction;
 		public int NbChooseOptionalItems;
 		public List<ItemTemplate> OptionalRewardItemTemplates = new();
 		public List<ItemTemplate> FinalRewardItemTemplates = new();
@@ -107,11 +108,12 @@ namespace DOL.GS.Quests
 			player.Out.SendSoundEffect(11, 0, 0, 0, 0, 0);
 			player.GainExperience(GameLiving.eXPSource.Quest, RewardXP);
 			player.AddMoney(RewardMoney);
-			InventoryLogging.LogInventoryAction("(QUEST;" + Name + ")", player, eInventoryActionType.Quest, RewardMoney);
-			if (RewardBP > 0)
-				player.GainBountyPoints(RewardBP);
 			if (RewardRP > 0)
 				player.GainRealmPoints(RewardRP);
+			if (RewardBP > 0)
+				player.GainBountyPoints(RewardBP);
+			if (RewardBreamorFaction > 0)
+				BreamorFactionMgr.Gain(player, RewardBreamorFaction);
 
 			foreach (var item in FinalRewardItemTemplates)
 				GiveItem(player, item);

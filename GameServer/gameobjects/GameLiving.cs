@@ -50,6 +50,8 @@ namespace DOL.GS
 	{
 		private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		public int BreamorFaction = 0;
+
 		#region Combat
 		/// <summary>
 		/// Holds the AttackData object of last attack

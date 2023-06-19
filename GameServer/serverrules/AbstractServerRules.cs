@@ -1132,6 +1132,9 @@ namespace DOL.GS.ServerRules
 				//Changed: people were getting penalized for their pets doing damage
 				var damagePercent = de.Value / totalDamage;
 
+				// Breamor factions
+				BreamorFactionMgr.UpdateFromKill(player, killedNPC, damagePercent);
+
 				#region Realm Points
 
 				// realm points
@@ -1414,6 +1417,9 @@ namespace DOL.GS.ServerRules
 				var damagePercent = de.Value / totalDamage;
 				if (!living.IsAlive)//Dead living gets 25% exp only
 					damagePercent *= 0.25f;
+
+				// Breamor factions
+				BreamorFactionMgr.UpdateFromKill(expGainPlayer, killedLiving, damagePercent);
 
 				// realm points
 				int rpCap = living.RealmPointsValue * 2;

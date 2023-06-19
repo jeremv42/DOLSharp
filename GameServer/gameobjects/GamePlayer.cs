@@ -12537,6 +12537,8 @@ namespace DOL.GS
 			m_Gold = DBCharacter.Gold;
 			m_Platinum = DBCharacter.Platinum;
 			m_Mithril = DBCharacter.Mithril;
+
+			BreamorFaction = DBCharacter.BreamorFaction;
 			
 			Model = (ushort)DBCharacter.CurrentModel;
 
@@ -12717,6 +12719,7 @@ namespace DOL.GS
 				SaveCraftingSkills();
 				DBCharacter.PlayedTime = PlayedTime;  //We have to set the PlayedTime on the character before setting the LastPlayed
 				DBCharacter.LastPlayed = DateTime.Now;
+				DBCharacter.BreamorFaction = BreamorFaction;
 
 				DBCharacter.ActiveWeaponSlot = (byte)((byte)ActiveWeaponSlot | (byte)ActiveQuiverSlot);
 				if (m_stuckFlag)

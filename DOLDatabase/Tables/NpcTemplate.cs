@@ -82,9 +82,10 @@ namespace DOL.Database
 		private byte m_visibleWeaponSlots = 0;
 		private bool m_replaceMobValues =  false;
 		private string m_packageID = string.Empty;
-        #endregion Variables
+		private int m_breamorFaction = 0;
+		#endregion Variables
 
-        /// <summary>
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		public DBNpcTemplate()
@@ -690,6 +691,17 @@ namespace DOL.Database
 				m_packageID = value;
 			}
         }
-        #endregion Properties
-    }
+
+		[DataElement(AllowDbNull = false)]
+		public int BreamorFaction
+		{
+			get { return m_breamorFaction; }
+			set
+			{
+				Dirty = true;
+				m_breamorFaction = value;
+			}
+		}
+		#endregion Properties
+	}
 }

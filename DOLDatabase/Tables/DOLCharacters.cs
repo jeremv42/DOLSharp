@@ -194,6 +194,8 @@ namespace DOL.Database
 		private byte m_notDisplayedInHerald = 0;
 
 		private byte m_activeSaddleBags = 0;
+
+		private int m_breamorFaction = 0;
 		
 		/// <summary>
 		/// Create the character row in table
@@ -2244,6 +2246,17 @@ namespace DOL.Database
 			{
 				Dirty = true;
 				m_activeSaddleBags = value;
+			}
+		}
+
+		[DataElement(AllowDbNull = false)]
+		public int BreamorFaction
+		{
+			get { return m_breamorFaction; }
+			set
+			{
+				Dirty = true;
+				m_breamorFaction = value;
 			}
 		}
 		

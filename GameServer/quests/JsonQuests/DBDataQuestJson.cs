@@ -47,6 +47,7 @@ namespace DOL.Database
 		private int m_rewardCLXP;
 		private int m_rewardRP;
 		private int m_rewardBP;
+		private int m_rewardBreamorFaction;
 		private int m_nbChooseOptionalItems;
 		private string m_optionalRewardItemTemplates;
 		private string m_finalRewardItemTemplates;
@@ -147,9 +148,6 @@ namespace DOL.Database
 			set { m_maxLevel = value; Dirty = true; }
 		}
 
-		/// <summary>
-		/// Reward Money to give at each step, 0 for none
-		/// </summary>
 		[DataElement(AllowDbNull = false)]
 		public long RewardMoney
 		{
@@ -157,44 +155,40 @@ namespace DOL.Database
 			set { m_rewardMoney = value; Dirty = true; }
 		}
 
-		/// <summary>
-		/// Reward XP to give at each step, 0 for none
-		/// </summary>
+
 		[DataElement(AllowDbNull = false)]
 		public long RewardXP
 		{
 			get { return m_rewardXP; }
 			set { m_rewardXP = value; Dirty = true; }
 		}
-		
-		/// <summary>
-		/// Reward CLXP to give at each step, 0 for none
-		/// </summary>
+
 		[DataElement(AllowDbNull = false)]
 		public int RewardCLXP
 		{
 			get { return m_rewardCLXP; }
 			set { m_rewardCLXP = value; Dirty = true; }
 		}
-		
-		/// <summary>
-		/// Reward RP to give at each step, 0 for none
-		/// </summary>
+
 		[DataElement(AllowDbNull = false)]
 		public int RewardRP
 		{
 			get { return m_rewardRP; }
 			set { m_rewardRP = value; Dirty = true; }
 		}
-		
-		/// <summary>
-		/// Reward BP to give at each step, 0 for none
-		/// </summary>
+
 		[DataElement(AllowDbNull = false)]
 		public int RewardBP
 		{
 			get { return m_rewardBP; }
 			set { m_rewardBP = value; Dirty = true; }
+		}
+
+		[DataElement(AllowDbNull = false)]
+		public int RewardBreamorFaction
+		{
+			get { return m_rewardBreamorFaction; }
+			set { m_rewardBreamorFaction = value; Dirty = true; }
 		}
 
 		[DataElement(AllowDbNull = false)]

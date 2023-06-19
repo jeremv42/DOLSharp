@@ -12,6 +12,7 @@ using DOL.GS.Scripts;
 using log4net;
 using System.Reflection;
 using DOL.Events;
+using System.Numerics;
 
 namespace DOL.GS.ServerRules
 {
@@ -483,37 +484,29 @@ namespace DOL.GS.ServerRules
 			}
 
 			bool dealNoXP = false;
-			var totalDamage = 0.0;
+			var totalDamage = 0.0f;
 			//Collect the total damage
 			foreach (var de in gainers)
 			{
-				GameObject obj = (GameObject) de.Key;
-				if (obj is GamePlayer)
+				GameObject obj = de.Key;
+				if (obj is GamePlayer player && player.Client.Account.PrivLevel > 1)
 				{
 					//If a gameplayer with privlevel > 1 attacked the
 					//mob, then the players won't gain xp ...
-					if (((GamePlayer) obj).Client.Account.PrivLevel > 1)
-					{
-						dealNoXP = true;
-						break;
-					}
+					dealNoXP = true;
+					break;
 				}
 
-				totalDamage += (double) de.Value;
+				totalDamage += de.Value;
 			}
 
 			if (dealNoXP)
 			{
 				foreach (var de in gainers)
-				{
-					GamePlayer player = de.Key as GamePlayer;
-					if (player != null)
+					if (de.Key is GamePlayer player)
 						player.Out.SendMessage("You gain no experience from this kill!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-
 				return;
 			}
-
 
 			long playerExpValue = killedPlayer.ExperienceValue;
 			playerExpValue = (long) (playerExpValue * Properties.XP_RATE);
@@ -560,6 +553,9 @@ namespace DOL.GS.ServerRules
 				var damagePercent = de.Value / totalDamage;
 				if (!living.IsAlive) //Dead living gets 25% exp only
 					damagePercent *= 0.25f;
+
+				// Breamor factions
+				BreamorFactionMgr.UpdateFromKill(expGainPlayer, killedPlayer, damagePercent);
 
 				// realm points
 				int rpCap = living.RealmPointsValue * 2;
