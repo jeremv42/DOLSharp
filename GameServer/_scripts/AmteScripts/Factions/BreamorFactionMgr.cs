@@ -13,8 +13,9 @@ namespace DOL.GS
 		public const int Zone_Neutral_Max = 100_000;
 		public const int Zone_Max = 10_000_000;
 
-		public static readonly Dictionary<int, (string, string)> Zone_Ranks = new Dictionary<int, (string, string)>
+		public static readonly Dictionary<int, (string, string)> Zone_Ranks = new()
 		{
+			// Helviens
 			{ -8_500_000, ("Ard-Rioga", "Grand Roi") },
 			{ -6_000_000, ("Hersir", "Chef Militaire") },
 			{ -4_000_000, ("Jarl", "Chef de Clan") },
@@ -28,6 +29,7 @@ namespace DOL.GS
 
 			{ +0_100_000, ("Coigreach", "Neutre") },
 
+			// Avernes
 			{ +0_200_000, ("Puer", "Serviteur") },
 			{ +0_400_000, ("Discipulus", "Apprenti") },
 			{ +0_650_000, ("Miles", "Soldat") },
