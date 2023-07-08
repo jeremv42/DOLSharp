@@ -18,11 +18,13 @@
  */
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using DOL.Language;
 using DOL.GS;
 using DOL.GS.ServerProperties;
 using DOL.GS.PacketHandler;
+using DOL.GS.Scripts;
 
 namespace DOL.GS.Commands
 {
@@ -78,9 +80,17 @@ namespace DOL.GS.Commands
 
 		private void Broadcast(GamePlayer player, string message)
 		{
+			if ((eBroadcastType) Properties.BROADCAST_TYPE == eBroadcastType.Server)
+			{
+				foreach (GamePlayer p in GetTargets(player))
+					p.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language, "Scripts.Players.Broadcast.Message", player.Name, message), eChatType.CT_Broadcast, eChatLoc.CL_ChatWindow);
+				DiscordBot.Instance?.SendMessageBroadcast(player, message);
+				return;
+			}
+
 			foreach (GamePlayer p in GetTargets(player))
 			{
-				if (GameServer.ServerRules.IsAllowedToUnderstand(p, player) || ((eBroadcastType)ServerProperties.Properties.BROADCAST_TYPE == eBroadcastType.Server))
+				if (GameServer.ServerRules.IsAllowedToUnderstand(p, player))
 				{
 					p.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language, "Scripts.Players.Broadcast.Message", player.Name, message), eChatType.CT_Broadcast, eChatLoc.CL_ChatWindow);
 				}
@@ -88,9 +98,9 @@ namespace DOL.GS.Commands
 
 		}
 
-		private ArrayList GetTargets(GamePlayer player)
+		private List<GamePlayer> GetTargets(GamePlayer player)
 		{
-			ArrayList list = new ArrayList();
+			List<GamePlayer> list = new();
 			eBroadcastType type = (eBroadcastType)ServerProperties.Properties.BROADCAST_TYPE;
 			switch (type)
 			{
