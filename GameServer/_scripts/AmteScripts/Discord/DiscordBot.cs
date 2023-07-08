@@ -72,7 +72,8 @@ public class DiscordBot
 		if (channelBroadcast == null)
 			return;
 		_channelBroadcast = channelBroadcast;
-		await _channelBroadcast.SendMessageAsync("Server open!");
+		if (Environment.TickCount64 < 300000) // 5min after start max
+			await _channelBroadcast.SendMessageAsync("Server open!");
 	}
 
 	public static async Task Stop()
