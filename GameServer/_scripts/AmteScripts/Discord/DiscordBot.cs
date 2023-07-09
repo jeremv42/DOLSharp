@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -72,7 +73,7 @@ public class DiscordBot
 		if (channelBroadcast == null)
 			return;
 		_channelBroadcast = channelBroadcast;
-		if (Environment.TickCount64 < 300000) // 5min after start max
+		if ((DateTime.Now - Process.GetCurrentProcess().StartTime).TotalMinutes < 5) // 5min after start max
 			await _channelBroadcast.SendMessageAsync("Server open!");
 	}
 
