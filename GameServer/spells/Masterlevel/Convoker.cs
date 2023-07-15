@@ -892,12 +892,11 @@ namespace DOL.AI.Brain
 #region MLBrain
 public class MLBrain : GuardBrain
 {
-	public MLBrain() : base() { }
-
-	public override int AggroRange
+	public MLBrain() : base()
 	{
-		get { return 400; }
+		AggroRange = 400;
 	}
+
 	protected override void CheckNPCAggro()
 	{
 		//Check if we are already attacking, return if yes

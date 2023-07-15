@@ -55,8 +55,8 @@ namespace DOL.AI.Brain
 		public StandardMobBrain()
 			: base()
 		{
-			m_aggroLevel = 0;
-			m_aggroMaxRange = 0;
+			AggroLevel = 0;
+			AggroRange = 0;
 		}
 
 		/// <summary>
@@ -65,7 +65,7 @@ namespace DOL.AI.Brain
 		/// <returns></returns>
 		public override string ToString()
 		{
-			return base.ToString() + ", m_aggroLevel=" + m_aggroLevel.ToString() + ", m_aggroMaxRange=" + m_aggroMaxRange.ToString();
+			return base.ToString() + ", m_aggroLevel=" + AggroLevel.ToString() + ", m_aggroMaxRange=" + AggroRange.ToString();
 		}
 
 		public override bool Stop()
@@ -330,14 +330,6 @@ namespace DOL.AI.Brain
 		#region Aggro
 
 		/// <summary>
-		/// Max Aggro range in that this npc searches for enemies
-		/// </summary>
-		protected int m_aggroMaxRange;
-		/// <summary>
-		/// Aggressive Level of this npc
-		/// </summary>
-		protected int m_aggroLevel;
-		/// <summary>
 		/// List of livings that this npc has aggro on, living => aggroamount
 		/// </summary>
 		protected readonly Dictionary<GameLiving, long> m_aggroTable = new Dictionary<GameLiving, long>();
@@ -353,20 +345,12 @@ namespace DOL.AI.Brain
 		/// <summary>
 		/// Aggressive Level in % 0..100, 0 means not Aggressive
 		/// </summary>
-		public virtual int AggroLevel
-		{
-			get { return m_aggroLevel; }
-			set { m_aggroLevel = value; }
-		}
+		public int AggroLevel { get; set; }
 
 		/// <summary>
 		/// Range in that this npc aggros
 		/// </summary>
-		public virtual int AggroRange
-		{
-			get { return m_aggroMaxRange; }
-			set { m_aggroMaxRange = value; }
-		}
+		public int AggroRange { get; set; }
 
 		/// <summary>
 		/// Checks whether living has someone on its aggrolist

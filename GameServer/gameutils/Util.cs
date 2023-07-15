@@ -37,9 +37,9 @@ namespace DOL.GS
 	/// </summary>
 	public class Util
 	{
-		private static Util soleInstance = new Util();
+		private static ThreadLocal<Util> soleInstance = new (() => new Util());
 
-		public static void LoadTestDouble(Util testDouble) { soleInstance = testDouble; }
+		public static void LoadTestDouble(Util testDouble) { soleInstance.Value = testDouble; }
 
 		protected virtual double RandomDoubleImpl()
 		{
@@ -177,7 +177,7 @@ namespace DOL.GS
 		/// <returns></returns>
 		public static int Random(int min, int max)
 		{
-            return soleInstance.RandomImpl(min, max);
+            return soleInstance.Value!.RandomImpl(min, max);
 		}
 
 		/// <summary>
@@ -189,7 +189,7 @@ namespace DOL.GS
 		/// </returns>
 		public static double RandomDouble()
 		{
-			return soleInstance.RandomDoubleImpl();
+			return soleInstance.Value!.RandomDoubleImpl();
 		}
 
 		/// <summary>

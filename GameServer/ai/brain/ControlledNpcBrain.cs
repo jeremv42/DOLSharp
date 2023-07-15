@@ -86,11 +86,11 @@ namespace DOL.AI.Brain
             m_walkState = eWalkState.Follow;
             if (owner is GameNPC && (owner as GameNPC).Brain is StandardMobBrain)
             {
-                m_aggroLevel = ((owner as GameNPC).Brain as StandardMobBrain).AggroLevel;
+                AggroLevel = ((owner as GameNPC).Brain as StandardMobBrain).AggroLevel;
             }
             else
-                m_aggroLevel = 99;
-            m_aggroMaxRange = 1500;
+                AggroLevel = 99;
+            AggroRange = 1500;
 		}
 
 		protected bool m_isMainPet = true;

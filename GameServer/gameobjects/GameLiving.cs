@@ -4877,14 +4877,10 @@ namespace DOL.GS
 		/// <returns></returns>
 		public virtual int GetModified(eProperty property)
 		{
-			if (m_propertyCalc != null && m_propertyCalc[(int)property] != null)
-			{
+			if (m_propertyCalc[(int)property] != null)
 				return m_propertyCalc[(int)property].CalcValue(this, property);
-			}
-			else
-			{
-				log.ErrorFormat("{0} did not find property calculator for property ID {1}.", Name, (int)property);
-			}
+
+			log.ErrorFormat("{0} did not find property calculator for property ID {1}.", Name, (int)property);
 			return 0;
 		}
 
@@ -5420,11 +5416,11 @@ namespace DOL.GS
 		/// <summary>
 		/// Amount of endurance
 		/// </summary>
-		protected int m_endurance;
+		protected int m_endurance = 100;
 		/// <summary>
 		/// Maximum value that can be in m_endurance
 		/// </summary>
-		protected int m_maxEndurance;
+		protected int m_maxEndurance = 100;
 
 		/// <summary>
 		/// Gets/sets the object health
@@ -6905,8 +6901,6 @@ namespace DOL.GS
 
 			m_health = 1;
 			m_mana = 1;
-			m_endurance = 1;
-			m_maxEndurance = 1;
 		}
 	}
 }

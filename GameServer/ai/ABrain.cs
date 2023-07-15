@@ -66,7 +66,7 @@ namespace DOL.AI
 		/// <returns></returns>
 		public override string ToString()
 		{
-			return new StringBuilder(32)
+			return new StringBuilder(128)
 				.Append("body name='").Append(Body==null?"(null)":Body.Name)
 				.Append("' (id=").Append(Body==null?"(null)":Body.ObjectID.ToString())
 				.Append("), active=").Append(IsActive)
@@ -94,11 +94,7 @@ namespace DOL.AI
 		/// <summary>
 		/// The interval at which the brain will fire, in milliseconds
 		/// </summary>
-		public virtual int ThinkInterval
-		{
-			get { return 2500; }
-			set {}
-		}
+		public virtual int ThinkInterval => 2500;
 
 		/// <summary>
 		/// How fast can this brain cast, in milliseconds

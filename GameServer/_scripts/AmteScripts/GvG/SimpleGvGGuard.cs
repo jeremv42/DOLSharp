@@ -173,10 +173,9 @@ namespace DOL.AI.Brain
 			}
 		}
 
-		public override int AggroLevel
+		public SimpleGvGGuardBrain()
 		{
-			get { return 100; }
-			set { }
+			AggroLevel = 100;
 		}
 
 		protected override void CheckPlayerAggro()

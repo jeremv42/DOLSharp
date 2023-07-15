@@ -228,77 +228,6 @@ namespace DOL.GS
 		private static Timer m_dayResetTimer;
 
 		/// <summary>
-		/// Region ID INI field
-		/// </summary>
-		private const string ENTRY_REG_ID = "id";
-		/// <summary>
-		/// Region IP INI field
-		/// </summary>
-		private const string ENTRY_REG_IP = "ip";
-		/// <summary>
-		/// Region port INI field
-		/// </summary>
-		private const string ENTRY_REG_PORT = "port";
-		/// <summary>
-		/// Region description INI field
-		/// </summary>
-		private const string ENTRY_REG_DESC = "description";
-		/// <summary>
-		/// Region diving enable INI field
-		/// </summary>
-		private const string ENTRY_REG_DIVING_ENABLE = "isDivingEnabled";
-		/// <summary>
-		/// Region diving enable INI field
-		/// </summary>
-		private const string ENTRY_REG_HOUSING_ENABLE = "isHousingEnabled";
-		/// <summary>
-		/// Region water level INI field
-		/// </summary>
-		private const string ENTRY_REG_WATER_LEVEL = "waterLevel";
-		/// <summary>
-		/// Region expansion INI field
-		/// </summary>
-		private const string ENTRY_REG_EXPANSION = "expansion";
-
-		/// <summary>
-		/// Zone ID INI field
-		/// </summary>
-		private const string ENTRY_ZONE_ZONEID = "zoneID";
-		/// <summary>
-		/// Zone region INI field
-		/// </summary>
-		private const string ENTRY_ZONE_REGIONID = "regionID";
-		/// <summary>
-		/// Zone description INI field
-		/// </summary>
-		private const string ENTRY_ZONE_DESC = "description";
-		/// <summary>
-		/// Zone X offset INI field
-		/// </summary>
-		private const string ENTRY_ZONE_OFFX = "offsetx";
-		/// <summary>
-		/// Zone Y offset INI field
-		/// </summary>
-		private const string ENTRY_ZONE_OFFY = "offsety";
-		/// <summary>
-		/// Zone width INI field
-		/// </summary>
-		private const string ENTRY_ZONE_WIDTH = "width";
-		/// <summary>
-		/// Zone height INI field
-		/// </summary>
-		private const string ENTRY_ZONE_HEIGHT = "height";
-		/// <summary>
-		/// Zone water level INI field
-		/// </summary>
-		private const string ENTRY_ZONE_WATER_LEVEL = "waterlevel";
-		
-		/// <summary>
-		/// Does this zone contain Lava
-		/// </summary>
-		private const string ENTRY_ZONE_LAVA = "IsLava";
-
-		/// <summary>
 		/// Relocation threads for relocation of zones
 		/// </summary>
 		private static Thread m_relocationThread;
@@ -728,7 +657,7 @@ namespace DOL.GS
 		/// <summary>
 		/// Gets the game time for a players current region
 		/// </summary>
-		/// <param name="client"></param>
+		/// <param name="player"></param>
 		/// <returns></returns>
 		public static uint GetCurrentGameTime(GamePlayer player)
 		{
@@ -1026,19 +955,6 @@ namespace DOL.GS
 			}
 			return -1;
 		}
-		
-		public static object[] OfTypeAndToArray<T>(this IEnumerable<T> input, Type type)
-		{
-			MethodInfo methodOfType = typeof(Enumerable).GetMethod("OfType");
-			MethodInfo genericOfType = methodOfType.MakeGenericMethod(new Type[]{ type });
-			// Use .NET 4 covariance
-			var result = (IEnumerable<object>) genericOfType.Invoke(null, new object[] { input });
-			
-			MethodInfo methodToArray = typeof(Enumerable).GetMethod("ToArray");
-			MethodInfo genericToArray = methodToArray.MakeGenericMethod(new Type[]{ type });
-			
-			return (object[]) genericToArray.Invoke(null, new object[] { result });
-		}
 
 		/// <summary>
 		/// Searches for all objects from a specific region
@@ -1046,13 +962,12 @@ namespace DOL.GS
 		/// <param name="regionID">The region to search</param>
 		/// <param name="objectType">The type of the object you search</param>
 		/// <returns>All objects with the specified parameters</returns>
-		public static GameObject[] GetobjectsFromRegion(ushort regionID, Type objectType)
+		public static T[] GetobjectsFromRegion<T>(ushort regionID) where T : GameObject
 		{
-			Region reg;
-			if (!m_regions.TryGetValue(regionID, out reg))
-				return Array.Empty<GameObject>();
+			if (!m_regions.TryGetValue(regionID, out var reg))
+				return Array.Empty<T>();
 
-			return (GameObject[]) reg.Objects.Where(obj => obj != null).OfTypeAndToArray(objectType);
+			return reg.Objects.OfType<T>().ToArray();
 		}
 		
 		/// <summary>
@@ -1062,7 +977,7 @@ namespace DOL.GS
 		/// <returns>All NPCs with the specified parameters</returns>
 		public static GameStaticItem[] GetStaticItemFromRegion(ushort regionID)
 		{
-			return (GameStaticItem[])GetobjectsFromRegion(regionID, typeof(GameStaticItem));
+			return GetobjectsFromRegion<GameStaticItem>(regionID);
 		}
 
 		/// <summary>
@@ -1071,15 +986,14 @@ namespace DOL.GS
 		/// <param name="name">The name of the object to search</param>
 		/// <param name="regionID">The region to search</param>
 		/// <param name="realm">The realm of the object we search!</param>
-		/// <param name="objectType">The type of the object you search</param>
 		/// <returns>All objects with the specified parameters</returns>
-		public static GameObject[] GetObjectsByNameFromRegion(string name, ushort regionID, eRealm realm, Type objectType)
+		public static T[] GetObjectsByNameFromRegion<T>(string name, ushort regionID, eRealm realm) where T : GameObject
 		{
 			Region reg;
 			if (!m_regions.TryGetValue(regionID, out reg))
-				return Array.Empty<GameObject>();
+				return Array.Empty<T>();
 			
-			return (GameObject[]) reg.Objects.Where(obj => obj != null && obj.Realm == realm && obj.Name == name).OfTypeAndToArray(objectType);
+			return reg.Objects.Where(obj => obj != null && obj.Realm == realm && obj.Name == name).OfType<T>().ToArray();
 		}
 
 		/// <summary>
@@ -1100,12 +1014,13 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="name">The name of the object to search</param>
 		/// <param name="realm">The realm of the object we search!</param>
-		/// <param name="objectType">The type of the object you search</param>
-		/// <returns>All objects with the specified parameters</returns>b
-		public static GameObject[] GetObjectsByName(string name, eRealm realm, Type objectType)
+		/// <returns>All objects with the specified parameters</returns>
+		public static T[] GetObjectsByName<T>(string name, eRealm realm) where T : GameObject
 		{
-			return (GameObject[]) m_regions.Values.Select(reg => GetObjectsByNameFromRegion(name, reg.ID, realm, objectType))
-				.SelectMany(objs => objs).OfTypeAndToArray(objectType);
+			return m_regions.Values
+				.Select(reg => GetObjectsByNameFromRegion<T>(name, reg.ID, realm))
+				.SelectMany(o => o)
+				.ToArray();
 		}
 
 		/// <summary>
@@ -1117,7 +1032,7 @@ namespace DOL.GS
 		/// <returns>All NPCs with the specified parameters</returns>
 		public static GameNPC[] GetNPCsByNameFromRegion(string name, ushort regionID, eRealm realm)
 		{
-			return GetObjectsByNameFromRegion(name, regionID, realm, typeof(GameNPC)).OfType<GameNPC>().ToArray();
+			return GetObjectsByNameFromRegion<GameNPC>(name, regionID, realm);
 		}
 
 		/// <summary>
@@ -1128,7 +1043,7 @@ namespace DOL.GS
 		/// <returns>All NPCs with the specified parameters</returns>b
 		public static GameNPC[] GetNPCsByName(string name, eRealm realm)
 		{
-			return (GameNPC[])GetObjectsByName(name, realm, typeof(GameNPC));
+			return GetObjectsByName<GameNPC>(name, realm);
 		}
 
 		/// <summary>
@@ -1146,29 +1061,25 @@ namespace DOL.GS
 		/// <summary>
 		/// Searches for all NPCs with the given type and realm in ALL regions!
 		/// </summary>
-		/// <param name="type"></param>
 		/// <param name="realm"></param>
 		/// <returns></returns>
-		public static List<GameNPC> GetNPCsByType(Type type, eRealm realm)
+		public static List<T> GetNPCsByType<T>(eRealm realm) where T : GameNPC
 		{
-			return m_regions.Values.Select(r => r.Objects.OfType<GameNPC>().Where(npc => npc.Realm == realm && type.IsInstanceOfType(npc)))
+			return m_regions.Values.Select(r => r.Objects.OfType<T>().Where(npc => npc.Realm == realm))
 				.SelectMany(objs => objs).ToList();
 		}
 
 		/// <summary>
 		/// Searches for all NPCs with the given type and realm in a specific region
 		/// </summary>
-		/// <param name="type"></param>
 		/// <param name="realm"></param>
 		/// <param name="region"></param>
 		/// <returns></returns>
-		public static List<GameNPC> GetNPCsByType(Type type, eRealm realm, ushort region)
+		public static List<T> GetNPCsByType<T>(eRealm realm, ushort region) where T : GameNPC
 		{
-			Region reg;
-			if (!m_regions.TryGetValue(region, out reg))
-				return new List<GameNPC>(0);
-			
-			return reg.Objects.OfType<GameNPC>().Where(npc => npc.Realm == realm && type.IsInstanceOfType(npc)).ToList();
+			if (!m_regions.TryGetValue(region, out var reg))
+				return new List<T>(0);
+			return reg.Objects.OfType<T>().Where(npc => npc.Realm == realm).ToList();
 		}
 
 		/// <summary>
@@ -1178,10 +1089,14 @@ namespace DOL.GS
 		/// <returns>The found GameClient or null if not found</returns>
 		public static GameClient GetClientFromID(uint id)
 		{
-			var i = id;
-			if (i <= 0 || i > m_clients.Length)
+			if (id <= 0)
 				return null;
-			return m_clients[i - 1];
+			lock (m_clients.SyncRoot)
+			{
+				if (id > m_clients.Length)
+					return null;
+				return m_clients[id - 1];
+			}
 		}
 
 		/// <summary>
@@ -1227,14 +1142,11 @@ namespace DOL.GS
 				client = m_clients[id - 1];
 				m_clients[id - 1] = null;
 			}
-			if (client == null)
-				return;
-			if (client.Player == null)
+			if (client?.Player == null)
 				return;
 			//client.Player.RemoveFromWorld();
 			client.Player.Delete();
 			client.Player = null;
-			return;
 		}
 
 		//Various functions to get a list of players/mobs/items

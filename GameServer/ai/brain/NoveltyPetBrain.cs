@@ -57,11 +57,7 @@ namespace DOL.AI.Brain
 
 		#region Think
 
-		public override int ThinkInterval
-		{
-			get { return 5000; }
-			set { }
-		}
+		public override int ThinkInterval => 5000;
 
 		public override void Think()
 		{

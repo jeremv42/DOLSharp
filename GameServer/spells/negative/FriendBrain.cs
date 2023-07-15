@@ -9,9 +9,10 @@ namespace DOL.AI.Brain
 		SpellHandler m_spellHandler = null;
 		public FriendBrain(SpellHandler spellHandler) : base()
 		{
-			ThinkInterval = 3000;
 			m_spellHandler = spellHandler;
 		}
+
+		public override int ThinkInterval => 3000;
 
 		protected override void CheckPlayerAggro()
 		{

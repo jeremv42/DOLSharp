@@ -721,13 +721,6 @@ namespace DOL.GS
 				//Open the server, players can now connect if webhook, inform Discord!
 				m_status = eGameServerStatus.GSS_Open;
 
-				if (Properties.DISCORD_ACTIVE && (!string.IsNullOrEmpty(Properties.DISCORD_WEBHOOK_ID)))
-				{
-
-					var hook = new DolWebHook(Properties.DISCORD_WEBHOOK_ID);					
-					hook.SendMessage("Server open for connections");
-				}
-								
 				if (log.IsInfoEnabled)
 					log.Info($"GameServer {Version} is now open for connections!");
 

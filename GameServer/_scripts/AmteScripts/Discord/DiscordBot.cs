@@ -31,12 +31,12 @@ public class DiscordBot
 			return;
 		_channelBroadcast.SendMessageAsync($"[{author.Name}] {message}"); // fire and forget
 	}
-	private async Task _MessageReceived(SocketMessage msg)
+	private Task _MessageReceived(SocketMessage msg)
 	{
 		if (msg.Channel.Id != _channelBroadcast?.Id || msg.Author is not SocketGuildUser author)
-			return;
+			return Task.CompletedTask;
 		if (author.IsBot)
-			return;
+			return Task.CompletedTask;
 
 		var formattedMessage = $"[Discord] {author.DisplayName}: {msg.Content}";
 		if (string.IsNullOrWhiteSpace(msg.Content))
@@ -45,6 +45,7 @@ public class DiscordBot
 		}
 		foreach (var client in WorldMgr.GetAllPlayingClients())
 			client.Player?.SendMessage(formattedMessage, eChatType.CT_Broadcast, eChatLoc.CL_ChatWindow);
+		return Task.CompletedTask;
 	}
 
 	public static DiscordBot Instance { get; private set; }

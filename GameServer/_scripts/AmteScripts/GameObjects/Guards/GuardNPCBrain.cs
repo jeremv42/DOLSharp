@@ -7,11 +7,10 @@ namespace DOL.AI.Brain
 {
     public class GuardNPCBrain : AmteMobBrain
     {
-        public override int AggroLevel
-        {
-            get { return 100; }
-            set { }
-        }
+		public GuardNPCBrain()
+		{
+			AggroLevel = 100;
+		}
 
         public override bool CanBAF { get => true; set => base.CanBAF = value; }
 

@@ -16,9 +16,8 @@ namespace DOL.AI.Brain
 			get
 			{
 				var interval = base.ThinkInterval;
-				return Math.Max(5000, Math.Min(interval, 1000 + (100 - base.AggroLevel) * 100));
+				return Math.Max(5000, Math.Min(interval, 1000 + (100 - AggroLevel) * 100));
 			}
-			set => base.ThinkInterval = value;
 		}
 
 		public AmteMobBrain()
@@ -31,8 +30,8 @@ namespace DOL.AI.Brain
 			if (!(brain is IOldAggressiveBrain))
 				return;
 			var old = (IOldAggressiveBrain)brain;
-			m_aggroLevel = old.AggroLevel;
-			m_aggroMaxRange = old.AggroRange;
+			AggroLevel = old.AggroLevel;
+			AggroRange = old.AggroRange;
 		}
 
 		public override int CalculateAggroLevelToTarget(GameLiving target)

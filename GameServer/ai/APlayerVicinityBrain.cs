@@ -64,13 +64,7 @@ namespace DOL.AI
 		/// The number of milliseconds this brain will stay active even when no player is close
 		/// This abstract class always returns 45 Seconds
 		/// </summary>
-		protected virtual int NoPlayersStopDelay
-		{
-			set
-			{
-			}
-			get { return 45000; }
-		}
+		protected virtual int NoPlayersStopDelay => 45000;
 
 		/// <summary>
 		/// Starts the brain thinking and resets the inactivity countdown
@@ -80,7 +74,7 @@ namespace DOL.AI
 		{
 			if (!Body.IsVisibleToPlayers)
 				return false;
-			Interlocked.Exchange(ref noPlayersStopCountdown, (int)(NoPlayersStopDelay/ThinkInterval));
+			Interlocked.Exchange(ref noPlayersStopCountdown, NoPlayersStopDelay/ThinkInterval);
 			return base.Start();
 		}
 

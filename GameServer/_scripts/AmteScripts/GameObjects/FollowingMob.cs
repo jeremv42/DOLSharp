@@ -43,10 +43,7 @@ namespace DOL.GS.Scripts
 			}
 		}
 
-		public override bool IsVisibleToPlayers
-		{
-			get { return true; }
-		}
+		public override bool IsVisibleToPlayers => true;
 
 		public override bool AddToWorld()
 		{

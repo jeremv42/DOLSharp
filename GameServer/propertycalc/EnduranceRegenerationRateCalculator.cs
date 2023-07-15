@@ -60,25 +60,17 @@ namespace DOL.GS.PropertyCalc
  				  Players will no longer need to sit to regenerate faster.
 			    - Fatigue now regenerates at the standing rate while moving.
 			*/
-			if (!living.InCombat)
+			if (!living.InCombat && living is GamePlayer pl && !pl.IsSprinting)
 			{
-				if (living is GamePlayer)
-				{
-					if (!((GamePlayer)living).IsSprinting)
-					{
-						regen += 4;
-					}
-				}
+				regen += 4;
 			}
-				
 
 			regen -= debuff;
 
 			if (regen < 0)
 				regen = 0;
 
-			if (regen != 0 && ServerProperties.Properties.ENDURANCE_REGEN_RATE != 1)
-				regen *= ServerProperties.Properties.ENDURANCE_REGEN_RATE;
+			regen *= ServerProperties.Properties.ENDURANCE_REGEN_RATE;
 
 			double decimals = regen - (int)regen;
 			if (Util.ChanceDouble(decimals))

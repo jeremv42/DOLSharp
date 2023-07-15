@@ -22,20 +22,10 @@ namespace DOL.AI.Brain
 {
 	public class GuardBrain : StandardMobBrain
 	{
-		public GuardBrain()
-			: base()
+		public GuardBrain() : base()
 		{
-			ThinkInterval = 2000;
-		}
-
-		public override int AggroLevel
-		{
-			get { return 90; }
-		}
-
-		public override int AggroRange
-		{
-			get { return 750; }
+			AggroLevel = 90;
+			AggroRange = 750;
 		}
 
 		protected override void CheckPlayerAggro()
