@@ -11,14 +11,7 @@ namespace DOL.AI.Brain
 	{
 		public int AggroLink { get; set; }
 
-		public override int ThinkInterval
-		{
-			get
-			{
-				var interval = base.ThinkInterval;
-				return Math.Max(5000, Math.Min(interval, 1000 + (100 - AggroLevel) * 100));
-			}
-		}
+		public override int ThinkInterval => Math.Max(1000, 3000 - AggroLevel * 20);
 
 		public AmteMobBrain()
 		{
@@ -43,9 +36,9 @@ namespace DOL.AI.Brain
 				return 0; // only attack if green+ to target
 
 			// related to the pet owner if applicable
-			if (target is GamePet)
+			if (target is GamePet pet)
 			{
-				GamePlayer thisLiving = ((IControlledBrain)((GamePet)target).Brain).GetPlayerOwner();
+				var thisLiving = ((IControlledBrain)pet.Brain).GetPlayerOwner();
 				if (thisLiving != null && thisLiving.IsObjectGreyCon(Body))
 					return 0;
 			}

@@ -3115,7 +3115,7 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="brain">The new brain</param>
 		/// <returns>The old own brain</returns>
-		public virtual ABrain SetOwnBrain(ABrain brain)
+		public ABrain SetOwnBrain(ABrain brain)
 		{
 			if (brain == null)
 				return null;
@@ -4818,8 +4818,8 @@ namespace DOL.GS
 		/// <summary>
 		/// Styles for this NPC
 		/// </summary>
-		private IList m_styles = new List<Style>(0);
-		public IList Styles
+		private List<Style> m_styles = new List<Style>(0);
+		public List<Style> Styles
 		{
 			get { return m_styles; }
 			set
@@ -5462,11 +5462,13 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="npc">The NPC that is checked against.</param>
 		/// <returns></returns>
-		public virtual bool IsFriend(GameNPC npc)
+		public bool IsFriend(GameNPC npc)
 		{
-			if (Faction == null || npc.Faction == null)
-				return false;
-			return (npc.Faction == Faction || (Faction.FriendFactions?.Contains(npc.Faction) ?? false));
+			if (npc.Brain is IControlledBrain)
+				return GameServer.ServerRules.IsSameRealm(this, npc, true);
+			if (Faction == null && npc.Faction == null)
+				return npc.Name == Name || (!string.IsNullOrEmpty(npc.GuildName) && npc.GuildName == GuildName);
+			return npc.Faction == Faction || (Faction?.FriendFactions?.Contains(npc.Faction) ?? false);
 		}
 
 		/// <summary>
@@ -5612,7 +5614,7 @@ namespace DOL.GS
 				copyTarget.Spells = new List<Spell>(Spells.Cast<Spell>());
 
 			if (Styles != null && Styles.Count > 0)
-				copyTarget.Styles = new ArrayList(Styles);
+				copyTarget.Styles = new List<Style>(Styles);
 
 			if (copyTarget.Inventory != null)
 				copyTarget.SwitchWeapon(ActiveWeaponSlot);
