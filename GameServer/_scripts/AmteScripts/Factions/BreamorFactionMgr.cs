@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DOL.AI.Brain;
+using DOL.GS.Scripts;
 
 namespace DOL.GS
 {
 	public class BreamorFactionMgr
 	{
 		public const int Zone_Min = -10_000_000;
+		public const int Zone_Helviens = -200_000;
 		public const int Zone_Neutral_Min = -100_000;
 		public const int Zone_Neutral_Max = 100_000;
+		public const int Zone_Avernes = -200_000;
 		public const int Zone_Max = 10_000_000;
 
 		public static readonly Dictionary<int, (string, string)> Zone_Ranks = new()
@@ -47,6 +51,11 @@ namespace DOL.GS
 			return Zone_Neutral_Min <= living.BreamorFaction && living.BreamorFaction <= Zone_Neutral_Max;
 		}
 
+		public static bool IsNeutralLarge(GameLiving living)
+		{
+			return Zone_Helviens <= living.BreamorFaction && living.BreamorFaction <= Zone_Avernes;
+		}
+
 		public static bool IsHelvien(GameLiving living)
 		{
 			return living.BreamorFaction < Zone_Neutral_Min;
@@ -55,6 +64,39 @@ namespace DOL.GS
 		public static bool IsAverne(GameLiving living)
 		{
 			return living.BreamorFaction > Zone_Neutral_Max;
+		}
+
+		public static bool IsSameFaction(GameLiving a, GameLiving b)
+		{
+			if (IsAverne(a) && IsAverne(b))
+				return true;
+			if (IsHelvien(a) && IsHelvien(b))
+				return true;
+			return false;
+		}
+
+		public static bool CanAttack(GameLiving attackerA, GameLiving defenderA)
+		{
+			var attacker = ((attackerA as GameNPC)?.Brain as IControlledBrain)?.GetLivingOwner() ?? attackerA;
+			var defender = ((defenderA as GameNPC)?.Brain as IControlledBrain)?.GetLivingOwner() ?? defenderA;
+
+			// Neutrals can always be attacked
+			if (IsNeutralLarge(attacker) || IsNeutralLarge(defender))
+				return true;
+			// Helviens can attack Avernes
+			if (attacker.BreamorFaction < Zone_Helviens && defender.BreamorFaction > Zone_Avernes)
+				return true;
+			// Avernes can attack Helviens 
+			if (attacker.BreamorFaction > Zone_Avernes && defender.BreamorFaction < Zone_Helviens)
+				return true;
+
+			// Same faction: PvP is forbidden, PvE is ok
+			if (attacker is GamePlayer && defender is GamePlayer)
+				return false;
+			if (attacker is GameNPC && defender is GameNPC)
+				return false;
+
+			return true;
 		}
 
 		public static (string, string) GetRank(GameLiving living)

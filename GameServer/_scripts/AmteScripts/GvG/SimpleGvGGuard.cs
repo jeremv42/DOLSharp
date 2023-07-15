@@ -78,7 +78,7 @@ namespace DOL.GS.Scripts
 		{
 			if (!base.WhisperReceive(source, text) || string.IsNullOrWhiteSpace(GuildName))
 				return false;
-			if (!(source is GamePlayer player) || player.Guild == null)
+			if (source is not GamePlayer player || player.Guild == null)
 				return false;
 			if (player.Client.Account.PrivLevel == 1 && player.GuildName != GuildName)
 				return false;
@@ -112,7 +112,7 @@ namespace DOL.GS.Scripts
 				if (!string.IsNullOrEmpty(plKiller.GuildName))
 					name = $"un membre de la guilde {plKiller.GuildName}";
 				guild.SendMessageToGuildMembers(
-					$"{Captain?.Name ?? "Capitaine"}: un garde vient d'�tre tu� par {name}.",
+					$"{Captain?.Name ?? "Capitaine"}: un garde vient d'être tué par {name}.",
 					eChatType.CT_Guild,
 					eChatLoc.CL_ChatWindow
 				);
@@ -156,7 +156,7 @@ namespace DOL.AI.Brain
 			{
 				if (_lastCaptainUpdate > DateTime.Now.Ticks)
 					return _captain;
-				_captain = GuildCaptainGuard.allCaptains.OrderBy(c => Body.GetDistanceTo(c)).FirstOrDefault();
+				_captain = GuildCaptainGuard.allCaptains.MinBy(c => Body.GetDistanceTo(c));
 				var name = _captain?.GuildName ?? "";
 				if (name != Body.GuildName)
 					Body.GuildName = name;
@@ -200,7 +200,7 @@ namespace DOL.AI.Brain
 		{
 			if (Body.AttackState)
 				return;
-			foreach (GameNPC npc in Body.GetNPCsInRadius((ushort)AggroRange, Body.CurrentRegion.IsDungeon ? false : true))
+			foreach (GameNPC npc in Body.GetNPCsInRadius((ushort)AggroRange, !Body.CurrentRegion.IsDungeon))
 			{
 				if (npc.Realm != 0 || (npc.Flags & GameNPC.eFlags.PEACE) != 0 ||
 					!npc.IsAlive || npc.ObjectState != GameObject.eObjectState.Active ||
@@ -218,33 +218,17 @@ namespace DOL.AI.Brain
 			}
 		}
 
-		private void BringReinforcements(GameNPC target)
-		{
-			int count = (int)Math.Log(target.Level - Body.Level, 2) + 1;
-			foreach (GameNPC npc in Body.GetNPCsInRadius(WorldMgr.YELL_DISTANCE))
-			{
-				if (count <= 0)
-					return;
-				if (npc.Brain is SimpleGvGGuardBrain == false)
-					continue;
-				var brain = npc.Brain as SimpleGvGGuardBrain;
-				brain.AddToAggroList(target, 1);
-				brain.AttackMostWanted();
-			}
-		}
-
 		public override int CalculateAggroLevelToTarget(GameLiving target)
 		{
 			if (target is GamePlayer player)
 			{
-				if (Captain != null)
-				{
-					var plGuildId = player.Guild != null ? player.GuildID : "NOGUILD";
-					if (target.GuildName == Body.GuildName || Captain.safeGuildIds.Contains(plGuildId))
-						return 0;
-					return 100;
-				}
-				return target.GuildName == Body.GuildName ? 0 : 100;
+				if (Captain == null)
+					return target.GuildName == Body.GuildName ? 0 : 100;
+
+				var plGuildId = player.Guild != null ? player.GuildID : "NOGUILD";
+				if (target.GuildName == Body.GuildName || Captain.safeGuildIds.Contains(plGuildId))
+					return 0;
+				return 100;
 			}
 			if (target.Realm == 0)
 				return 0;

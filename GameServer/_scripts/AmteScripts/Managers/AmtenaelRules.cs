@@ -87,74 +87,67 @@ namespace DOL.GS.ServerRules
 				(defender is GameNPC && (((GameNPC)defender).Flags & GameNPC.eFlags.PEACE) != 0))
 				return false;
 
-			var playerAttacker = attacker as GamePlayer;
-			var playerDefender = defender as GamePlayer;
+			var attackerPlayer = attacker as GamePlayer;
+			var defenderPlayer = defender as GamePlayer;
+			var attackerNPC = attacker as GameNPC;
+			var defenderNPC = defender as GameNPC;
+			var attackerPetBrain = attackerNPC?.Brain as IControlledBrain;
+			var defenderPetBrain = defenderNPC?.Brain as IControlledBrain;
 
 			// if Pet, let's define the controller once
-			if (defender is GameNPC && (defender as GameNPC).Brain is IControlledBrain)
-				playerDefender = ((defender as GameNPC).Brain as IControlledBrain).GetPlayerOwner();
+			if (defenderPetBrain != null)
+				defenderPlayer = defenderPetBrain.GetPlayerOwner();
 
-			if (attacker is GameNPC && (attacker as GameNPC).Brain is IControlledBrain)
+			if (attackerPetBrain != null)
 			{
-				playerAttacker = ((attacker as GameNPC).Brain as IControlledBrain).GetPlayerOwner();
+				attackerPlayer = attackerPetBrain.GetPlayerOwner();
 				quiet = false;
 			}
 
-			if (playerDefender != null && playerDefender == playerAttacker)
+			if (defenderPlayer != null && defenderPlayer == attackerPlayer)
 			{
 				if (quiet == false) MessageToLiving(attacker, "Vous ne pouvez pas vous attaquer vous-même.");
 				return false;
 			}
 
-			if (playerDefender != null && playerAttacker != null &&
+			if (defenderPlayer != null && attackerPlayer != null &&
 				(attacker.CurrentRegionID == HousingRegionID || defender.CurrentRegionID == HousingRegionID))
 				return false;
 
-			//GMs can't be attacked
-			if (playerDefender != null && playerDefender.Client.Account.PrivLevel > 1)
+			// GMs can't be attacked
+			if (defenderPlayer != null && defenderPlayer.Client.Account.PrivLevel > 1)
 				return false;
 
-			if (!_IsAllowedToAttack_PvpImmunity(attacker, playerAttacker, playerDefender, quiet))
+			if (!_IsAllowedToAttack_PvpImmunity(attacker, attackerPlayer, defenderPlayer, quiet))
 				return false;
 
 			// Your pet can only attack stealthed players you have selected
-			if (defender.IsStealthed && attacker is GameNPC)
-				if (((attacker as GameNPC).Brain is IControlledBrain) &&
-					defender is GamePlayer &&
-					attacker.TargetObject != defender)
-					return false;
+			if (defender.IsStealthed && attackerPetBrain != null && 
+			    defenderPlayer != null && attacker.TargetObject != defender)
+				return false;
 
 			//Checking for shadowed necromancer, can't be attacked.
-			if (defender.ControlledBrain != null && defender.ControlledBrain.Body != null && defender.ControlledBrain.Body is NecromancerPet)
+			if (defender.ControlledBrain?.Body is NecromancerPet)
 			{
 				if (quiet == false) MessageToLiving(attacker, "You can't attack a shadowed necromancer!");
 				return false;
 			}
 
 			// Pets
-			if (attacker is GameNPC)
+			if (attackerPetBrain != null)
 			{
-				var controlled = ((GameNPC)attacker).Brain as IControlledBrain;
-				if (controlled != null)
-				{
-					attacker = controlled.GetLivingOwner() ?? attacker;
-					quiet = true; // silence all attacks by controlled npc
-				}
+				attacker = attackerPetBrain.GetLivingOwner() ?? attacker;
+				quiet = true; // silence all attacks by controlled npc
 			}
-			if (defender is GameNPC)
-			{
-				var controlled = ((GameNPC)defender).Brain as IControlledBrain;
-				if (controlled != null)
-					defender = controlled.GetLivingOwner() ?? defender;
-			}
+			defender = defenderPetBrain?.GetLivingOwner() ?? defender;
 
-			if (playerAttacker != null && JailMgr.IsPrisoner(playerAttacker))
+			if (attackerPlayer != null && JailMgr.IsPrisoner(attackerPlayer))
 			{
 				if (quiet == false)
 					MessageToLiving(attacker, "Vous ne pouvez pas attaquer lorsque vous êtes en prison.");
 				return false;
 			}
-			if (playerDefender != null && JailMgr.IsPrisoner(playerDefender))
+			if (defenderPlayer != null && JailMgr.IsPrisoner(defenderPlayer))
 			{
 				if (quiet == false)
 					MessageToLiving(attacker, "Vous ne pouvez pas attaquer un prisonnier.");
@@ -166,7 +159,7 @@ namespace DOL.GS.ServerRules
 				return RvrManager.Instance.IsAllowedToAttack(attacker, defender, quiet);
 
 			// Safe area
-			if (attacker is GamePlayer && defender is GamePlayer)
+			if (attackerPlayer != null && defenderPlayer != null)
 			{
 				if (defender.CurrentAreas.Cast<AbstractArea>().Any(area => area.IsSafeArea) ||
 					attacker.CurrentAreas.Cast<AbstractArea>().Any(area => area.IsSafeArea))
@@ -177,66 +170,68 @@ namespace DOL.GS.ServerRules
 				}
 			}
 
-			// PVP)
-			if (playerAttacker != null && playerDefender != null)
+			// PVP
+			if (attackerPlayer != null && defenderPlayer != null)
 			{
 				//check group
-				if (playerAttacker.Group != null && playerAttacker.Group.IsInTheGroup(playerDefender))
+				if (attackerPlayer.Group != null && attackerPlayer.Group.IsInTheGroup(defenderPlayer))
 				{
-					if (!quiet) MessageToLiving(playerAttacker, "Vous ne pouvez pas attaquer un membre de votre groupe.");
+					if (!quiet) MessageToLiving(attackerPlayer, "Vous ne pouvez pas attaquer un membre de votre groupe.");
 					return false;
 				}
 
-				if (playerAttacker.DuelTarget != defender)
+				if (attackerPlayer.DuelTarget != defender)
 				{
 					//check guild
-					if (playerAttacker.Guild != null && playerAttacker.Guild == playerDefender.Guild)
+					if (attackerPlayer.Guild != null && attackerPlayer.Guild == defenderPlayer.Guild)
 					{
-						if (!quiet) MessageToLiving(playerAttacker, "Vous ne pouvez pas attaquer un membre de votre guilde.");
+						if (!quiet) MessageToLiving(attackerPlayer, "Vous ne pouvez pas attaquer un membre de votre guilde.");
+						return false;
+					}
+
+					if (attackerPlayer.Guild?.AllianceId == defenderPlayer.Guild?.AllianceId)
+					{
+						if (!quiet) MessageToLiving(attackerPlayer, "Vous ne pouvez pas attaquer un membre de votre alliance.");
 						return false;
 					}
 
 					// Player can't hit other members of the same BattleGroup
-					var mybattlegroup = (BattleGroup)playerAttacker.TempProperties.getProperty<object>(BattleGroup.BATTLEGROUP_PROPERTY, null);
-
-					if (mybattlegroup != null && mybattlegroup.IsInTheBattleGroup(playerDefender))
+					var mybattlegroup = (BattleGroup)attackerPlayer.TempProperties.getProperty<object>(BattleGroup.BATTLEGROUP_PROPERTY, null);
+					if (mybattlegroup != null && mybattlegroup.IsInTheBattleGroup(defenderPlayer))
 					{
-						if (!quiet) MessageToLiving(playerAttacker, "Vous ne pouvez pas attaquer un membre de votre groupe de combat.");
+						if (!quiet) MessageToLiving(attackerPlayer, "Vous ne pouvez pas attaquer un membre de votre groupe de combat.");
 						return false;
 					}
 				}
 			}
 
-			// Simple GvG Guards
-			if (defender is SimpleGvGGuard && (defender.GuildName == attacker.GuildName || (playerAttacker != null && playerAttacker.GuildName == defender.GuildName)))
+			// Breamor Factions
+			if (!BreamorFactionMgr.CanAttack(attacker, defender) && attackerPlayer?.DuelTarget != defender)
+			{
+				if (!quiet) MessageToLiving(attackerPlayer, "Vous ne pouvez pas attaquer un membre de votre faction.");
 				return false;
-			if (attacker is SimpleGvGGuard && (defender.GuildName == attacker.GuildName || (playerDefender != null && playerDefender.GuildName == attacker.GuildName)))
+			}
+
+			// Simple GvG Guards
+			if (defender is SimpleGvGGuard && (defender.GuildName == attacker.GuildName || (attackerPlayer != null && attackerPlayer.GuildName == defender.GuildName)))
+				return false;
+			if (attacker is SimpleGvGGuard && (defender.GuildName == attacker.GuildName || (defenderPlayer != null && defenderPlayer.GuildName == attacker.GuildName)))
 				return false;
 
 			// allow mobs to attack mobs
 			if (attacker.Realm == 0 && defender.Realm == 0)
 			{
-				if (attacker is GameNPC && !((GameNPC)attacker).IsConfused &&
-					defender is GameNPC && !((GameNPC)defender).IsConfused)
-					return !((GameNPC)attacker).IsFriend((GameNPC)defender);
+				if (attackerNPC != null && !attackerNPC.IsConfused &&
+					defenderNPC != null && !defenderNPC.IsConfused)
+					return !attackerNPC.IsFriend(defenderNPC);
 				return true;
 			}
-			if ((attacker.Realm != 0 || defender.Realm != 0) && playerDefender == null && playerAttacker == null)
+			if ((attacker.Realm != 0 || defender.Realm != 0) && defenderPlayer == null && attackerPlayer == null)
 				return true;
 
 			//allow confused mobs to attack same realm
-			if (attacker is GameNPC && (attacker as GameNPC).IsConfused && attacker.Realm == defender.Realm)
+			if (attackerNPC != null && attackerNPC.IsConfused && attacker.Realm == defender.Realm)
 				return true;
-
-			// "friendly" NPCs can't attack "friendly" players
-			if (defender is GameNPC && defender.Realm != 0 && attacker.Realm != 0 && defender is GameKeepGuard == false && defender is GameFont == false)
-			{
-				if (quiet == false) MessageToLiving(attacker, "Vous ne pouvez pas attaquer un PNJ amical.");
-				return false;
-			}
-			// "friendly" NPCs can't be attacked by "friendly" players
-			if (attacker is GameNPC && attacker.Realm != 0 && defender.Realm != 0 && attacker is GameKeepGuard == false)
-				return false;
 
 			return true;
 		}
@@ -245,13 +240,15 @@ namespace DOL.GS.ServerRules
 		{
 			if (source == null || target == null)
 				return false;
+
+			// Peace flag 
 			if (target is GameNPC npcTarget)
 				if ((npcTarget.Flags & GameNPC.eFlags.PEACE) != 0)
 					return true;
-
 			if (source is GameNPC npcSource)
 				if ((npcSource.Flags & GameNPC.eFlags.PEACE) != 0)
 					return true;
+
 			if (RvrManager.Instance != null && (RvrManager.Instance.IsInRvr(source) || RvrManager.Instance.IsInRvr(target)))
 				return source.Realm == target.Realm;
 

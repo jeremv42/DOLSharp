@@ -10,14 +10,14 @@ namespace DOL.GS.Scripts
 {
 	public class GuildCaptainGuard : AmteMob
 	{
-		public const long CLAIM_COST = 500 * 100 * 100; // 500g
-		public const ushort AREA_RADIUS = 4096;
+		public const long CLAIM_COST = 50 * 100 * 100; // 50g
+		public const ushort AREA_RADIUS = 5500;
 		public const ushort NEUTRAL_EMBLEM = 256;
 
 		/// <summary>
 		/// "Fausses" guildes : Albion, Hibernia, Midgard, Les Maitres du Temps, Citoyens d'Amtenael
 		/// </summary>
-		private static readonly string[] _systemGuildIds = new[]
+		private static readonly string[] _systemGuildIds =
 		{
 			"063bbcc7-0005-4667-a9ba-402746c5ae15",
 			"bdbc6f4a-b9f8-4316-b88b-9698e06cdd7b",
@@ -25,11 +25,12 @@ namespace DOL.GS.Scripts
 			"ce6f0b34-78bc-45a9-9f65-6e849d498f6c",
 			"386c822f-996b-4db6-8bd8-121c07fc11cd",
 		};
-		public static readonly List<GuildCaptainGuard> allCaptains = new List<GuildCaptainGuard>();
+
+		public static readonly List<GuildCaptainGuard> allCaptains = new();
 
 		private Guild _guild;
 
-		public List<string> safeGuildIds = new List<string>();
+		public List<string> safeGuildIds = new();
 		private readonly AmteCustomParam _safeGuildParam;
 
 		public GuildCaptainGuard()
@@ -58,14 +59,18 @@ namespace DOL.GS.Scripts
 			return param;
 		}
 
-		public override string GuildName {
+		public override string GuildName
+		{
 			get => base.GuildName;
-			set {
+			set
+			{
 				base.GuildName = value;
 				_guild = GuildMgr.GetGuildByName(value);
 				ResetArea(_guild?.Emblem ?? NEUTRAL_EMBLEM);
 			}
 		}
+
+		public Guild Guild => _guild;
 
 		public override bool AddToWorld()
 		{
@@ -83,54 +88,65 @@ namespace DOL.GS.Scripts
 
 		public override bool Interact(GamePlayer player)
 		{
-			if (!base.Interact(player) || player.Guild == null)
+			if (!base.Interact(player))
 				return false;
 
+			/*
 			if (player.Client.Account.PrivLevel == 1 && !player.GuildRank.Claim)
 			{
 				player.Out.SendMessage($"Bonjour {player.Name}, je ne discute pas avec les bleus, circulez.", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 				return true;
 			}
-
-			if (player.GuildID != _guild?.GuildID)
+			*/
+			var sameFaction = BreamorFactionMgr.IsSameFaction(this, player);
+			var hasGuildClaim = player.Guild != null && player.GuildRank.Claim;
+			var canGuildClaim = hasGuildClaim && Guild == player.Guild;
+			var actions = new List<(bool, string)>
 			{
-				player.Out.SendMessage(
-					$"Bonjour {player.GuildRank?.Title ?? ""} {player.Name} que puis-je faire pour vous ?\n[capturer le territoire] ({Money.GetShortString(CLAIM_COST)})",
-					eChatType.CT_System,
-					eChatLoc.CL_PopupWindow
-				);
-				return true;
-			}
+				(!sameFaction && !BreamorFactionMgr.IsNeutral(player), "capturer le territoire pour ma faction"),
+				(hasGuildClaim && Guild == null, "capturer le territoire pour ma guilde"),
+				(canGuildClaim, "modifier les alliances"),
+				((!BreamorFactionMgr.IsNeutral(player) && sameFaction) || canGuildClaim, "payer un nouveau garde"),
+			};
 
-			player.Out.SendMessage($"Bonjour {player.GuildRank?.Title ?? ""} {player.Name}, que puis-je faire pour vous ?\n\n[modifier les alliances]\n", eChatType.CT_System, eChatLoc.CL_PopupWindow);
+			var title = player.GuildRank?.Title ?? BreamorFactionMgr.GetRank(player).Item1;
+			var actionStr = string.Join('\n', actions.Where(act => act.Item1).Select(act => act.Item2));
+			player.Out.SendMessage($"Bonjour {title} {player.Name}, que puis-je faire pour vous ?\n\n{actionStr}", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 			return true;
 		}
 
 		public override bool WhisperReceive(GameLiving source, string text)
 		{
-			if (!base.WhisperReceive(source, text) || _guild == null)
+			if (!base.WhisperReceive(source, text) || source is not GamePlayer player)
 				return false;
-			if (!(source is GamePlayer player))
-				return false;
-			if (player.GuildID != _guild.GuildID)
+			
+			var sameFaction = BreamorFactionMgr.IsSameFaction(this, player);
+			var hasGuildClaim = player.Guild != null && player.GuildRank.Claim;
+			var canGuildClaim = hasGuildClaim && Guild == player.Guild;
+
+			switch (text)
 			{
-				if (player.GuildRank.Claim && text == "capturer le territoire")
+				case "capturer le territoire pour ma guilde":
 				{
-					Claim(player);
+					if (hasGuildClaim && Guild == null)
+						Claim(player, player.Guild);
 					return true;
 				}
-				if (player.Client.Account.PrivLevel == 1)
-					return false;
-			}
+				case "capturer le territoire pour ma faction":
+				{
+					if (!sameFaction && !BreamorFactionMgr.IsNeutral(player))
+						Claim(player, null);
+					return true;
+				}
 
-			switch(text)
-			{
-				case "default":
 				case "modifier les alliances":
+					if (!canGuildClaim)
+						return false;
 					var guilds = GuildMgr.GetAllGuilds()
 						.Where(g => !_systemGuildIds.Contains(g.GuildID) && g.GuildID != _guild.GuildID)
 						.OrderBy(g => g.Name)
-						.Select(g => {
+						.Select(g =>
+						{
 							var safe = safeGuildIds.Contains(g.GuildID);
 							if (safe)
 								return $"{g.Name}: [{g.ID}. attaquer à vue]";
@@ -142,14 +158,19 @@ namespace DOL.GS.Scripts
 					guilds += (safeNoGuild ? "" : "ne plus ") + "attaquer à vue]";
 					player.Out.SendMessage($"Voici la liste des guildes et leurs paramètres :\n${guilds}", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 					return true;
-				case "acheter un garde":
-					BuyGuard(player);
+
+				case "payer un nouveau garde":
+					if ((!BreamorFactionMgr.IsNeutral(player) && sameFaction) || canGuildClaim)
+						BuyGuard(player);
 					return true;
 			}
 
+			// change guild allies
+			if (!canGuildClaim)
+				return false;
 			var dotIdx = text.IndexOf('.');
 			ushort id;
-			if (dotIdx > 0 && ushort.TryParse(text.Substring(0, dotIdx), out id))
+			if (dotIdx > 0 && ushort.TryParse(text[..dotIdx], out id))
 			{
 				var guild = GuildMgr.GetAllGuilds().FirstOrDefault(g => g.ID == id);
 				if (guild == null && id != 256)
@@ -160,8 +181,9 @@ namespace DOL.GS.Scripts
 				else
 					safeGuildIds.Add(guildID);
 				SaveIntoDatabase();
-				return WhisperReceive(source, "default");
+				return WhisperReceive(source, "modifier les alliances");
 			}
+
 			return false;
 		}
 
@@ -189,7 +211,7 @@ namespace DOL.GS.Scripts
 			player.Out.SendMessage($"Vous devez prendre contact avec un Game Master d'Amtenaël.", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 		}
 
-		public void Claim(GamePlayer player)
+		public void Claim(GamePlayer player, Guild guild)
 		{
 			if (!Name.StartsWith("Capitaine"))
 			{
@@ -222,7 +244,7 @@ namespace DOL.GS.Scripts
 				return;
 			}
 
-			if (!player.RemoveMoney(CLAIM_COST))
+			if (Guild != null && !player.RemoveMoney(CLAIM_COST))
 			{
 				player.Out.SendMessage(
 					"Vous n'avez pas assez d'argent pour prendre possession du territoire.",
