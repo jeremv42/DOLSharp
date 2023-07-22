@@ -261,7 +261,7 @@ namespace DOL.GS
 		public override void WalkToSpawn(short _speed)
 		{
 			EvadeChance = 100;
-			WalkToSpawn(MaxSpeed);
+			base.WalkToSpawn(MaxSpeed);
 		}
 
 		public override void OnAttackedByEnemy(AttackData ad)

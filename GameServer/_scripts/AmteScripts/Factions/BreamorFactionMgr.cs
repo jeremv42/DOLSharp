@@ -17,6 +17,11 @@ namespace DOL.GS
 		public const int Zone_Avernes = -200_000;
 		public const int Zone_Max = 10_000_000;
 
+		public const int GvGGuard_Helviens = -500_000;
+		public const int GvGGuard_Avernes = 500_000;
+		public const int GvGGuard_Avernes_Emblem = 45358;
+		public const int GvGGuard_Helviens_Emblem = 61258;
+
 		public static readonly Dictionary<int, (string, string)> Zone_Ranks = new()
 		{
 			// Helviens

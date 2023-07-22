@@ -68,7 +68,8 @@ namespace DOL.GS.Commands
         "/player allchars <PlayerName>",
         "/player class <list|classID> - view a list of classes, or change the targets class.",
         "/player areas - list all the areas the player is currently inside of ",
-        "/player quest [remove <quest name>] - Manage the player's quests"
+        "/player quest [remove <quest name>] - Manage the player's quests",
+        "/player faction <add|set> <value> - modify Breamor faction value of the targeted player"
 		)]
 	public class PlayerCommandHandler : AbstractCommandHandler, ICommandHandler
 	{
@@ -2235,6 +2236,30 @@ namespace DOL.GS.Commands
                         return;
                     }
                 #endregion
+
+                case "faction":
+                {
+                    if (args.Length != 4 || !new List<string> {"add", "set"}.Contains(args[2]) || !int.TryParse(args[3], out var value))
+                    {
+                        DisplaySyntax(client, "faction");
+                        return;
+                    }
+
+                    if (client.Player?.TargetObject is not GamePlayer player)
+                    {
+                        DisplaySyntax(client, "faction");
+                        return;
+                    }
+
+                    if (args[2] == "add")
+                        player.BreamorFaction += value;
+                    else
+                        player.BreamorFaction = value;
+                    player.SaveIntoDatabase();
+                    
+                    DisplayMessage(client, $"{player.Name} (acc: {player.AccountName})'s Breamor faction is {BreamorFactionMgr.GetRank(player)} ({player.BreamorFaction})");
+                    break;
+                }
             }
 		}
 

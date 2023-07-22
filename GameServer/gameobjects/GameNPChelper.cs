@@ -30,23 +30,23 @@ namespace DOL.GS
 
 		#region GameNPC cast methods
 		/// <summary>
-		/// Cast a spell on player and its pets/subpets if available.
+		/// Cast a spell on living and its pets/subpets if available.
 		/// </summary>
 		/// <param name="sourceNPC">NPC that is casting the spell</param>
-		/// <param name="player">Player is the owner and first target of the spell</param>
+		/// <param name="living">Living is the owner and first target of the spell</param>
 		/// <param name="spell">Casted spell</param>
 		/// <param name="line">SpellLine the casted spell is derived from</param>
 		/// <param name="checkLOS">Determines if line of sight is checked</param>
-		public static void CastSpellOnOwnerAndPets(this GameNPC sourceNPC, GamePlayer player, Spell spell, SpellLine line, bool checkLOS)
+		public static void CastSpellOnOwnerAndPets(this GameNPC sourceNPC, GameLiving living, Spell spell, SpellLine line, bool checkLOS)
 		{
-			sourceNPC.TargetObject = player;
+			sourceNPC.TargetObject = living;
 			sourceNPC.CastSpell(spell, line, checkLOS);
-			if (player.ControlledBrain != null)
+			if (living.ControlledBrain != null)
 			{
-				sourceNPC.TargetObject = player.ControlledBrain.Body;
+				sourceNPC.TargetObject = living.ControlledBrain.Body;
 				sourceNPC.CastSpell(spell, line, checkLOS);
-				if (player.ControlledBrain.Body.ControlledNpcList != null)
-					foreach (AI.Brain.IControlledBrain subpet in player.ControlledBrain.Body.ControlledNpcList)
+				if (living.ControlledBrain.Body.ControlledNpcList != null)
+					foreach (AI.Brain.IControlledBrain subpet in living.ControlledBrain.Body.ControlledNpcList)
 						if (subpet != null)
 						{
 							sourceNPC.TargetObject = subpet.Body;
@@ -59,12 +59,12 @@ namespace DOL.GS
 		/// Cast a spell on player and its pets/subpets if available (LOS checked).
 		/// </summary>
 		/// <param name="sourceNPC">NPC that is casting the spell</param>
-		/// <param name="player">Player is the owner and first target of the spell</param>
+		/// <param name="living">Living is the owner and first target of the spell</param>
 		/// <param name="spell">Casted spell</param>
 		/// <param name="line">SpellLine the casted spell is derived from</param>
-		public static void CastSpellOnOwnerAndPets(this GameNPC sourceNPC, GamePlayer player, Spell spell, SpellLine line)
+		public static void CastSpellOnOwnerAndPets(this GameNPC sourceNPC, GameLiving living, Spell spell, SpellLine line)
 		{
-			CastSpellOnOwnerAndPets(sourceNPC, player, spell, line, true);
+			CastSpellOnOwnerAndPets(sourceNPC, living, spell, line, true);
 		}
 		#endregion GameNPC cast methods
 	}

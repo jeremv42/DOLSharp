@@ -12,7 +12,7 @@ namespace DOL.GS.Scripts
 	{
 		public const long CLAIM_COST = 50 * 100 * 100; // 50g
 		public const ushort AREA_RADIUS = 5500;
-		public const ushort NEUTRAL_EMBLEM = 256;
+		public const int NEUTRAL_EMBLEM = 256;
 
 		/// <summary>
 		/// "Fausses" guildes : Albion, Hibernia, Midgard, Les Maitres du Temps, Citoyens d'Amtenael
@@ -59,17 +59,6 @@ namespace DOL.GS.Scripts
 			return param;
 		}
 
-		public override string GuildName
-		{
-			get => base.GuildName;
-			set
-			{
-				base.GuildName = value;
-				_guild = GuildMgr.GetGuildByName(value);
-				ResetArea(_guild?.Emblem ?? NEUTRAL_EMBLEM);
-			}
-		}
-
 		public Guild Guild => _guild;
 
 		public override bool AddToWorld()
@@ -110,7 +99,7 @@ namespace DOL.GS.Scripts
 			};
 
 			var title = player.GuildRank?.Title ?? BreamorFactionMgr.GetRank(player).Item1;
-			var actionStr = string.Join('\n', actions.Where(act => act.Item1).Select(act => act.Item2));
+			var actionStr = string.Join('\n', actions.Where(act => act.Item1).Select(act => $"[{act.Item2}]"));
 			player.Out.SendMessage($"Bonjour {title} {player.Name}, que puis-je faire pour vous ?\n\n{actionStr}", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 			return true;
 		}
@@ -213,7 +202,7 @@ namespace DOL.GS.Scripts
 
 		public void Claim(GamePlayer player, Guild guild)
 		{
-			if (!Name.StartsWith("Capitaine"))
+			if (!Name.StartsWith("Capitaine") && !Name.StartsWith("Legatus") && !Name.StartsWith("Jarl"))
 			{
 				player.Out.SendMessage(
 					"Vous devez demander à un GM pour ce type de territoire.",
@@ -223,18 +212,10 @@ namespace DOL.GS.Scripts
 				return;
 			}
 
-			if (DateTime.Now.DayOfWeek != DayOfWeek.Monday || DateTime.Now.Hour < 21 || DateTime.Now.Hour > 23)
-			{
-				player.Out.SendMessage(
-					"Il n'est pas possible de capturer des territoires aujourd'hui à cette heure-ci.\n" +
-					"Pour le moment, les territoires ne sont prenables que le lundi entre 21h et 23h.\n",
-					eChatType.CT_System,
-					eChatLoc.CL_PopupWindow
-				);
+			if (!GvGManager.IsOpen(player))
 				return;
-			}
 
-			if (GetGuardsInRadius(AREA_RADIUS).Any(g => g.IsAlive))
+			if (GetGuardsInRadius(AREA_RADIUS * 2).Any(g => g.IsAlive))
 			{
 				player.Out.SendMessage(
 					"Vous devez tuer tous les gardes avant de pouvoir prendre possession du territoire.",
@@ -244,7 +225,7 @@ namespace DOL.GS.Scripts
 				return;
 			}
 
-			if (Guild != null && !player.RemoveMoney(CLAIM_COST))
+			if (guild != null && !player.RemoveMoney(CLAIM_COST))
 			{
 				player.Out.SendMessage(
 					"Vous n'avez pas assez d'argent pour prendre possession du territoire.",
@@ -255,14 +236,35 @@ namespace DOL.GS.Scripts
 			}
 
 			var oldguild = GuildMgr.GetGuildByName(GuildName);
-			GuildName = player.GuildName;
+			int emblem;
+			if (guild == null)
+			{
+				BreamorFaction = BreamorFactionMgr.IsAverne(player) ? BreamorFactionMgr.GvGGuard_Avernes : BreamorFactionMgr.GvGGuard_Helviens;
+				_guild = null;
+				GuildName = BreamorFactionMgr.IsAverne(player) ? "Avernes" : "Helviens";
+				emblem = BreamorFactionMgr.IsAverne(player) ? BreamorFactionMgr.GvGGuard_Avernes_Emblem : BreamorFactionMgr.GvGGuard_Helviens_Emblem;
+			}
+			else
+			{
+				BreamorFaction = 0;
+				_guild = guild;
+				GuildName = guild.Name;
+				emblem = guild.Emblem;
+			}
 			SaveIntoDatabase();
-			ResetArea(player.Guild?.Emblem ?? NEUTRAL_EMBLEM, oldguild?.Emblem ?? NEUTRAL_EMBLEM);
-			player.Out.SendMessage(
-				"Le territoire appartient maintenant à votre guilde, que voulez-vous faire ?\n\n[modifier les alliances]\n",
-				eChatType.CT_System,
-				eChatLoc.CL_PopupWindow
-			);
+			ResetArea(emblem, oldguild?.Emblem ?? NEUTRAL_EMBLEM);
+			if (guild != null)
+				player.Out.SendMessage(
+					"Le territoire appartient maintenant à votre guilde, que voulez-vous faire ?\n\n[modifier les alliances]\n",
+					eChatType.CT_System,
+					eChatLoc.CL_PopupWindow
+				);
+			else
+				player.Out.SendMessage(
+					"Le territoire appartient maintenant à votre faction !",
+					eChatType.CT_System,
+					eChatLoc.CL_PopupWindow
+				);
 		}
 	}
 }

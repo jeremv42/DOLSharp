@@ -25,18 +25,6 @@ namespace DOL.GS.Scripts
 			}
 		}
 
-		public override string GuildName
-		{
-			get => base.GuildName;
-			set
-			{
-				var old = base.GuildName;
-				base.GuildName = value;
-				if (old != value)
-					RefreshEmblem();
-			}
-		}
-
 		public SimpleGvGGuard()
 		{
 			var brain = new SimpleGvGGuardBrain();
@@ -130,15 +118,29 @@ namespace DOL.GS.Scripts
 
 		public void RefreshEmblem()
 		{
-			if (string.IsNullOrWhiteSpace(GuildName) || ObjectState != eObjectState.Active || CurrentRegion == null || Inventory?.VisibleItems == null)
+			if (ObjectState != eObjectState.Active || CurrentRegion == null || Inventory?.VisibleItems == null)
 				return;
-			var guild = GuildMgr.GetGuildByName(GuildName);
-			if (guild == null)
-				return;
+			var emblem = GuildCaptainGuard.NEUTRAL_EMBLEM;
+			if (BreamorFaction != 0)
+			{
+				emblem = BreamorFactionMgr.IsAverne(this) ? BreamorFactionMgr.GvGGuard_Avernes_Emblem : BreamorFactionMgr.GvGGuard_Helviens_Emblem;
+			}
+			else
+			{
+				var guild = GuildMgr.GetGuildByName(GuildName);
+				if (guild != null)
+					emblem = guild.Emblem;
+			}
 			foreach (var item in Inventory.VisibleItems)
 				if (item.Emblem != 0 || item.Color == GuildCaptainGuard.NEUTRAL_EMBLEM)
-					item.Emblem = guild.Emblem;
+					item.Emblem = emblem;
 			SaveIntoDatabase();
+		}
+
+		public override void WalkToSpawn(short speed)
+		{
+			this.CastSpellOnOwnerAndPets(this, SkillBase.GetSpellByID(GameHastener.SPEEDOFTHEREALMID), SkillBase.GetSpellLine(GlobalSpellsLines.Realm_Spells), false);
+			base.WalkToSpawn(MaxSpeed);
 		}
 	}
 }
@@ -170,6 +172,8 @@ namespace DOL.AI.Brain
 				var name = _captain?.GuildName ?? "";
 				if (name != Body.GuildName)
 					Body.GuildName = name;
+				Body.BreamorFaction = _captain?.BreamorFaction ?? 0;
+				(Body as SimpleGvGGuard)?.RefreshEmblem();
 			}
 		}
 
@@ -187,7 +191,7 @@ namespace DOL.AI.Brain
 				if (!pl.IsAlive || pl.ObjectState != GameObject.eObjectState.Active || !GameServer.ServerRules.IsAllowedToAttack(Body, pl, true))
 					continue;
 
-				int aggro = CalculateAggroLevelToTarget(pl);
+				var aggro = CalculateAggroLevelToTarget(pl);
 				if (aggro <= 0)
 					continue;
 				AddToAggroList(pl, aggro);
@@ -209,7 +213,7 @@ namespace DOL.AI.Brain
 					!GameServer.ServerRules.IsAllowedToAttack(Body, npc, true))
 					continue;
 
-				int aggro = CalculateAggroLevelToTarget(npc);
+				var aggro = CalculateAggroLevelToTarget(npc);
 				if (aggro <= 0)
 					continue;
 				AddToAggroList(npc, aggro);

@@ -75,7 +75,9 @@ namespace DOL.GS.Commands
 			text.Append("using System;\n");
 			text.Append("using System.Reflection;\n");
 			text.Append("using System.Collections;\n");
+			text.Append("using System.Collections.Generic;\n");
 			text.Append("using System.Threading;\n");
+			text.Append("using System.Linq;\n");
 			text.Append("using DOL;\n");
 			text.Append("using DOL.AI;\n");
 			text.Append("using DOL.AI.Brain;\n");
@@ -97,7 +99,8 @@ namespace DOL.GS.Commands
 			text.Append("	string str = (obj==null)?\"(null)\":obj.ToString();\n");
 			text.Append("	if (Client==null || Client.Player==null) Log.Debug(str);\n	else Client.Out.SendMessage(str, eChatType.CT_System, eChatLoc.CL_SystemWindow);\n}\n");
 			text.Append("public static void DynMethod(GameObject target, GamePlayer player) {\nif (player!=null) Client = player.Client;\n");
-			text.Append("GameNPC targetNpc = target as GameNPC;");
+			text.Append("GameNPC targetNpc = target as GameNPC;\n");
+			text.Append("GamePlayer targetPlayer = target as GamePlayer;\n");
 			text.Append(methodBody);
 			text.Append("\n}\n}\n");
 			return text.ToString();
