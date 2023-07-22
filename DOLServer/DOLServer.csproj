@@ -1,10 +1,11 @@
 ﻿<Project>
   <PropertyGroup>
     <BaseIntermediateOutputPath>..\build\DOLServer\$(Configuration)\</BaseIntermediateOutputPath>
+    <Nullable>warnings</Nullable>
   </PropertyGroup>
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
