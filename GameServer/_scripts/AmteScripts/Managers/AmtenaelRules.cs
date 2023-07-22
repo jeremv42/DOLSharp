@@ -24,7 +24,7 @@ namespace DOL.GS.ServerRules
 
 		public override string RulesDescription()
 		{
-			return "Règles d'Amtenaël (PvP + RvR)";
+			return "Règles de Breamor (PvP avec factions)";
 		}
 
 		public override void OnReleased(DOLEvent e, object sender, EventArgs args)

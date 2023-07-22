@@ -95,7 +95,7 @@ namespace DOL.GS.Scripts
 				(!sameFaction && !BreamorFactionMgr.IsNeutral(player), "capturer le territoire pour ma faction"),
 				(hasGuildClaim && Guild == null, "capturer le territoire pour ma guilde"),
 				(canGuildClaim, "modifier les alliances"),
-				((!BreamorFactionMgr.IsNeutral(player) && sameFaction) || canGuildClaim, "payer un nouveau garde"),
+				// ((!BreamorFactionMgr.IsNeutral(player) && sameFaction) || canGuildClaim, "payer un nouveau garde"),
 			};
 
 			var title = player.GuildRank?.Title ?? BreamorFactionMgr.GetRank(player).Item1;
@@ -197,7 +197,7 @@ namespace DOL.GS.Scripts
 
 		public void BuyGuard(GamePlayer player)
 		{
-			player.Out.SendMessage($"Vous devez prendre contact avec un Game Master d'Amtenaël.", eChatType.CT_System, eChatLoc.CL_PopupWindow);
+			player.Out.SendMessage($"Vous devez prendre contact avec un Game Master.", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 		}
 
 		public void Claim(GamePlayer player, Guild guild)

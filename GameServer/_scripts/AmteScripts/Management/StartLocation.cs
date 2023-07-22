@@ -26,43 +26,17 @@ namespace AmteScripts.Management
 				return;
 			charArgs.Character.GuildID = "17118d10-a7e9-4aee-82e5-cd6ca50c0c33";
 			charArgs.Character.GuildRank = 8;
-			switch (charArgs.Character.Realm)
-            {
-                case (int)eRealm.Albion:
-                default:
-                    charArgs.Character.Xpos = 535434;
-                    charArgs.Character.Ypos = 547817;
-                    charArgs.Character.Zpos = 4800;
-                    charArgs.Character.Region = 51;
-                    charArgs.Character.BindXpos = 535434;
-                    charArgs.Character.BindYpos = 547817;
-                    charArgs.Character.BindZpos = 4800;
-                    charArgs.Character.BindRegion = 51;
-                    charArgs.Character.BindHeading = 2333;
-                    break;
-                case (int)eRealm.Midgard:
-                    charArgs.Character.Xpos = 403686;
-                    charArgs.Character.Ypos = 503203;
-                    charArgs.Character.Zpos = 4680;
-                    charArgs.Character.Region = 51;
-                    charArgs.Character.BindXpos = 403686;
-                    charArgs.Character.BindYpos = 503203;
-                    charArgs.Character.BindZpos = 4680;
-                    charArgs.Character.BindRegion = 51;
-                    charArgs.Character.BindHeading = 1999;
-                    break;
-                case (int)eRealm.Hibernia:
-                    charArgs.Character.Xpos = 427382;
-                    charArgs.Character.Ypos = 416633;
-                    charArgs.Character.Zpos = 5712;
-                    charArgs.Character.Region = 51;
-                    charArgs.Character.BindXpos = 427382;
-                    charArgs.Character.BindYpos = 416633;
-                    charArgs.Character.BindZpos = 5712;
-                    charArgs.Character.BindRegion = 51;
-                    charArgs.Character.BindHeading = 2602;
-                    break;
-            }
+			charArgs.Character.Region = 163;
+			charArgs.Character.Xpos = 609510;
+			charArgs.Character.Ypos = 376820;
+			charArgs.Character.Zpos = 8904;
+			charArgs.Character.Direction = 3726;
+
+			charArgs.Character.BindRegion = 163;
+			charArgs.Character.BindXpos = 609510;
+			charArgs.Character.BindYpos = 376820;
+			charArgs.Character.BindZpos = 8904;
+			charArgs.Character.BindHeading = 3726;
 		}
 	}
 }

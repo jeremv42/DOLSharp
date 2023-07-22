@@ -15,7 +15,7 @@ namespace DOL.GS
         {
             get
             {
-                return GameServer.Instance.Configuration.ServerNameShort == "AMTETEST";
+                return GameServer.Instance.Configuration.ServerNameShort == "BREATEST";
             }
         }
 
@@ -24,7 +24,7 @@ namespace DOL.GS
         {
             get
             {
-                return GameServer.Instance.Configuration.ServerNameShort == "AMTENAEL";
+                return GameServer.Instance.Configuration.ServerNameShort == "BREAMOR";
             }
         }
 
