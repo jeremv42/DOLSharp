@@ -1482,179 +1482,15 @@ namespace DOL.GS
 						relHeading = (ushort)BindHouseHeading;
 						break;
 					}
-					
-				case eReleaseType.City:
-					{
-						if (Realm == eRealm.Hibernia)
-						{
-							relRegion = 201; // Tir Na Nog
-							relX = 8192 + 15780;
-							relY = 8192 + 22727;
-							relZ = 7060;
-						}
-						else if (Realm == eRealm.Midgard)
-						{
-							relRegion = 101; // Jordheim
-							relX = 8192 + 24664;
-							relY = 8192 + 21402;
-							relZ = 8759;
-						}
-						else
-						{
-							relRegion = 10; // City of Camelot
-							relX = 8192 + 26315;
-							relY = 8192 + 21177;
-							relZ = 8256;
-						}
-						relHeading = 2048;
-						break;
-					}
 				case eReleaseType.RvR:
-					{
-						foreach (AbstractGameKeep keep in GameServer.KeepManager.GetKeepsOfRegion(CurrentRegionID))
-						{
-							if (keep.IsPortalKeep && keep.OriginalRealm == Realm)
-							{
-								relRegion = keep.CurrentRegion.ID;
-								relX = keep.X;
-								relY = keep.Y;
-								relZ = keep.Z;
-							}
-						}
-
-						//if we aren't releasing anywhere, release to the border keeps
-						if (relX == 0)
-						{
-							relRegion = CurrentRegion.ID;
-							GameServer.KeepManager.GetBorderKeepLocation(((byte)Realm * 2) / 1, out relX, out relY, out relZ, out relHeading);
-						}
-						break;
-					}
+				case eReleaseType.City:
 				default:
 					{
-						if (!ServerProperties.Properties.DISABLE_TUTORIAL)
-						{
-							//Tutorial
-							if (BindRegion == 27)
-							{
-								switch (Realm)
-								{
-									case eRealm.Albion:
-										{
-											relRegion = 1; // Cotswold
-											relX = 8192 + 553251;
-											relY = 8192 + 502936;
-											relZ = 2280;
-											break;
-										}
-									case eRealm.Midgard:
-										{
-											relRegion = 100; // Mularn
-											relX = 8192 + 795621;
-											relY = 8192 + 719590;
-											relZ = 4680;
-											break;
-										}
-									case eRealm.Hibernia:
-										{
-											relRegion = 200; // MagMell
-											relX = 8192 + 338652;
-											relY = 8192 + 482335;
-											relZ = 5200;
-											break;
-										}
-								}
-								break;
-							}
-						}
-						switch (CurrentRegionID)
-						{
-								//battlegrounds
-							case 234:
-							case 235:
-							case 236:
-							case 237:
-							case 238:
-							case 239:
-							case 240:
-							case 241:
-							case 242:
-								{
-									//get the bg cap
-									byte cap = 50;
-									foreach (AbstractGameKeep keep in GameServer.KeepManager.GetKeepsOfRegion(CurrentRegionID))
-									{
-										if (keep.DBKeep.BaseLevel < cap)
-										{
-											cap = keep.DBKeep.BaseLevel;
-											break;
-										}
-									}
-									//get the portal location
-									foreach (AbstractGameKeep keep in GameServer.KeepManager.GetKeepsOfRegion(CurrentRegionID))
-									{
-										if (keep.DBKeep.BaseLevel > 50 && keep.Realm == Realm)
-										{
-											relRegion = (ushort)keep.Region;
-											relX = keep.X;
-											relY = keep.Y;
-											relZ = keep.Z;
-											break;
-										}
-									}
-									break;
-								}
-								//nf
-							case 163:
-								{
-									if (BindRegion != 163)
-									{
-										relRegion = 163;
-										switch (Realm)
-										{
-											case eRealm.Albion:
-												{
-													GameServer.KeepManager.GetBorderKeepLocation(1, out relX, out relY, out relZ, out relHeading);
-													break;
-												}
-											case eRealm.Midgard:
-												{
-													GameServer.KeepManager.GetBorderKeepLocation(3, out relX, out relY, out relZ, out relHeading);
-													break;
-												}
-											case eRealm.Hibernia:
-												{
-													GameServer.KeepManager.GetBorderKeepLocation(5, out relX, out relY, out relZ, out relHeading);
-													break;
-												}
-										}
-										break;
-									}
-									else
-									{
-										relRegion = (ushort)BindRegion;
-										relX = BindXpos;
-										relY = BindYpos;
-										relZ = BindZpos;
-										relHeading = (ushort)BindHeading;
-									}
-									break;
-								}/*
-								//bg45-49
-							case 165:
-								{
-									break;
-								}*/
-							default:
-								{
-									relRegion = (ushort)BindRegion;
-									relX = BindXpos;
-									relY = BindYpos;
-									relZ = BindZpos;
-									relHeading = (ushort)BindHeading;
-									break;
-								}
-						}
+						relRegion = (ushort)BindRegion;
+						relX = BindXpos;
+						relY = BindYpos;
+						relZ = BindZpos;
+						relHeading = (ushort)BindHeading;
 						break;
 					}
 			}
@@ -4957,6 +4793,14 @@ namespace DOL.GS
 		{
 			if (!GainXP && expTotal > 0)
 				return;
+
+			// TODO Breamor BETA
+			if (Level >= 35)
+			{
+				if (sendMessage)
+					Out.SendMessage("La béta limite l'expérience au niveau 35, vous ne gagnerez plus d'expérience une fois celui-ci atteint.", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
+				return;
+			}
 
 			//xp rate modifier
 			if (allowMultiply)
