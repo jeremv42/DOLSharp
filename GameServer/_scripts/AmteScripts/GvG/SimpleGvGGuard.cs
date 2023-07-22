@@ -109,6 +109,8 @@ namespace DOL.GS.Scripts
 
 		public override bool AddToWorld()
 		{
+			if (Brain is not SimpleGvGGuardBrain)
+				SetOwnBrain(new SimpleGvGGuardBrain());
 			if (!base.AddToWorld())
 				return false;
 			if (Captain != null)
