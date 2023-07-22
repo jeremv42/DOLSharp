@@ -24,7 +24,7 @@ void test_IsMidPointAligned(dtNavMeshQuery*)
         float B[] = Bcoords;                                                                                                                        \
         float C[] = Ccoords;                                                                                                                        \
         if (IsMidPointAligned(A, B, C) != (expected)) {                                                                                             \
-            std::cerr << "IsMidPointAligned(" STR(Acoords) ", " STR(Bcoords) ", " STR(Ccoords) ") expected to equals " STR(expected) << std::endl;  \
+            std::cerr << "IsMidPointAligned(" << STR(Acoords) << ", " << STR(Bcoords) << ", " << STR(Ccoords) << ") expected to equals " << STR(expected) << std::endl;  \
             /*throw 0;*/                                                                                                                                \
         }                                                                                                                                           \
     } while (0)
