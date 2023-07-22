@@ -1,4 +1,5 @@
 using System;
+using DOL.Events;
 using DOL.GS.PacketHandler;
 
 namespace DOL.GS.Scripts;
@@ -24,5 +25,23 @@ public static class GvGManager
 		}
 
 		return true;
+	}
+
+	[GameServerStartedEvent]
+	public static void ServerInit(DOLEvent _e, object _sender, EventArgs _args)
+	{
+		try
+		{
+			foreach (var captain in GuildCaptainGuard.allCaptains)
+			{
+				foreach (var guard in captain.GetGuardsInRadius())
+					guard.Captain = captain;
+			}
+		}
+		catch (Exception e)
+		{
+			Console.Error.WriteLine(e);
+			throw;
+		}
 	}
 }

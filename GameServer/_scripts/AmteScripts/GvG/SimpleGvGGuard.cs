@@ -14,10 +14,7 @@ namespace DOL.GS.Scripts
 	{
 		public GuildCaptainGuard Captain
 		{
-			get
-			{
-				return (Brain as SimpleGvGGuardBrain)?.Captain;
-			}
+			get => (Brain as SimpleGvGGuardBrain)?.Captain;
 			set
 			{
 				if (Brain is SimpleGvGGuardBrain guard)
