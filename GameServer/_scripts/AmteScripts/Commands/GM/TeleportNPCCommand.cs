@@ -167,6 +167,7 @@ namespace DOL.GS.Scripts
 						DisplaySyntax(client);
 						return;
 					}
+					text = string.Join(" ", args, 2, args.Length - 2);
 					if (npc.RemoveJumpPos(text))
 					{
 						player.Out.SendMessage("Le jump \"" + text + "\" a été supprimé.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
