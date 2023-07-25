@@ -14,18 +14,22 @@ namespace AmteScripts.Managers
 {
 	public class PvpManager
 	{
-		private static readonly TimeSpan _startTime = new TimeSpan(20, 0, 0);
-		private static readonly TimeSpan _endTime = new TimeSpan(23, 59, 59);
+		private static readonly TimeSpan _startTime = new(20, 0, 0);
+		private static readonly TimeSpan _endTime = new(23, 59, 59);
 		private const int _checkInterval = 30 * 1000; // 30 seconds
-		private static readonly GameLocation _stuckSpawn = new GameLocation("", 51, 434303, 493165, 3088, 1069);
+		private static readonly GameLocation _stuckSpawn = new("", 51, 434303, 493165, 3088, 1069);
 
 		#region Static part
-		private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+		private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
 		private static PvpManager _instance;
 		private static RegionTimer _timer;
 
-		public static PvpManager Instance { get { return _instance; } }
+		public static PvpManager Instance
+		{
+			get { return _instance; }
+		}
 
 		[ScriptLoadedEvent]
 		public static void OnServerStarted(DOLEvent e, object sender, EventArgs args)
@@ -45,19 +49,20 @@ namespace AmteScripts.Managers
 			log.Info("PvP Manager: Stopped");
 			_timer.Stop();
 		}
+
 		#endregion
 
 		private bool _isOpen;
 		private bool _isForcedOpen;
 		private ushort _region;
 
-		public bool IsOpen { get { return _isOpen; } }
-		public ushort Region { get { return _region; } }
+		public bool IsOpen => _isOpen;
+		public ushort Region => _region;
 
 		/// <summary>
 		/// &lt;regionID, Tuple&lt;TPs, spawnAlb, spawnMid, spawnHib&gt;&gt;
 		/// </summary>
-		private readonly Dictionary<ushort, Tuple<GameNPC, GameLocation>> _maps = new Dictionary<ushort, Tuple<GameNPC, GameLocation>>();
+		private readonly Dictionary<ushort, Tuple<GameNPC, GameLocation>> _maps = new();
 
 		private PvpManager()
 		{
@@ -77,6 +82,7 @@ namespace AmteScripts.Managers
 					continue;
 				_maps.Add(id, new Tuple<GameNPC, GameLocation>(spawn, new GameLocation("Spawn", spawn)));
 			}
+
 			return (from m in _maps select m.Key);
 		}
 
@@ -94,6 +100,7 @@ namespace AmteScripts.Managers
 				if ((DateTime.Now.TimeOfDay < _startTime || DateTime.Now.TimeOfDay > _endTime) && !Close())
 					WorldMgr.GetClientsOfRegion(_region).Foreach(RemovePlayer);
 			}
+
 			return _checkInterval;
 		}
 
@@ -128,11 +135,12 @@ namespace AmteScripts.Managers
 		{
 			if (!_isOpen || player.Level < 20)
 				return false;
-			if (player.Client.Account.PrivLevel == (uint)ePrivLevel.GM)
+			if (player.Client.Account.PrivLevel == (uint) ePrivLevel.GM)
 			{
 				player.Out.SendMessage("Casse-toi connard de GM !", eChatType.CT_System, eChatLoc.CL_PopupWindow);
 				return false;
 			}
+
 			RvrPlayer rvr = new RvrPlayer(player);
 			GameServer.Database.AddObject(rvr);
 
@@ -153,7 +161,7 @@ namespace AmteScripts.Managers
 
 		public void RemovePlayer(GamePlayer player)
 		{
-			if (player.Client.Account.PrivLevel == (uint)ePrivLevel.GM)
+			if (player.Client.Account.PrivLevel == (uint) ePrivLevel.GM)
 				return;
 			var rvr = GameServer.Database.SelectObject<RvrPlayer>(r => r.PlayerID == player.InternalID);
 			if (rvr == null)
@@ -164,7 +172,7 @@ namespace AmteScripts.Managers
 			else
 			{
 				rvr.ResetCharacter(player);
-				player.MoveTo((ushort)rvr.OldRegion, rvr.OldX, rvr.OldY, rvr.OldZ, (ushort)rvr.OldHeading);
+				player.MoveTo((ushort) rvr.OldRegion, rvr.OldX, rvr.OldY, rvr.OldZ, (ushort) rvr.OldHeading);
 				if (player.Guild != null)
 					player.Guild.RemovePlayer("PVP", player);
 				if (!string.IsNullOrWhiteSpace(rvr.GuildID))
@@ -173,6 +181,7 @@ namespace AmteScripts.Managers
 					if (guild != null)
 						guild.AddPlayer(player, guild.GetRankByID(rvr.GuildRank));
 				}
+
 				player.SaveIntoDatabase();
 				GameServer.Database.DeleteObject(rvr);
 			}

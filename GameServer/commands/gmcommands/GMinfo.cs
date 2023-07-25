@@ -43,11 +43,11 @@ namespace DOL.GS.Commands
 				
 			string name = "(NoName)";
 			var info = new List<string>();
-			info.Add("        Current Region : " + client.Player.CurrentRegionID );
-			info.Add(" ");
+			info.Add("       Current Region : " + client.Player.CurrentRegionID );
+			info.Add("");
 			Type regionType = client.Player.CurrentRegion.GetType();
-			info.Add("       Region ClassType: " + regionType.FullName);
-			info.Add(" ");
+			info.Add("      Region ClassType: " + regionType.FullName);
+			info.Add("");
 			
 			if (client.Player.TargetObject != null)
 			{
@@ -61,83 +61,83 @@ namespace DOL.GS.Commands
 					var target = client.Player.TargetObject as GameNPC;
 
 					if (target.NPCTemplate != null)
-						info.Add(" + NPCTemplate: " + "[" + target.NPCTemplate.TemplateId + "] " + target.NPCTemplate.Name);
-					info.Add(" + Class: " + target.GetType().ToString());
-					info.Add(" + Brain: " + (target.Brain == null ? "(null)" : target.Brain.GetType().ToString()));
+						info.Add("+ NPCTemplate: " + "[" + target.NPCTemplate.TemplateId + "] " + target.NPCTemplate.Name);
+					info.Add("+ Class: " + target.GetType().ToString());
+					info.Add("+ Brain: " + (target.Brain == null ? "(null)" : target.Brain.GetType().ToString()));
 					if (target.LoadedFromScript)
-						info.Add(" + Loaded: from Script");
+						info.Add("+ Loaded: from Script");
 					else
-						info.Add(" + Loaded: from Database");
-					info.Add(" ");
+						info.Add("+ Loaded: from Database");
+					info.Add("");
 					if (client.Player.TargetObject is GameMerchant)
 					{
 						var targetM = client.Player.TargetObject as GameMerchant;
 						
-                        info.Add(" + Is Merchant ");
+                        info.Add("+ Is Merchant ");
 						if (targetM.TradeItems != null)
 						{
-                            info.Add(" + Sell List: \n   " + targetM.TradeItems.ItemsListID);
+                            info.Add("+ Sell List: \n   " + targetM.TradeItems.ItemsListID);
 						}
 						else 
-							info.Add(" + Sell List:  Not Present !\n");
-						info.Add(" ");
+							info.Add("+ Sell List:  Not Present !\n");
+						info.Add("");
 					}
 					if (client.Player.TargetObject is GamePet)
 					{
 						var targetP = client.Player.TargetObject as GamePet;
-                        info.Add(" + Is Pet ");
-						info.Add(" + Pet Owner:   " + targetP.Owner);
-						info.Add(" ");
+                        info.Add("+ Is Pet ");
+						info.Add("+ Pet Owner:   " + targetP.Owner);
+						info.Add("");
 					}
 					
 					if (client.Player.TargetObject is GameMovingObject)
 					{
 						var targetM = client.Player.TargetObject as GameMovingObject;
-                        info.Add(" + Is GameMovingObject  ");
-                        info.Add(" + ( Boats - Siege weapons - Custom Object");
-						info.Add(" + Emblem:   " + targetM.Emblem);
-						info.Add(" ");
+                        info.Add("+ Is GameMovingObject  ");
+                        info.Add("+ ( Boats - Siege weapons - Custom Object");
+						info.Add("+ Emblem:   " + targetM.Emblem);
+						info.Add("");
 					}
 					
-					info.Add(" + Name: " + name);
+					info.Add("+ Name: " + name);
 					if (target.GuildName != null && target.GuildName.Length > 0)
-						info.Add(" + Guild: " + target.GuildName);
-					info.Add(" + Level: " + target.Level);
-					info.Add(" + Realm: " + GlobalConstants.RealmToName(target.Realm));
-					info.Add(" + Faction value: " + target.BreamorFaction);
-					info.Add(" + Model:  " + target.Model);
-					info.Add(" + Size " + target.Size);
+						info.Add("+ Guild: " + target.GuildName);
+					info.Add("+ Level: " + target.Level);
+					info.Add("+ Realm: " + GlobalConstants.RealmToName(target.Realm));
+					info.Add("+ Faction value: " + target.BreamorFaction);
+					info.Add("+ Model:  " + target.Model);
+					info.Add("+ Size " + target.Size);
 					info.Add(string.Format(" + Flags: {0} (0x{1})", ((GameNPC.eFlags)target.Flags).ToString("G"), target.Flags.ToString("X")));
-					info.Add(" ");
+					info.Add("");
 					
-					info.Add(" + Speed(current/max): " + target.CurrentSpeed + "/" + target.MaxSpeedBase);
-					info.Add(" + Health: " + target.Health + "/" + target.MaxHealth);
-					info.Add(" + Endu: " + target.Endurance + "/" + target.MaxEndurance);
-					info.Add(" + Mana: " + target.Mana + "/" + target.MaxMana);
-					info.Add(" + Conc: " + target.Concentration + "/" + target.MaxConcentration);
+					info.Add("+ Speed(current/max): " + target.CurrentSpeed + "/" + target.MaxSpeedBase);
+					info.Add("+ Health: " + target.Health + "/" + target.MaxHealth);
+					info.Add("+ Endu: " + target.Endurance + "/" + target.MaxEndurance);
+					info.Add("+ Mana: " + target.Mana + "/" + target.MaxMana);
+					info.Add("+ Conc: " + target.Concentration + "/" + target.MaxConcentration);
 					
 					IOldAggressiveBrain aggroBrain = target.Brain as IOldAggressiveBrain;
 					if (aggroBrain != null)
 					{
-						info.Add(" + Aggro level: " + aggroBrain.AggroLevel);
-						info.Add(" + Aggro range: " + aggroBrain.AggroRange);
+						info.Add("+ Aggro level: " + aggroBrain.AggroLevel);
+						info.Add("+ Aggro range: " + aggroBrain.AggroRange);
 
 						if (target.MaxDistance < 0)
-							info.Add(" + MaxDistance: " + -target.MaxDistance * aggroBrain.AggroRange / 100);
+							info.Add("+ MaxDistance: " + -target.MaxDistance * aggroBrain.AggroRange / 100);
 						else
-							info.Add(" + MaxDistance: " + target.MaxDistance);
+							info.Add("+ MaxDistance: " + target.MaxDistance);
 					}
 					else
-						info.Add(" + Not aggressive brain");
+						info.Add("+ Not aggressive brain");
 						
 					if (target.NPCTemplate != null)
-						info.Add(" + NPCTemplate: " + "[" + target.NPCTemplate.TemplateId + "] " + target.NPCTemplate.Name);
+						info.Add("+ NPCTemplate: " + "[" + target.NPCTemplate.TemplateId + "] " + target.NPCTemplate.Name);
 
-					info.Add(" + Roaming Range: " + target.RoamingRange);
+					info.Add("+ Roaming Range: " + target.RoamingRange);
 
 					TimeSpan respawn = TimeSpan.FromMilliseconds(target.RespawnInterval);
 					if (target.RespawnInterval <= 0)
-						info.Add(" + Respawn: NPC will not respawn");
+						info.Add("+ Respawn: NPC will not respawn");
 					else
 					{
 						string days = "";
@@ -146,79 +146,79 @@ namespace DOL.GS.Commands
 							days = respawn.Days + " days ";
 						if (respawn.Hours > 0)
 							hours = respawn.Hours + " hours ";
-						info.Add(" + Respawn: " + days + hours + respawn.Minutes + " minutes " + respawn.Seconds + " seconds");
-						info.Add(" + SpawnPoint:  " + target.SpawnPoint.X + ", " + target.SpawnPoint.Y + ", " + target.SpawnPoint.Z);
+						info.Add("+ Respawn: " + days + hours + respawn.Minutes + " minutes " + respawn.Seconds + " seconds");
+						info.Add("+ SpawnPoint:  " + target.SpawnPoint.X + ", " + target.SpawnPoint.Y + ", " + target.SpawnPoint.Z);
 					}
 					
 					if (target.QuestIdListToGive.Count > 0)
-						info.Add(" + Quests to give:  " + target.QuestIdListToGive.Count);
+						info.Add("+ Quests to give:  " + target.QuestIdListToGive.Count);
 						
 					if (target.PathID != null && target.PathID.Length > 0)
-						info.Add(" + Path: " + target.PathID);
+						info.Add("+ Path: " + target.PathID);
 						
 					if (target.OwnerID != null && target.OwnerID.Length > 0)
-						info.Add(" + OwnerID: " + target.OwnerID);
+						info.Add("+ OwnerID: " + target.OwnerID);
 						
-					info.Add(" ");
+					info.Add("");
 					info.Add($" + {target.Strength} STR / {target.Constitution} CON / {target.Dexterity} DEX / {target.Quickness} QUI");
 					info.Add($" + {target.Intelligence} INT / {target.Empathy} EMP / {target.Piety} PIE / {target.Charisma} CHR");
 					info.Add($" + {target.WeaponDps} DPS / {target.WeaponSpd} SPD / {target.ArmorFactor} AF / {target.ArmorAbsorb} ABS");
 					info.Add($" + {target.BlockChance}% Block / {target.ParryChance}% Parry / {target.EvadeChance}% Evade");
 					
-					info.Add(" + Damage type: " + target.MeleeDamageType);
+					info.Add("+ Damage type: " + target.MeleeDamageType);
 					if (target.LeftHandSwingChance > 0)
-						info.Add(" + Left Swing %: " + target.LeftHandSwingChance);
+						info.Add("+ Left Swing %: " + target.LeftHandSwingChance);
 						
 					if (target.Abilities != null && target.Abilities.Count > 0)
-						info.Add(" + Abilities: " + target.Abilities.Count);
+						info.Add("+ Abilities: " + target.Abilities.Count);
 						
 					if (target.Spells != null && target.Spells.Count > 0)
-						info.Add(" + Spells: " + target.Spells.Count);
+						info.Add("+ Spells: " + target.Spells.Count);
 						
 					if (target.Styles != null && target.Styles.Count > 0)
-						info.Add(" + Styles: " + target.Styles.Count);
+						info.Add("+ Styles: " + target.Styles.Count);
 						
-					info.Add(" ");
+					info.Add("");
 					if (target.Race > 0)
-						info.Add(" + Race:  " + target.Race);
+						info.Add("+ Race:  " + target.Race);
 						
 					if (target.BodyType > 0)
-						info.Add(" + Body Type:  " + target.BodyType);
+						info.Add("+ Body Type:  " + target.BodyType);
 						
 					if (target.GetDamageResist(eProperty.Resist_Crush) > 0)
-				    	info.Add(" + Resist Crush:  " + target.GetDamageResist(eProperty.Resist_Crush));
+				    	info.Add("+ Resist Crush:  " + target.GetDamageResist(eProperty.Resist_Crush));
 					if (target.GetDamageResist(eProperty.Resist_Slash) > 0)
-				    	info.Add(" + Resist Slash:  " + target.GetDamageResist(eProperty.Resist_Slash));
+				    	info.Add("+ Resist Slash:  " + target.GetDamageResist(eProperty.Resist_Slash));
 					if (target.GetDamageResist(eProperty.Resist_Thrust) > 0)
-				    	info.Add(" + Resist Thrust:  " + target.GetDamageResist(eProperty.Resist_Thrust));
+				    	info.Add("+ Resist Thrust:  " + target.GetDamageResist(eProperty.Resist_Thrust));
 					if (target.GetDamageResist(eProperty.Resist_Heat) > 0)
-				    	info.Add(" + Resist Heat:  " + target.GetDamageResist(eProperty.Resist_Heat));
+				    	info.Add("+ Resist Heat:  " + target.GetDamageResist(eProperty.Resist_Heat));
 					if (target.GetDamageResist(eProperty.Resist_Cold) > 0)
-				    	info.Add(" + Resist Cold:  " + target.GetDamageResist(eProperty.Resist_Cold));
+				    	info.Add("+ Resist Cold:  " + target.GetDamageResist(eProperty.Resist_Cold));
 					if (target.GetDamageResist(eProperty.Resist_Matter) > 0)
-				    	info.Add(" + Resist Matter:  " + target.GetDamageResist(eProperty.Resist_Matter));
+				    	info.Add("+ Resist Matter:  " + target.GetDamageResist(eProperty.Resist_Matter));
 					if (target.GetDamageResist(eProperty.Resist_Natural) > 0)
-				    	info.Add(" + Resist Natural:  " + target.GetDamageResist(eProperty.Resist_Natural));
+				    	info.Add("+ Resist Natural:  " + target.GetDamageResist(eProperty.Resist_Natural));
 					if (target.GetDamageResist(eProperty.Resist_Body) > 0)
-				    	info.Add(" + Resist Body:  " + target.GetDamageResist(eProperty.Resist_Body));
+				    	info.Add("+ Resist Body:  " + target.GetDamageResist(eProperty.Resist_Body));
 					if (target.GetDamageResist(eProperty.Resist_Spirit) > 0)
-				    	info.Add(" + Resist Spirit:  " + target.GetDamageResist(eProperty.Resist_Spirit));
+				    	info.Add("+ Resist Spirit:  " + target.GetDamageResist(eProperty.Resist_Spirit));
 					if (target.GetDamageResist(eProperty.Resist_Energy) > 0)
-				    	info.Add(" + Resist Energy:  " + target.GetDamageResist(eProperty.Resist_Energy));
-					info.Add(" + Active weapon slot: " + target.ActiveWeaponSlot);
-					info.Add(" + Visible weapon slot: " + target.VisibleActiveWeaponSlots);
+				    	info.Add("+ Resist Energy:  " + target.GetDamageResist(eProperty.Resist_Energy));
+					info.Add("+ Active weapon slot: " + target.ActiveWeaponSlot);
+					info.Add("+ Visible weapon slot: " + target.VisibleActiveWeaponSlots);
 					
 					if (target.EquipmentTemplateID != null && target.EquipmentTemplateID.Length > 0)
-						info.Add(" + Equipment Template ID: " + target.EquipmentTemplateID);
+						info.Add("+ Equipment Template ID: " + target.EquipmentTemplateID);
 						
 					if (target.Inventory != null)
-						info.Add(" + Inventory: " + target.Inventory.AllItems.Count + " items");
+						info.Add("+ Inventory: " + target.Inventory.AllItems.Count + " items");
 						
-					info.Add(" ");
-					info.Add(" + Mob_ID:  " + target.InternalID);
-					info.Add(" + Position:  " + target.Position.ToString("F0") + ", " + target.Heading);
-					info.Add(" + OID: " + target.ObjectID);
-					info.Add(" + Package ID:  " + target.PackageID);
+					info.Add("");
+					info.Add("+ Mob_ID:  " + target.InternalID);
+					info.Add("+ Position:  " + target.Position.ToString("F0") + ", " + target.Heading);
+					info.Add("+ OID: " + target.ObjectID);
+					info.Add("+ Package ID:  " + target.PackageID);
 					
 				/*	if (target.Brain != null && target.Brain.IsActive)
 					{
@@ -228,7 +228,7 @@ namespace DOL.GS.Commands
 					}
 				*/
 					info.Add("");
-					info.Add(" ------ State ------");
+					info.Add("------ State ------");
 					if (target.IsReturningHome || target.IsReturningToSpawnPoint)
 					{
 						info.Add("IsReturningHome: " + target.IsReturningHome);
@@ -285,7 +285,7 @@ namespace DOL.GS.Commands
 					}
 										
 					info.Add("");
-					info.Add(" + Loot:");
+					info.Add("+ Loot:");
 
 					var template = DOLDB<LootTemplate>.SelectObjects(DB.Column(nameof(LootTemplate.TemplateName)).IsEqualTo(target.Name));
 					foreach (LootTemplate loot in template)
@@ -316,37 +316,37 @@ namespace DOL.GS.Commands
 					var target = client.Player.TargetObject as GamePlayer;
 										
 					info.Add("PLAYER INFORMATION (Client # " + target.Client.SessionID + ")");
-					info.Add("  - Name : " + target.Name);
-					info.Add("  - Lastname : " + target.LastName);
-					info.Add("  - Realm : " + GlobalConstants.RealmToName(target.Realm));
-					info.Add("  - Faction value: " + target.BreamorFaction);
-					info.Add("  - Level : " + target.Level);
-					info.Add("  - Class : " + target.CharacterClass.Name);
-					info.Add("  - Guild : " + target.GuildName);
-					info.Add(" ");
-					info.Add("  - Account Name : " + target.AccountName);
-					info.Add("  - IP : " + target.Client.Account.LastLoginIP);
-					info.Add("  - Priv. Level : " + target.Client.Account.PrivLevel);
-					info.Add("  - Client Version: " + target.Client.Account.LastClientVersion);
-					info.Add(" ");
-					info.Add("  - Craftingskill : " + target.CraftingPrimarySkill + "");
-					info.Add("  - Model ID : " + target.Model);
-					info.Add("  - AFK Message: " + target.TempProperties.getProperty<string>(GamePlayer.AFK_MESSAGE) + "");
-					info.Add(" ");
-                    info.Add("  - Money : " + Money.GetString(target.GetCurrentMoney()) + "\n");
-					info.Add("  - Speed : " + target.MaxSpeedBase);
-					info.Add("  - XPs : " + target.Experience);
-					info.Add("  - RPs : " + target.RealmPoints);
-					info.Add("  - BPs : " + target.BountyPoints);
+					info.Add("- Name: " + target.Name);
+					info.Add("- Lastname: " + target.LastName);
+					info.Add("- Realm: " + GlobalConstants.RealmToName(target.Realm));
+					info.Add("- Faction value: " + target.BreamorFaction);
+					info.Add("- Level: " + target.Level);
+					info.Add("- Class: " + target.CharacterClass.Name);
+					info.Add("- Guild: " + target.GuildName);
+					info.Add("");
+					info.Add("- Account: " + target.AccountName + " (Discord: " + target.Client.Account.Discord + ")");
+					info.Add("- IP: " + target.Client.Account.LastLoginIP);
+					info.Add("- Priv. Level: " + target.Client.Account.PrivLevel);
+					info.Add("- Client Version: " + target.Client.Account.LastClientVersion);
+					info.Add("");
+					info.Add("- Craftingskill: " + target.CraftingPrimarySkill + "");
+					info.Add("- Model ID: " + target.Model);
+					info.Add("- AFK Message: " + target.TempProperties.getProperty<string>(GamePlayer.AFK_MESSAGE) + "");
+					info.Add("");
+                    info.Add("- Money: " + Money.GetString(target.GetCurrentMoney()) + "\n");
+					info.Add("- Speed: " + target.MaxSpeedBase);
+					info.Add("- XPs: " + target.Experience);
+					info.Add("- RPs: " + target.RealmPoints);
+					info.Add("- BPs: " + target.BountyPoints);
 
-					String sCurrent = "";
-					String sTitle = "";
+					string sCurrent = "";
+					string sTitle = "";
 					int cnt = 0;
 								
-					info.Add(" ");
-					info.Add("SPECCING INFORMATIONS ");
-					info.Add("  - Remaining spec. points : " + target.SkillSpecialtyPoints);
-					sTitle = "  - Player specialisations / level: \n";
+					info.Add("");
+					info.Add("SPEC. INFORMATIONS");
+					info.Add("- Remaining spec. points: " + target.SkillSpecialtyPoints);
+					sTitle = "- Player specialisations / level: \n";
 					sCurrent = "";
                     foreach (Specialization spec in target.GetSpecList())
 					{
@@ -357,18 +357,18 @@ namespace DOL.GS.Commands
 					sCurrent = "";
 					sTitle = "";
 
-					info.Add(" ");
-					info.Add("CHARACTER STATS ");
-					info.Add("  - Maximum Health : " + target.MaxHealth);
-					info.Add("  - Current AF : " + target.GetModified(eProperty.ArmorFactor));
-					info.Add("  - Current ABS : " + target.GetModified(eProperty.ArmorAbsorption));
+					info.Add("");
+					info.Add("CHARACTER STATS");
+					info.Add("- Maximum Health: " + target.MaxHealth);
+					info.Add("- Current AF: " + target.GetModified(eProperty.ArmorFactor));
+					info.Add("- Current ABS: " + target.GetModified(eProperty.ArmorAbsorption));
 
 					for (eProperty stat = eProperty.Stat_First; stat <= eProperty.Stat_Last; stat++, cnt++)
 					{
 						sTitle += GlobalConstants.PropertyToName(stat);
                         sCurrent += target.GetModified(stat);
 						
-						info.Add("  - " + sTitle + " : " + sCurrent);
+						info.Add("- " + sTitle + " : " + sCurrent);
 						sCurrent = "";
 						sTitle = "";
 					}
@@ -380,31 +380,31 @@ namespace DOL.GS.Commands
 					{
 						sTitle += GlobalConstants.PropertyToName(res);
                         sCurrent += target.GetModified(res);
-						info.Add("  - " + sTitle + " : " + sCurrent);
+						info.Add("- " + sTitle + " : " + sCurrent);
 						sCurrent = "";
 						sTitle = "";
 					}
 
-					info.Add(" ");
-					info.Add(" ");
-					info.Add("  - Respecs dol : " + target.RespecAmountDOL);
-					info.Add("  - Respecs single : " + target.RespecAmountSingleSkill);
-					info.Add("  - Respecs full : " + target.RespecAmountAllSkill);
+					info.Add("");
+					info.Add("");
+					info.Add("- Respecs dol : " + target.RespecAmountDOL);
+					info.Add("- Respecs single : " + target.RespecAmountSingleSkill);
+					info.Add("- Respecs full : " + target.RespecAmountAllSkill);
 					
-					info.Add(" ");
-					info.Add(" ");
-					info.Add("  --------------------------------------");
-					info.Add("  -----  Inventory Equiped -----");
-					info.Add("  --------------------------------------");
+					info.Add("");
+					info.Add("");
+					info.Add("--------------------------------------");
+					info.Add("-----  Inventory Equiped -----");
+					info.Add("--------------------------------------");
 					////////////// Inventaire /////////////
-					info.Add("  ----- Money:");
+					info.Add("----- Money:");
 					info.Add(Money.GetShortString(target.GetCurrentMoney()));
-					info.Add(" ");
+					info.Add("");
 
-					info.Add("  ----- Wearing:");
+					info.Add("----- Wearing:");
 					foreach (InventoryItem item in target.Inventory.EquippedItems)
-						info.Add(" [" + GlobalConstants.SlotToName(item.Item_Type) + "] " + item.Name);
-					info.Add(" ");
+						info.Add("[" + GlobalConstants.SlotToName(item.Item_Type) + "] " + item.Name);
+					info.Add("");
 				}
 
 				#endregion Player
@@ -416,19 +416,19 @@ namespace DOL.GS.Commands
 				{
 					var target = client.Player.TargetObject as GameStaticItem;
 					
-					info.Add("  ------- OBJECT ------\n");
-					info.Add(" Name: " + name);
-					info.Add(" Model: " + target.Model);
-					info.Add(" Emblem: " + target.Emblem);
-					info.Add(" Realm: " + target.Realm);
+					info.Add(" ------- OBJECT ------\n");
+					info.Add("Name: " + name);
+					info.Add("Model: " + target.Model);
+					info.Add("Emblem: " + target.Emblem);
+					info.Add("Realm: " + target.Realm);
 					if (target.Owners.LongLength > 0)
 					{
-						info.Add(" ");
-						info.Add(" Owner Name: " + target.Owners[0].Name);
+						info.Add("");
+						info.Add("Owner Name: " + target.Owners[0].Name);
 					}
-					info.Add(" ");
-					info.Add(" OID: " + target.ObjectID);
-					info.Add (" Type: " + target.GetType());
+					info.Add("");
+					info.Add("OID: " + target.ObjectID);
+					info.Add("Type: " + target.GetType());
 
 					WorldInventoryItem invItem = target as WorldInventoryItem;
 					if( invItem != null )
@@ -436,8 +436,8 @@ namespace DOL.GS.Commands
 						info.Add (" Count: " + invItem.Item.Count);
 					}
 
-					info.Add(" ");
-					info.Add(" Location: " + target.Position.ToString("F0"));
+					info.Add("");
+					info.Add("Location: " + target.Position.ToString("F0"));
 				}
 
 				#endregion StaticItem
@@ -450,7 +450,7 @@ namespace DOL.GS.Commands
 					var target = client.Player.TargetObject as GameDoor;
 					
 					string Realmname = "";
-					string statut = "";
+					string status = "";
 					
 					name = target.Name;
 					
@@ -470,24 +470,24 @@ namespace DOL.GS.Commands
 						Realmname = "All";
 						
 					if (target.Locked == 1)
-						statut = " Locked";
+						status = " Locked";
 						
 					if( target.Locked == 0 )
-						statut = " Unlocked";
+						status = " Unlocked";
 
-					info.Add("  ------- DOOR ------\n");
-					info.Add(" ");
-					info.Add( " + Name : " + target.Name );
-					info.Add(" + ID : " + target.DoorID);
-					info.Add( " + Realm : " + (int)target.Realm + " : " +Realmname );
-					info.Add( " + Level : " + target.Level );
-					info.Add( " + Guild : " + target.GuildName );
-					info.Add( " + Health : " + target.Health +" / "+ target.MaxHealth);
-					info.Add(" + Statut : " + statut);
-					info.Add(" + Type : " + DoorRequestHandler.m_handlerDoorID / 100000000);
-					info.Add(" ");
-					info.Add(" + Position : " + target.Position.ToString("F0"));
-					info.Add(" + Heading : " + target.Heading);
+					info.Add(" ------- DOOR ------\n");
+					info.Add("");
+					info.Add("+ Name: " + target.Name );
+					info.Add("+ ID: " + target.DoorID);
+					info.Add("+ Realm: " + (int)target.Realm + " : " +Realmname );
+					info.Add("+ Level: " + target.Level );
+					info.Add("+ Guild: " + target.GuildName );
+					info.Add("+ Health: " + target.Health +" / "+ target.MaxHealth);
+					info.Add("+ Status: " + status);
+					info.Add("+ Type: " + DoorRequestHandler.m_handlerDoorID / 100000000);
+					info.Add("");
+					info.Add("+ Position: " + target.Position.ToString("F0"));
+					info.Add("+ Heading: " + target.Heading);
 				}
 
 				#endregion Door
@@ -511,49 +511,49 @@ namespace DOL.GS.Commands
 					if((byte)target.Realm == 3)
 						realm = " Hibernia";
 						
-					info.Add( "  ------- KEEP ------\n");
-					info.Add( " + Name : " + target.Name);
-					info.Add( " + KeepID : " + target.Keep.KeepID);
-					info.Add( " + Level : " + target.Level);
-					info.Add( " + BaseLevel : " + target.Keep.BaseLevel);
-					info.Add( " + Realm : " + realm);
-					info.Add( " ");
-					info.Add( " + Model : " + target.Model);
-					info.Add( " + Skin : " + target.Skin);
-					info.Add( " + Height : " + target.Height);
-					info.Add( " + ID : " + target.ID);
-					info.Add( " ");
-					info.Add( " + Health : " + target.Health);
-					info.Add( " + IsRaized : " + target.IsRaized);
-					info.Add( " + Status : " + target.Status);
-					info.Add( " ");
-					info.Add( " + Climbing : " + target.Climbing);
-					info.Add( " ");
-					info.Add( " + ComponentX : " + target.ComponentX);
-					info.Add( " + ComponentY : " + target.ComponentY);
-					info.Add( " + ComponentHeading : " + target.ComponentHeading);
-					info.Add( " ");
-					info.Add( " + HookPoints : " + target.HookPoints.Count);
-					info.Add( " + Positions : " + target.Positions.Count);
-					info.Add( " ");
-					info.Add( " + RealmPointsValue : " + target.RealmPointsValue);
-					info.Add( " + ExperienceValue : " + target.ExperienceValue);
-					info.Add( " + AttackRange : " + target.AttackRange);
-					info.Add(" ");
+					info.Add("------- KEEP ------");
+					info.Add("+ Name: " + target.Name);
+					info.Add("+ KeepID: " + target.Keep.KeepID);
+					info.Add("+ Level: " + target.Level);
+					info.Add("+ BaseLevel: " + target.Keep.BaseLevel);
+					info.Add("+ Realm: " + realm);
+					info.Add("");
+					info.Add("+ Model: " + target.Model);
+					info.Add("+ Skin: " + target.Skin);
+					info.Add("+ Height: " + target.Height);
+					info.Add("+ ID: " + target.ID);
+					info.Add("");
+					info.Add("+ Health: " + target.Health);
+					info.Add("+ IsRaized: " + target.IsRaized);
+					info.Add("+ Status: " + target.Status);
+					info.Add("");
+					info.Add("+ Climbing: " + target.Climbing);
+					info.Add("");
+					info.Add("+ ComponentX: " + target.ComponentX);
+					info.Add("+ ComponentY: " + target.ComponentY);
+					info.Add("+ ComponentHeading: " + target.ComponentHeading);
+					info.Add("");
+					info.Add("+ HookPoints: " + target.HookPoints.Count);
+					info.Add("+ Positions: " + target.Positions.Count);
+					info.Add("");
+					info.Add("+ RealmPointsValue: " + target.RealmPointsValue);
+					info.Add("+ ExperienceValue: " + target.ExperienceValue);
+					info.Add("+ AttackRange: " + target.AttackRange);
+					info.Add("");
 					if (GameServer.KeepManager.GetFrontierKeeps().Contains(target.Keep))
 					{
-						info.Add(" + Keep Manager : " + GameServer.KeepManager.GetType().FullName);
-						info.Add(" + Frontiers");
+						info.Add("+ Keep Manager: " + GameServer.KeepManager.GetType().FullName);
+						info.Add("+ Frontiers");
 					}
 					else if (GameServer.KeepManager.GetBattleground(target.CurrentRegionID) != null)
 					{
-						info.Add(" + Keep Manager : " + GameServer.KeepManager.GetType().FullName);
+						info.Add("+ Keep Manager: " + GameServer.KeepManager.GetType().FullName);
 						Battleground bg = GameServer.KeepManager.GetBattleground(client.Player.CurrentRegionID);
-						info.Add(" + Battleground (" + bg.MinLevel + " to " + bg.MaxLevel + ", max RL: " + bg.MaxRealmLevel + ")");
+						info.Add("+ Battleground (" + bg.MinLevel + " to " + bg.MaxLevel + ", max RL: " + bg.MaxRealmLevel + ")");
 					}
 					else
 					{
-						info.Add(" + Keep Manager :  Not Managed");
+						info.Add("+ Keep Manager: Not Managed");
 					}
 				}
 
@@ -577,16 +577,16 @@ namespace DOL.GS.Commands
 					int level = house.Model - ((house.Model - 1)/4)*4;
 					TimeSpan due = (house.LastPaid.AddDays(ServerProperties.Properties.RENT_DUE_DAYS).AddHours(1) - DateTime.Now);
 					
-					info.Add("  ------- HOUSE ------\n");
+					info.Add(" ------- HOUSE ------\n");
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.Owner", name));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.Lotnum", house.HouseNumber));
 					info.Add("Unique ID: "+house.UniqueID);
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.Level", level));
-					info.Add(" ");
+					info.Add("");
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.Porch"));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.PorchEnabled", (house.Porch ? " Present" : " Not Present")));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.PorchRoofColor",  Color(house.PorchRoofColor)));
-					info.Add(" ");
+					info.Add("");
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.ExteriorMaterials"));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.RoofMaterial", MaterialWall(house.RoofMaterial)));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.WallMaterial", MaterialWall(house.WallMaterial)));
@@ -597,15 +597,15 @@ namespace DOL.GS.Commands
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.PorchMaterial", MaterialTruss(house.PorchMaterial)));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.WindowMaterial", MaterialTruss(house.WindowMaterial)));
 					
-					info.Add(" ");
+					info.Add("");
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.ExteriorUpgrades"));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.OutdoorGuildBanner", ((house.OutdoorGuildBanner) ? " Present" : " Not Present")));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.OutdoorGuildShield", ((house.OutdoorGuildShield) ? " Present" : " Not Present")));
-					info.Add(" ");
+					info.Add("");
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.InteriorUpgrades"));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.IndoorGuildBanner", ((house.IndoorGuildBanner) ? " Present" : " Not Present")));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.IndoorGuildShield",((house.IndoorGuildShield) ? " Present" : " Not Present")));
-					info.Add(" ");
+					info.Add("");
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.InteriorCarpets"));
 					if (house.Rug1Color != 0)
 						info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.Rug1Color", Color(house.Rug1Color)));
@@ -615,7 +615,7 @@ namespace DOL.GS.Commands
 						info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.Rug3Color", Color(house.Rug3Color)));
 					if (house.Rug4Color != 0)
 						info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.Rug4Color", Color(house.Rug4Color)));
-					info.Add(" ");
+					info.Add("");
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.Lockbox", Money.GetString(house.KeptMoney)));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.RentalPrice", Money.GetString(HouseMgr.GetRentByModel(house.Model))));
 					info.Add(LanguageMgr.GetTranslation(client.Account.Language, "House.SendHouseInfo.MaxLockbox", Money.GetString(HouseMgr.GetRentByModel(house.Model) * ServerProperties.Properties.RENT_LOCKBOX_PAYMENTS)));
@@ -627,76 +627,76 @@ namespace DOL.GS.Commands
 				}
 				else // No target and not in a house
 				{
-					info.Add(" Game Time: \t"+ hour.ToString() + ":" + minute.ToString());
-                    info.Add(" ");
-					info.Add(" Server Rules: " + GameServer.ServerRules.GetType().FullName);
+					info.Add("Game Time: \t"+ hour.ToString() + ":" + minute.ToString());
+                    info.Add("");
+					info.Add("Server Rules: " + GameServer.ServerRules.GetType().FullName);
 
 					if (GameServer.KeepManager.FrontierRegionsList.Contains(client.Player.CurrentRegionID))
 					{
-						info.Add(" Keep Manager: " + GameServer.KeepManager.GetType().FullName);
-						info.Add(" Frontiers");
+						info.Add("Keep Manager: " + GameServer.KeepManager.GetType().FullName);
+						info.Add("Frontiers");
 					}
 					else if (GameServer.KeepManager.GetBattleground(client.Player.CurrentRegionID) != null)
 					{
-						info.Add(" Keep Manager: " + GameServer.KeepManager.GetType().FullName);
+						info.Add("Keep Manager: " + GameServer.KeepManager.GetType().FullName);
 						Battleground bg = GameServer.KeepManager.GetBattleground(client.Player.CurrentRegionID);
-						info.Add(" Battleground (" + bg.MinLevel + " to " + bg.MaxLevel + ", max RL: " + bg.MaxRealmLevel + ")");
+						info.Add("Battleground (" + bg.MinLevel + " to " + bg.MaxLevel + ", max RL: " + bg.MaxRealmLevel + ")");
 					}
 					else
 					{
-						info.Add(" Keep Manager :  None for this region");
+						info.Add("Keep Manager :  None for this region");
 					}
 
-					info.Add(" ");
-					info.Add(" Server players: " + WorldMgr.GetAllPlayingClientsCount());
-                    info.Add(" ");
-                    info.Add(" Region Players:");
-                    info.Add(" All players: " + WorldMgr.GetClientsOfRegionCount(client.Player.CurrentRegion.ID));
-                    info.Add(" ");
-                    info.Add(" Alb players: " + WorldMgr.GetClientsOfRegionCount(client.Player.CurrentRegion.ID, eRealm.Albion));
-                    info.Add(" Hib players: " + WorldMgr.GetClientsOfRegionCount(client.Player.CurrentRegion.ID, eRealm.Hibernia));
-                    info.Add(" Mid players: " + WorldMgr.GetClientsOfRegionCount(client.Player.CurrentRegion.ID, eRealm.Midgard));
+					info.Add("");
+					info.Add("Server players: " + WorldMgr.GetAllPlayingClientsCount());
+                    info.Add("");
+                    info.Add("Region Players:");
+                    info.Add("All players: " + WorldMgr.GetClientsOfRegionCount(client.Player.CurrentRegion.ID));
+                    info.Add("");
+                    info.Add("Alb players: " + WorldMgr.GetClientsOfRegionCount(client.Player.CurrentRegion.ID, eRealm.Albion));
+                    info.Add("Hib players: " + WorldMgr.GetClientsOfRegionCount(client.Player.CurrentRegion.ID, eRealm.Hibernia));
+                    info.Add("Mid players: " + WorldMgr.GetClientsOfRegionCount(client.Player.CurrentRegion.ID, eRealm.Midgard));
 
-					info.Add(" ");
-					info.Add(" Total objects in region: " + client.Player.CurrentRegion.TotalNumberOfObjects);
+					info.Add("");
+					info.Add("Total objects in region: " + client.Player.CurrentRegion.TotalNumberOfObjects);
 
-                    info.Add(" ");
-					info.Add(" NPC in zone:");
-                    info.Add(" Alb : " + client.Player.CurrentZone.GetNPCsOfZone(eRealm.Albion).Count);
-                    info.Add(" Hib : " + client.Player.CurrentZone.GetNPCsOfZone(eRealm.Hibernia).Count);
-                    info.Add(" Mid: " + client.Player.CurrentZone.GetNPCsOfZone(eRealm.Midgard).Count);
-                    info.Add(" None : " + client.Player.CurrentZone.GetNPCsOfZone(eRealm.None).Count);
-                    info.Add(" ");
-					info.Add(" Total objects in zone: " + client.Player.CurrentZone.TotalNumberOfObjects);
-					info.Add(" ");
-					info.Add(" Zone Description: "+ client.Player.CurrentZone.Description);
-					info.Add(" Zone Realm: "+ client.Player.CurrentZone.Realm.ToString());
-					info.Add(" Zone ID: "+ client.Player.CurrentZone.ID);
-					info.Add(" Zone IsDungeon: "+ client.Player.CurrentZone.IsDungeon);
-					info.Add(" Zone SkinID: "+ client.Player.CurrentZone.ZoneSkinID);
-					info.Add(" Zone X: "+ client.Player.CurrentZone.XOffset);
-					info.Add(" Zone Y: "+ client.Player.CurrentZone.YOffset);
-					info.Add(" Zone Width: "+ client.Player.CurrentZone.Width);
-					info.Add(" Zone Height: "+ client.Player.CurrentZone.Height);
-					info.Add(" Zone DivingEnabled: " + client.Player.CurrentZone.IsDivingEnabled);
-					info.Add(" Zone Waterlevel: " + client.Player.CurrentZone.Waterlevel);
-					info.Add(" Zone pathing: " + (PathingMgr.Instance.HasNavmesh(client.Player.CurrentZone) ? "enabled" : "disabled"));
-					info.Add(" ");
-					info.Add(" Region Name: "+ client.Player.CurrentRegion.Name);
-                    info.Add(" Region Description: " + client.Player.CurrentRegion.Description);
-                    info.Add(" Region Skin: " + client.Player.CurrentRegion.Skin);
-					info.Add(" Region ID: "+ client.Player.CurrentRegion.ID);
-                    info.Add(" Region Expansion: " + client.Player.CurrentRegion.Expansion);
-					info.Add(" Region IsRvR: "+ client.Player.CurrentRegion.IsRvR);
-					info.Add(" Region IsFrontier: " + client.Player.CurrentRegion.IsFrontier);
-					info.Add(" Region IsDungeon: " + client.Player.CurrentRegion.IsDungeon);
-					info.Add(" Zone in Region: " + client.Player.CurrentRegion.Zones.Count);
-                    info.Add(" Region WaterLevel: " + client.Player.CurrentRegion.WaterLevel);
-                    info.Add(" Region HousingEnabled: " + client.Player.CurrentRegion.HousingEnabled);
-                    info.Add(" Region IsDisabled: " + client.Player.CurrentRegion.IsDisabled);
-					info.Add(" ");
-                    info.Add(" Region ServerIP: " + client.Player.CurrentRegion.ServerIP);
-                    info.Add(" Region ServerPort: " + client.Player.CurrentRegion.ServerPort);
+                    info.Add("");
+					info.Add("NPC in zone:");
+                    info.Add("Alb: " + client.Player.CurrentZone.GetNPCsOfZone(eRealm.Albion).Count);
+                    info.Add("Hib: " + client.Player.CurrentZone.GetNPCsOfZone(eRealm.Hibernia).Count);
+                    info.Add("Mid: " + client.Player.CurrentZone.GetNPCsOfZone(eRealm.Midgard).Count);
+                    info.Add("None: " + client.Player.CurrentZone.GetNPCsOfZone(eRealm.None).Count);
+                    info.Add("");
+					info.Add("Total objects in zone: " + client.Player.CurrentZone.TotalNumberOfObjects);
+					info.Add("");
+					info.Add("Zone Description: "+ client.Player.CurrentZone.Description);
+					info.Add("Zone Realm: "+ client.Player.CurrentZone.Realm);
+					info.Add("Zone ID: "+ client.Player.CurrentZone.ID);
+					info.Add("Zone IsDungeon: "+ client.Player.CurrentZone.IsDungeon);
+					info.Add("Zone SkinID: "+ client.Player.CurrentZone.ZoneSkinID);
+					info.Add("Zone X: "+ client.Player.CurrentZone.XOffset);
+					info.Add("Zone Y: "+ client.Player.CurrentZone.YOffset);
+					info.Add("Zone Width: "+ client.Player.CurrentZone.Width);
+					info.Add("Zone Height: "+ client.Player.CurrentZone.Height);
+					info.Add("Zone DivingEnabled: " + client.Player.CurrentZone.IsDivingEnabled);
+					info.Add("Zone Waterlevel: " + client.Player.CurrentZone.Waterlevel);
+					info.Add("Zone pathing: " + (PathingMgr.Instance.HasNavmesh(client.Player.CurrentZone) ? "enabled" : "disabled"));
+					info.Add("");
+					info.Add("Region Name: "+ client.Player.CurrentRegion.Name);
+                    info.Add("Region Description: " + client.Player.CurrentRegion.Description);
+                    info.Add("Region Skin: " + client.Player.CurrentRegion.Skin);
+					info.Add("Region ID: "+ client.Player.CurrentRegion.ID);
+                    info.Add("Region Expansion: " + client.Player.CurrentRegion.Expansion);
+					info.Add("Region IsRvR: "+ client.Player.CurrentRegion.IsRvR);
+					info.Add("Region IsFrontier: " + client.Player.CurrentRegion.IsFrontier);
+					info.Add("Region IsDungeon: " + client.Player.CurrentRegion.IsDungeon);
+					info.Add("Zone in Region: " + client.Player.CurrentRegion.Zones.Count);
+                    info.Add("Region WaterLevel: " + client.Player.CurrentRegion.WaterLevel);
+                    info.Add("Region HousingEnabled: " + client.Player.CurrentRegion.HousingEnabled);
+                    info.Add("Region IsDisabled: " + client.Player.CurrentRegion.IsDisabled);
+					info.Add("");
+                    info.Add("Region ServerIP: " + client.Player.CurrentRegion.ServerIP);
+                    info.Add("Region ServerPort: " + client.Player.CurrentRegion.ServerPort);
 					
                     client.Out.SendCustomTextWindow("[ " + client.Player.CurrentRegion.Description + " ]", info);
 				}

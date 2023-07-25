@@ -4209,47 +4209,46 @@ namespace DOL.GS.PacketHandler
 			byte line = 0;
 			bool needBreak = false;
 
-			foreach(var listStr in text)
+			foreach (var listStr in text)
 			{
-				string str = listStr;
+				if (listStr == null)
+					continue;
 
-				if (str != null)
+				if (pak.Position + 4 > MaxPacketLength) // line + pascalstringline(1) + trailingZero
+					return;
+
+				var str = listStr;
+				pak.WriteByte(++line);
+
+				while (str.Length > byte.MaxValue)
 				{
-					if (pak.Position + 4 > MaxPacketLength) // line + pascalstringline(1) + trailingZero
+					string s = str.Substring(0, byte.MaxValue);
+
+					if (pak.Position + s.Length + 2 > MaxPacketLength)
+					{
+						needBreak = true;
+						break;
+					}
+
+					pak.WritePascalString(s);
+					str = str.Substring(byte.MaxValue, str.Length - byte.MaxValue);
+					if (line >= 200 || pak.Position + Math.Min(byte.MaxValue, str.Length) + 2 >= MaxPacketLength)
+						// line + pascalstringline(1) + trailingZero
 						return;
 
 					pak.WriteByte(++line);
-
-					while (str.Length > byte.MaxValue)
-					{
-						string s = str.Substring(0, byte.MaxValue);
-
-						if (pak.Position + s.Length + 2 > MaxPacketLength)
-						{
-							needBreak = true;
-							break;
-						}
-
-						pak.WritePascalString(s);
-						str = str.Substring(byte.MaxValue, str.Length - byte.MaxValue);
-						if (line >= 200 || pak.Position + Math.Min(byte.MaxValue, str.Length) + 2 >= MaxPacketLength)
-							// line + pascalstringline(1) + trailingZero
-							return;
-
-						pak.WriteByte(++line);
-					}
-
-					if (pak.Position + str.Length + 2 > MaxPacketLength) // str.Length + trailing zero
-					{
-						str = str.Substring(0, (int)Math.Max(Math.Min(1, str.Length), MaxPacketLength - pak.Position - 2));
-						needBreak = true;
-					}
-
-					pak.WritePascalString(str);
-
-					if (needBreak || line >= 200) // Check max packet length or max stings in window (0 - 199)
-						break;
 				}
+
+				if (pak.Position + str.Length + 2 > MaxPacketLength) // str.Length + trailing zero
+				{
+					str = str.Substring(0, (int)Math.Max(Math.Min(1, str.Length), MaxPacketLength - pak.Position - 2));
+					needBreak = true;
+				}
+
+				pak.WritePascalString(str);
+
+				if (needBreak || line >= 200) // Check max packet length or max stings in window (0 - 199)
+					break;
 			}
 		}
 
