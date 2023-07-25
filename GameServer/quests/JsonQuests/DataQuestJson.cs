@@ -101,7 +101,7 @@ namespace DOL.GS.Quests
 			var player = data.Owner;
 			if (!player.Inventory.IsSlotsFree(inventorySpaceRequired, eInventorySlot.FirstBackpack, eInventorySlot.LastBackpack))
 			{
-				player.Out.SendMessage(string.Format("Your inventory is full, you need {0} free slot(s) to complete this quest.", inventorySpaceRequired), eChatType.CT_System, eChatLoc.CL_SystemWindow);
+				player.Out.SendMessage($"Your inventory is full, you need {inventorySpaceRequired} free slot(s) to complete this quest.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 				return;
 			}
 
@@ -132,7 +132,7 @@ namespace DOL.GS.Quests
 			{
 				InventoryLogging.LogInventoryAction(quest._db.ObjectId, $"(QUEST;{quest.Name})", "", $"(ground;{player.InternalID};{player.Name})", eInventoryActionType.Quest, item, item.Count);
 				player.CreateItemOnTheGround(item);
-				player.Out.SendMessage(string.Format("Your backpack is full, {0} is dropped on the ground.", itemTemplate.Name), eChatType.CT_Important, eChatLoc.CL_PopupWindow);
+				player.Out.SendMessage($"Your backpack is full, {itemTemplate.Name} is dropped on the ground.", eChatType.CT_Important, eChatLoc.CL_PopupWindow);
 			}
 			else
 				InventoryLogging.LogInventoryAction(quest._db.ObjectId, $"(QUEST;{quest.Name})", player, eInventoryActionType.Quest, item, item.Count);
@@ -178,6 +178,7 @@ namespace DOL.GS.Quests
 
 		public DataQuestJson(DBDataQuestJson db)
 		{
+			_db = db;
 			Id = db.Id;
 			Name = db.Name;
 			Description = db.Description;
