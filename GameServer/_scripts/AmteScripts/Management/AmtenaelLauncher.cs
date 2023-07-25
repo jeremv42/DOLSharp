@@ -25,7 +25,7 @@ namespace DOL.GS.Scripts
 		public static void OnScriptsCompiled(DOLEvent e, object sender, EventArgs args)
 		{
 			_running = true;
-			_listener = new TcpListener(IPAddress.Any, 10201);
+			_listener = new TcpListener(IPAddress.Any, 10301);
 			_listener.Start();
 			_worker = new Thread(_Work);
 			_worker.Start();

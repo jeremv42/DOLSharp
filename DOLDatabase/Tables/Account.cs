@@ -53,6 +53,9 @@ namespace DOL.Database
 			m_realm = 0;
 			m_isMuted = false;
 		}
+		
+		[DataElement(AllowDbNull = true, Index = true)]
+		public string? Discord { get; set; }
 
 		/// <summary>
 		/// The name of the account (login)
