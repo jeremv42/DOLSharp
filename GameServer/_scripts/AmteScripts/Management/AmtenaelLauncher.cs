@@ -117,7 +117,7 @@ namespace DOL.GS.Scripts
 
 			var account = _findOrCreateAccount(client, login, password);
 			if (account == null)
-				return "error:Mot de passe incorrect.";
+				return "error:Le compte n'existe pas ou le mot de passe est incorrect.";
 
 			if (_IsBan(account))
 				return "error:Ce compte a été banni.";
@@ -152,7 +152,7 @@ namespace DOL.GS.Scripts
 
 		private static Account _findOrCreateAccount(TcpClient client, string name, string password)
 		{
-			var ip = client.Client.RemoteEndPoint.ToString();
+			var ip = client.Client.RemoteEndPoint?.ToString() ?? "unknownIP";
 			int count;
 			if (_attemptIps.TryGetValue(ip, out count) && count > 20)
 				return null;
@@ -171,6 +171,7 @@ namespace DOL.GS.Scripts
 				if (!account.Password.StartsWith("##"))
 				{
 					account.Password = LoginRequestHandler.CryptPassword(account.Password);
+					GameServer.Database.SaveObject(account);
 				}
 
 				if (!hashedPassword.Equals(account.Password))
@@ -179,31 +180,18 @@ namespace DOL.GS.Scripts
 					if (!_attemptIps.ContainsKey(ip))
 						_attemptIps.Add(ip, 1);
 					else
-						_attemptIps[ip] = _attemptIps[ip] + 1;
+						_attemptIps[ip] += 1;
 					// Log failure
 					AuditMgr.AddAuditEntry(AuditType.Account, AuditSubtype.AccountFailedLogin, "", name);
 					return null;
 				}
+
 				return account;
 			}
 
-			// create a new account
-			account = new Account();
-			account.Name = name;
-			account.Password = hashedPassword;
-			account.Realm = 0;
-			account.CreationDate = DateTime.Now;
-			account.LastLogin = DateTime.Now;
-			account.Language = Properties.SERV_LANGUAGE;
-			account.PrivLevel = 1;
-
-			log.Info("New account created: " + name);
-
-			GameServer.Database.AddObject(account);
-
 			// Log account creation
-			AuditMgr.AddAuditEntry(AuditType.Account, AuditSubtype.AccountCreate, "", name);
-			return account;
+			AuditMgr.AddAuditEntry(AuditType.Account, AuditSubtype.AccountFailedLogin, "", name);
+			return null;
 		}
 	}
 }
