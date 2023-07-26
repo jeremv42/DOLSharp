@@ -1020,6 +1020,8 @@ namespace DOL.AI.Brain
 				{
 					foreach (GameNPC npc in Body.GetNPCsInRadius(range))
 					{
+						if (npc == Body)
+							continue;
 						if (numAdds >= maxAdds)
 							break;
 
