@@ -381,7 +381,7 @@ namespace DOL.GS
 			{
 				if (_doubleAccountCacheDate < DateTime.Now.Ticks)
 				{
-					_doubleAccountCache = WorldMgr.GetAllPlayingClients().Where(cl => cl.UniqueID == UniqueID).Count() >= 2;
+					_doubleAccountCache = WorldMgr.GetAllPlayingClients().Count(cl => cl.UniqueID == UniqueID) >= 2;
 					_doubleAccountCacheDate = DateTime.Now.Ticks + 30 * 60 * 1000 * 10000L;
 				}
 				return _doubleAccountCache;

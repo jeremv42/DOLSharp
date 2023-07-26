@@ -81,11 +81,11 @@ namespace DOL.AI.Brain
 
         public override int CalculateAggroLevelToTarget(GameLiving target)
         {
-			if (target is GamePlayer player)
+			if (target is GamePlayer player) 
 				return GuardsMgr.CalculateAggro(player);
-        	if (target.Realm == 0)
-                return Math.Max(100, 200 - target.Level);
-            return base.CalculateAggroLevelToTarget(target);
+			if (target.Realm == 0) 
+				return target.Level + 1;
+			return base.CalculateAggroLevelToTarget(target);
         }
     }
 }

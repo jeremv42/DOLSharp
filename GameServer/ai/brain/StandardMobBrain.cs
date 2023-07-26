@@ -127,6 +127,12 @@ namespace DOL.AI.Brain
 				}
 			}
 
+			if (Body.MaxDistance == 0 && Body.AttackState && (Body.CurrentRegion.Time - Body.LastAttackedByEnemyTick) > 20000)
+			{
+				Body.WalkToSpawn();
+				return;
+			}
+
 			//If this NPC can randomly walk around, we allow it to walk around
 			if (!Body.AttackState && CanRandomWalk && !Body.IsRoaming && Util.Chance(DOL.GS.ServerProperties.Properties.GAMENPC_RANDOMWALK_CHANCE))
 			{
