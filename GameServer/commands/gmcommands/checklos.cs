@@ -33,7 +33,7 @@ namespace DOL.GS.Commands
 		"'/checklos'")]
 	public class CheckLosCommandHandler : AbstractCommandHandler, ICommandHandler
 	{
-		public async void OnCommand(GameClient client, string[] args)
+		public void OnCommand(GameClient client, string[] args)
 		{
 			if (client.Player?.TargetObject == null && client.Player?.GroundTarget == null)
 			{
@@ -54,10 +54,10 @@ namespace DOL.GS.Commands
 				var serverResult = LosCheckMgr.GetCollisionDistance(client.Player, target, ref stats);
 				sw.Stop();
 				text.Add($"Target in view (server-side los): {serverResult} ({stats.nbNodeTests} node, {stats.nbFaceTests} face, {sw.Elapsed.TotalMilliseconds}ms)");
-				var losResult = new TaskCompletionSource<ushort>();
-				client.Out.SendCheckLOS(client.Player, target, (player, response, targetOID) => losResult.SetResult(response));
-				var result = await losResult.Task;
-				text.Add($"CheckLOS packet response: 0x{result:X4} (in view: {(result & 0x100) != 0})");
+				client.Out.SendCheckLOS(client.Player, target, (player, response, targetOID) =>
+				{
+					text.Add($"CheckLOS packet response: 0x{response:X4} (in view: {(response & 0x100) != 0})");
+				});
 			}
 			else
 			{

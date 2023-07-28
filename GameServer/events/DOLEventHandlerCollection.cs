@@ -18,7 +18,9 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
+using log4net;
 
 namespace DOL.Events
 {
@@ -37,6 +39,8 @@ namespace DOL.Events
 	/// handlers, the memory usage will be very low!</remarks>
 	public sealed class DOLEventHandlerCollection
 	{
+		private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
 		/// <summary>
 		/// How long to wait for a lock acquisition before failing.
 		/// </summary>
@@ -81,25 +85,28 @@ namespace DOL.Events
 		/// <param name="del">The callback method</param>
 		public void AddHandler(DOLEvent e, DOLEventHandler del)
 		{
-			if(_lock.TryEnterWriteLock(LOCK_TIMEOUT))
+			if (!_lock.TryEnterReadLock(LOCK_TIMEOUT))
 			{
-				try
-				{
-					WeakMulticastDelegate deleg;
+				log.Error($"Timeout exceeded on attempt to RemoveAllHandlers {e}, {del}");
+				return;
+			}
 
-					if(!_events.TryGetValue(e, out deleg))
-					{
-						_events.Add(e, new WeakMulticastDelegate(del));
-					}
-					else
-					{
-						_events[e] = WeakMulticastDelegate.Combine(deleg, del);
-					}
-				}
-				finally
+			try
+			{
+				WeakMulticastDelegate deleg;
+
+				if (!_events.TryGetValue(e, out deleg))
 				{
-					_lock.ExitWriteLock();
+					_events.Add(e, new WeakMulticastDelegate(del));
 				}
+				else
+				{
+					_events[e] = WeakMulticastDelegate.Combine(deleg, del);
+				}
+			}
+			finally
+			{
+				_lock.ExitWriteLock();
 			}
 		}
 
@@ -110,25 +117,28 @@ namespace DOL.Events
 		/// <param name="del">The callback method</param>
 		public void AddHandlerUnique(DOLEvent e, DOLEventHandler del)
 		{
-			if(_lock.TryEnterWriteLock(LOCK_TIMEOUT))
+			if (!_lock.TryEnterReadLock(LOCK_TIMEOUT))
 			{
-				try
-				{
-					WeakMulticastDelegate deleg;
+				log.Error($"Timeout exceeded on attempt to RemoveAllHandlers {e}, {del}");
+				return;
+			}
 
-					if(!_events.TryGetValue(e, out deleg))
-					{
-						_events.Add(e, new WeakMulticastDelegate(del));
-					}
-					else
-					{
-						_events[e] = WeakMulticastDelegate.CombineUnique(deleg, del);
-					}
-				}
-				finally
+			try
+			{
+				WeakMulticastDelegate deleg;
+
+				if (!_events.TryGetValue(e, out deleg))
 				{
-					_lock.ExitWriteLock();
+					_events.Add(e, new WeakMulticastDelegate(del));
 				}
+				else
+				{
+					_events[e] = WeakMulticastDelegate.CombineUnique(deleg, del);
+				}
+			}
+			finally
+			{
+				_lock.ExitWriteLock();
 			}
 		}
 
@@ -139,30 +149,33 @@ namespace DOL.Events
 		/// <param name="del">The callback method to remove</param>
 		public void RemoveHandler(DOLEvent e, DOLEventHandler del)
 		{
-			if(_lock.TryEnterWriteLock(LOCK_TIMEOUT))
+			if (!_lock.TryEnterReadLock(LOCK_TIMEOUT))
 			{
-				try
+				log.Error($"Timeout exceeded on attempt to RemoveAllHandlers {e}, {del}");
+				return;
+			}
+
+			try
+			{
+				WeakMulticastDelegate deleg;
+
+				if (_events.TryGetValue(e, out deleg))
 				{
-					WeakMulticastDelegate deleg;
+					deleg = WeakMulticastDelegate.Remove(deleg, del);
 
-					if(_events.TryGetValue(e, out deleg))
+					if (deleg == null)
 					{
-						deleg = WeakMulticastDelegate.Remove(deleg, del);
-
-						if(deleg == null)
-						{
-							_events.Remove(e);
-						}
-						else
-						{
-							_events[e] = deleg;
-						}
+						_events.Remove(e);
+					}
+					else
+					{
+						_events[e] = deleg;
 					}
 				}
-				finally
-				{
-					_lock.ExitWriteLock();
-				}
+			}
+			finally
+			{
+				_lock.ExitWriteLock();
 			}
 		}
 
@@ -172,16 +185,19 @@ namespace DOL.Events
 		/// <param name="e">The event from which to remove all handlers</param>
 		public void RemoveAllHandlers(DOLEvent e)
 		{
-			if(_lock.TryEnterWriteLock(LOCK_TIMEOUT))
+			if (!_lock.TryEnterReadLock(LOCK_TIMEOUT))
 			{
-				try
-				{
-					_events.Remove(e);
-				}
-				finally
-				{
-					_lock.ExitWriteLock();
-				}
+				log.Error($"Timeout exceeded on attempt to RemoveAllHandlers {e}");
+				return;
+			}
+
+			try
+			{
+				_events.Remove(e);
+			}
+			finally
+			{
+				_lock.ExitWriteLock();
 			}
 		}
 
@@ -190,16 +206,19 @@ namespace DOL.Events
 		/// </summary>
 		public void RemoveAllHandlers()
 		{
-			if(_lock.TryEnterWriteLock(LOCK_TIMEOUT))
+			if (!_lock.TryEnterReadLock(LOCK_TIMEOUT))
 			{
-				try
-				{
-					_events.Clear();
-				}
-				finally
-				{
-					_lock.ExitWriteLock();
-				}
+				log.Error("Timeout exceeded on attempt to RemoveAllHandlers");
+				return;
+			}
+
+			try
+			{
+				_events.Clear();
+			}
+			finally
+			{
+				_lock.ExitWriteLock();
 			}
 		}
 
@@ -244,19 +263,21 @@ namespace DOL.Events
 		{
 			WeakMulticastDelegate eventDelegate = null;
 
-			if(_lock.TryEnterReadLock(LOCK_TIMEOUT))
+			if (!_lock.TryEnterReadLock(LOCK_TIMEOUT))
 			{
-				try
-				{
-					if(!_events.TryGetValue(e, out eventDelegate))
-						return;
-				}
-				finally
-				{
-					_lock.ExitReadLock();
-				}
+				log.ErrorFormat("Timeout exceeded on attempt to Notify event: {0} for object: {1}", e.Name, sender);
+				return;
 			}
 
+			try
+			{
+				if(!_events.TryGetValue(e, out eventDelegate))
+					return;
+			}
+			finally
+			{
+				_lock.ExitReadLock();
+			}
 			eventDelegate.InvokeSafe(new[] { e, sender, eArgs });
 		}
 	}

@@ -254,46 +254,49 @@ namespace DOL.Events
 			if(!e.IsValidFor(obj))
 				throw new ArgumentException("Object is not valid for this event type", "obj");
 
-			if(Lock.TryEnterUpgradeableReadLock(LOCK_TIMEOUT))
+			if (!Lock.TryEnterUpgradeableReadLock(LOCK_TIMEOUT))
 			{
-				try
+				log.ErrorFormat("Timeout exceeded on attempt to AddHandler for object: {0}, event: {1}", obj, e.Name);
+				return;
+			}
+
+			try
+			{
+				DOLEventHandlerCollection col;
+
+				if(!m_gameObjectEventCollections.TryGetValue(obj, out col))
 				{
-					DOLEventHandlerCollection col;
+					col = new DOLEventHandlerCollection();
 
-					if(!m_gameObjectEventCollections.TryGetValue(obj, out col))
+					if (Lock.TryEnterWriteLock(LOCK_TIMEOUT))
 					{
-						col = new DOLEventHandlerCollection();
-
-						if (Lock.TryEnterWriteLock(LOCK_TIMEOUT))
+						try
 						{
-							try
-							{
-								m_gameObjectEventCollections.Add(obj, col);
-							}
-							finally
-							{
-								Lock.ExitWriteLock();
-							}
+							m_gameObjectEventCollections.Add(obj, col);
 						}
-						else
+						finally
 						{
-							log.ErrorFormat("Timeout exceeded on attempt to AddHandler for object: {0}, event: {1}", obj.ToString(), e.Name);
+							Lock.ExitWriteLock();
 						}
-					}
-
-					if(unique)
-					{
-						col.AddHandlerUnique(e, del);
 					}
 					else
 					{
-						col.AddHandler(e, del);
+						log.ErrorFormat("Timeout exceeded on attempt to AddHandler for object: {0}, event: {1}", obj, e.Name);
 					}
 				}
-				finally
+
+				if(unique)
 				{
-					Lock.ExitUpgradeableReadLock();
+					col.AddHandlerUnique(e, del);
 				}
+				else
+				{
+					col.AddHandler(e, del);
+				}
+			}
+			finally
+			{
+				Lock.ExitUpgradeableReadLock();
 			}
 		}
 
@@ -350,7 +353,7 @@ namespace DOL.Events
 			}
 			else
 			{
-				log.ErrorFormat("Timeout exceeded on attempt to RemoveHandler for object: {0}, event: {1}", obj.ToString(), e.Name);
+				log.ErrorFormat("Timeout exceeded on attempt to RemoveHandler for object: {0}, event: {1}", obj, e.Name);
 			}
 
 			if (col != null)
@@ -381,7 +384,7 @@ namespace DOL.Events
 			}
 			else
 			{
-				log.ErrorFormat("Timeout exceeded (Read) on attempt to RemoveAllHandlersForObject: {0}", obj.ToString());
+				log.ErrorFormat("Timeout exceeded (Read) on attempt to RemoveAllHandlersForObject: {0}", obj);
 			}
 
 			if (col != null)
@@ -401,7 +404,7 @@ namespace DOL.Events
 				}
 				else
 				{
-					log.ErrorFormat("Timeout exceeded (Write) on attempt to RemoveAllHandlersForObject: {0}", obj.ToString());
+					log.ErrorFormat("Timeout exceeded (Write) on attempt to RemoveAllHandlersForObject: {0}", obj);
 				}
 			}
 		}
@@ -500,12 +503,11 @@ namespace DOL.Events
 						Lock.ExitReadLock();
 					}
 
-					if(col != null)
-						col.Notify(e, sender, eArgs);
+					col?.Notify(e, sender, eArgs);
 				}
 				else
 				{
-					log.ErrorFormat("Timeout exceeded on attempt to Notify event: {0} for object: {1}", e.Name, sender.ToString());
+					log.ErrorFormat("Timeout exceeded on attempt to Notify event: {0} for object: {1}", e.Name, sender);
 				}
 			}
 
