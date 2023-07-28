@@ -85,7 +85,7 @@ namespace DOL.Events
 		/// <param name="del">The callback method</param>
 		public void AddHandler(DOLEvent e, DOLEventHandler del)
 		{
-			if (!_lock.TryEnterReadLock(LOCK_TIMEOUT))
+			if (!_lock.TryEnterWriteLock(LOCK_TIMEOUT))
 			{
 				log.Error($"Timeout exceeded on attempt to RemoveAllHandlers {e}, {del}");
 				return;
@@ -117,7 +117,7 @@ namespace DOL.Events
 		/// <param name="del">The callback method</param>
 		public void AddHandlerUnique(DOLEvent e, DOLEventHandler del)
 		{
-			if (!_lock.TryEnterReadLock(LOCK_TIMEOUT))
+			if (!_lock.TryEnterWriteLock(LOCK_TIMEOUT))
 			{
 				log.Error($"Timeout exceeded on attempt to RemoveAllHandlers {e}, {del}");
 				return;
@@ -149,7 +149,7 @@ namespace DOL.Events
 		/// <param name="del">The callback method to remove</param>
 		public void RemoveHandler(DOLEvent e, DOLEventHandler del)
 		{
-			if (!_lock.TryEnterReadLock(LOCK_TIMEOUT))
+			if (!_lock.TryEnterWriteLock(LOCK_TIMEOUT))
 			{
 				log.Error($"Timeout exceeded on attempt to RemoveAllHandlers {e}, {del}");
 				return;
@@ -185,7 +185,7 @@ namespace DOL.Events
 		/// <param name="e">The event from which to remove all handlers</param>
 		public void RemoveAllHandlers(DOLEvent e)
 		{
-			if (!_lock.TryEnterReadLock(LOCK_TIMEOUT))
+			if (!_lock.TryEnterWriteLock(LOCK_TIMEOUT))
 			{
 				log.Error($"Timeout exceeded on attempt to RemoveAllHandlers {e}");
 				return;
@@ -206,7 +206,7 @@ namespace DOL.Events
 		/// </summary>
 		public void RemoveAllHandlers()
 		{
-			if (!_lock.TryEnterReadLock(LOCK_TIMEOUT))
+			if (!_lock.TryEnterWriteLock(LOCK_TIMEOUT))
 			{
 				log.Error("Timeout exceeded on attempt to RemoveAllHandlers");
 				return;
