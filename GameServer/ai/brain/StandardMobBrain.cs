@@ -127,7 +127,7 @@ namespace DOL.AI.Brain
 				}
 			}
 
-			if (Body.MaxDistance == 0 && Body.AttackState && (Body.CurrentRegion.Time - Body.LastCombatTick) > 20000)
+			if (Body.MaxDistance == 0 && Body.AttackState && (Body.CurrentRegion.Time - Body.LastCombatTick) > 40000)
 			{
 				Body.WalkToSpawn();
 				return;

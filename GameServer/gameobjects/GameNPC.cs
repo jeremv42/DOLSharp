@@ -3722,7 +3722,8 @@ namespace DOL.GS
 				owner?.Stealth(false);
 			}
 
-			SetLastMeleeAttackTick();
+			if (target != TargetObject)
+				SetLastMeleeAttackTick();
 			StartMeleeAttackTimer();
 
 			base.StartAttack(target);
