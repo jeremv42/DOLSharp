@@ -139,7 +139,7 @@ DLLEXPORT inline bool IsMidPointAligned(float const* A, float const* B, float co
 	float cross[3];
 	dtVcross(cross, vectAB, vectAC);
 	float len = dtVlen(cross);
-	return len <= 1;
+	return len <= .05f;
 }
 
 void PathOptimize(dtNavMeshQuery *query, int *pointCount, float *pointBuffer, dtPolyRef *refs)
