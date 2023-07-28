@@ -3713,15 +3713,13 @@ namespace DOL.GS
 			StopMoving();
 			StopMovingOnPath();
 
-			if (Brain != null && Brain is IControlledBrain)
+			if (Brain is IControlledBrain petBrain)
 			{
-				if ((Brain as IControlledBrain).AggressionState == eAggressionState.Passive)
+				if (petBrain.AggressionState == eAggressionState.Passive)
 					return;
 
-				GamePlayer owner = null;
-
-				if ((owner = ((IControlledBrain)Brain).GetPlayerOwner()) != null)
-					owner.Stealth(false);
+				var owner = petBrain.GetPlayerOwner();
+				owner?.Stealth(false);
 			}
 
 			SetLastMeleeAttackTick();

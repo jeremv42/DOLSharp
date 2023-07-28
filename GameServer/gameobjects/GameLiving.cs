@@ -619,15 +619,7 @@ namespace DOL.GS
 		/// <summary>
 		/// last attack tick in either pve or pvp
 		/// </summary>
-		public virtual long LastAttackTick
-		{
-			get
-			{
-				if (m_lastAttackTickPvE > m_lastAttackTickPvP)
-					return m_lastAttackTickPvE;
-				return m_lastAttackTickPvP;
-			}
-		}
+		public long LastAttackTick => Math.Max(LastAttackTickPvP, LastAttackTickPvE);
 
 		/// <summary>
 		/// last attack tick for pve
@@ -638,17 +630,12 @@ namespace DOL.GS
 		/// </summary>
 		public virtual long LastAttackTickPvE
 		{
-			get { return m_lastAttackTickPvE; }
+			get => m_lastAttackTickPvE;
 			set
 			{
 				m_lastAttackTickPvE = value;
-				if (this is GameNPC)
-				{
-					if ((this as GameNPC).Brain is IControlledBrain)
-					{
-						((this as GameNPC).Brain as IControlledBrain).Owner.LastAttackTickPvE = value;
-					}
-				}
+				if (this is GameNPC npc && npc.Brain is IControlledBrain petBrain)
+					petBrain.Owner.LastAttackTickPvE = value;
 			}
 		}
 
@@ -659,52 +646,33 @@ namespace DOL.GS
 		/// <summary>
 		/// gets/sets gametick when this living has attacked its target in pvp
 		/// </summary>
-		public virtual long LastAttackTickPvP
+		public long LastAttackTickPvP
 		{
-			get { return m_lastAttackTickPvP; }
+			get => m_lastAttackTickPvP;
 			set
 			{
 				m_lastAttackTickPvP = value;
-				if (this is GameNPC)
-				{
-					if ((this as GameNPC).Brain is IControlledBrain)
-					{
-						((this as GameNPC).Brain as IControlledBrain).Owner.LastAttackTickPvP = value;
-					}
-				}
+				if (this is GameNPC npc && npc.Brain is IControlledBrain petBrain)
+					petBrain.Owner.LastAttackTickPvP = value;
 			}
 		}
+
+		public long LastCombatTick => Math.Max(LastCombatTickPvE, LastCombatTickPvP);
 
 		/// <summary>
 		/// gets the last attack or attackedbyenemy tick in pvp
 		/// </summary>
-		public long LastCombatTickPvP
-		{
-			get
-			{
-				if (m_lastAttackTickPvP > m_lastAttackedByEnemyTickPvP)
-					return m_lastAttackTickPvP;
-				else return m_lastAttackedByEnemyTickPvP;
-			}
-		}
+		public long LastCombatTickPvP => Math.Max(LastAttackTickPvP, LastAttackedByEnemyTickPvP);
 
 		/// <summary>
 		/// gets the last attack or attackedbyenemy tick in pve
 		/// </summary>
-		public long LastCombatTickPvE
-		{
-			get
-			{
-				if (m_lastAttackTickPvE > m_lastAttackedByEnemyTickPvE)
-					return m_lastAttackTickPvE;
-				else return m_lastAttackedByEnemyTickPvE;
-			}
-		}
+		public long LastCombatTickPvE => Math.Max(LastAttackTickPvE, LastAttackedByEnemyTickPvE);
 
 		/// <summary>
 		/// last attacked by enemy tick in either pvp or pve
 		/// </summary>
-		public virtual long LastAttackedByEnemyTick
+		public long LastAttackedByEnemyTick
 		{
 			get
 			{
@@ -717,63 +685,50 @@ namespace DOL.GS
 		/// <summary>
 		/// last attacked by enemy tick in pve
 		/// </summary>
-		protected long m_lastAttackedByEnemyTickPvE;
+		private long m_lastAttackedByEnemyTickPvE;
 		/// <summary>
 		/// gets/sets gametick when this living was last time attacked by an enemy in pve
 		/// </summary>
 		public virtual long LastAttackedByEnemyTickPvE
 		{
-			get { return m_lastAttackedByEnemyTickPvE; }
+			get => m_lastAttackedByEnemyTickPvE;
 			set
 			{
 				m_lastAttackedByEnemyTickPvE = value;
-				if (this is GameNPC)
-				{
-					if ((this as GameNPC).Brain is IControlledBrain)
-					{
-						((this as GameNPC).Brain as IControlledBrain).Owner.LastAttackedByEnemyTickPvE = value;
-					}
-				}
+				if (this is GameNPC npc && npc.Brain is IControlledBrain petBrain)
+					petBrain.Owner.LastAttackedByEnemyTickPvE = value;
 			}
 		}
 
 		/// <summary>
 		/// last attacked by enemy tick in pve
 		/// </summary>
-		protected long m_lastAttackedByEnemyTickPvP;
+		private long m_lastAttackedByEnemyTickPvP;
 		/// <summary>
 		/// gets/sets gametick when this living was last time attacked by an enemy in pvp
 		/// </summary>
-		public virtual long LastAttackedByEnemyTickPvP
+		public long LastAttackedByEnemyTickPvP
 		{
-			get { return m_lastAttackedByEnemyTickPvP; }
+			get => m_lastAttackedByEnemyTickPvP;
 			set
 			{
 				m_lastAttackedByEnemyTickPvP = value;
-				if (this is GameNPC)
-				{
-					if ((this as GameNPC).Brain is IControlledBrain)
-					{
-						((this as GameNPC).Brain as IControlledBrain).Owner.LastAttackedByEnemyTickPvP = value;
-					}
-				}
+				if (this is GameNPC npc && npc.Brain is IControlledBrain petBrain)
+					petBrain.Owner.LastAttackedByEnemyTickPvP = value;
 			}
 		}
 
 		/// <summary>
 		/// Total damage RvR Value
 		/// </summary>
-		protected long m_damageRvRMemory;
+		protected long m_damageRvRMemory = 0;
 		/// <summary>
 		/// gets the DamageRvR Memory of this living (always 0 for Gameliving)
 		/// </summary>
 		public virtual long DamageRvRMemory
 		{
-			get { return 0; }
-			set
-			{
-				m_damageRvRMemory = 0;
-			}
+			get => 0;
+			set { }
 		}
 
 		/// <summary>
