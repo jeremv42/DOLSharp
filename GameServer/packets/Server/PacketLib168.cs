@@ -1581,35 +1581,28 @@ namespace DOL.GS.PacketHandler
 		public virtual void SendQuestUpdate(IQuestPlayerData quest)
 		{
 			int questIndex = 0;
-
-			lock (m_gameClient.Player.QuestList)
+			foreach (var q in m_gameClient.Player.QuestList)
 			{
-				foreach (var q in m_gameClient.Player.QuestList)
+				if (q == quest)
 				{
-					if (q == quest)
-					{
-						SendQuestPacket(q, questIndex);
-						break;
-					}
-
-					if (q.Status != eQuestStatus.Done)
-						questIndex++;
+					SendQuestPacket(q, questIndex);
+					break;
 				}
+
+				if (q.Status != eQuestStatus.Done)
+					questIndex++;
 			}
 		}
 
 		public virtual void SendQuestListUpdate()
 		{
 			int questIndex = 0;
-			lock (m_gameClient.Player.QuestList)
+			foreach (var quest in m_gameClient.Player.QuestList)
 			{
-				foreach (var quest in m_gameClient.Player.QuestList)
+				if (quest.Status != eQuestStatus.Done)
 				{
-					if (quest.Status != eQuestStatus.Done)
-					{
-						SendQuestPacket(quest, questIndex);
-						questIndex++;
-					}
+					SendQuestPacket(quest, questIndex);
+					questIndex++;
 				}
 			}
 		}

@@ -2485,7 +2485,14 @@ namespace DOL.GS
 		/// <summary>
 		/// Gets the questlist of this player
 		/// </summary>
-		public IReadOnlyList<ushort> QuestIdListToGive => m_questIdListToGive;
+		public IReadOnlyList<ushort> QuestIdListToGive
+		{
+			get
+			{
+				lock (m_questIdListToGive)
+					return m_questIdListToGive.ToList();
+			}
+		}
 
 		/// <summary>
 		/// Adds a scripted quest type to the npc questlist
@@ -2495,7 +2502,7 @@ namespace DOL.GS
 		public void AddQuestToGive(DataQuestJson quest)
 		{
 			lock (m_questIdListToGive)
-				if (!HasQuest(quest))
+				if (!m_questIdListToGive.Contains(quest.Id))
 					m_questIdListToGive.Add(quest.Id);
 		}
 

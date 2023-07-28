@@ -94,25 +94,23 @@ public static class DataQuestJsonMgr
 		if (possibleQuests.Count == 0)
 			return;
 
-		lock (player.QuestList)
-			if (player.QuestList.Any(q => possibleQuests.Contains(q.QuestId) || q.CanInteractWith(sender)))
-				return; // Quest in progress
+		if (player.QuestList.Any(q => possibleQuests.Contains(q.QuestId) || q.CanInteractWith(sender)))
+			return; // Quest in progress
 		foreach (var questId in possibleQuests)
 		{
 			var quest = GetQuest(questId);
-			if (quest != null && quest.CheckQuestQualification(player))
-			{
-				player.Out.SendQuestOfferWindow(quest.Npc, player, PlayerQuest.CreateQuestPreview(quest, player));
-				return;
-			}
+			if (quest == null || !quest.CheckQuestQualification(player)) continue;
+
+			player.Out.SendQuestOfferWindow(quest.Npc, player, PlayerQuest.CreateQuestPreview(quest, player));
+			return;
 		}
 	}
 
 	public static void OnAcceptQuest(DOLEvent _, object sender, EventArgs args)
 	{
-		var arguments = args as QuestEventArgs;
-		if (arguments == null || arguments.Source == null)
+		if (args is not QuestEventArgs arguments || arguments.Source == null)
 			return;
+
 		var player = arguments.Player;
 		var quest = Quests.Values.FirstOrDefault(q => q.Id == arguments.QuestID);
 		if (quest == null || arguments.Source != quest.Npc || !quest.CheckQuestQualification(player))
@@ -130,17 +128,16 @@ public static class DataQuestJsonMgr
 			CustomPropertiesString = JsonConvert.SerializeObject(new PlayerQuest.JsonState { QuestId = quest.Id, Goals = null }),
 		};
 		var dq = new PlayerQuest(player, dbQuest);
-		if (player.AddQuest(dq))
-		{
-			dq.SaveIntoDatabase();
-			player.Out.SendNPCsQuestEffect(npc, npc.GetQuestIndicator(player));
-			player.Out.SendQuestListUpdate();
-		}
+		if (!player.AddQuest(dq)) return;
+
+		dq.SaveIntoDatabase();
+		player.Out.SendNPCsQuestEffect(npc, npc.GetQuestIndicator(player));
+		player.Out.SendQuestListUpdate();
 	}
 
 	public static (PlayerQuest quest, PlayerGoalState goal) FindQuestAndGoalFromPlayer(GamePlayer player, ushort questId, int goalId)
 	{
-		var quest = player.QuestList.Find(q => q.QuestId == questId);
+		var quest = player.QuestList.FirstOrDefault(q => q.QuestId == questId);
 		PlayerGoalState goal = null;
 		quest?.GoalStates.TryGetValue(goalId, out goal);
 		return (quest, goal);

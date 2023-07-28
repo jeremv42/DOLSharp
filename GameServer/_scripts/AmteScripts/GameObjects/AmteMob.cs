@@ -113,9 +113,9 @@ public class AmteMob : GameNPC, IAmteNPC
 		if (res != eQuestIndicator.None)
 			return res;
 
-		foreach (var q in QuestIdListToGive.OfType<PlayerQuest>())
+		foreach (var qid in QuestIdListToGive)
 		{
-			var quest = player.QuestList.OfType<PlayerQuest>().FirstOrDefault(pq => pq.QuestId == q.QuestId);
+			var quest = player.QuestList.FirstOrDefault(pq => pq.QuestId == qid);
 			if (quest == null)
 				continue;
 			if (quest.VisibleGoals.OfType<DataQuestJsonGoal.GenericDataQuestGoal>().Any(g => g.Goal is EndGoal end && end.Target == this))

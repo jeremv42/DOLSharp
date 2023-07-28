@@ -70,7 +70,7 @@ namespace DOL.GS.Scripts
 
 			foreach (var q in QuestIdListToGive.OfType<PlayerQuest>())
 			{
-				var quest = player.QuestList.OfType<PlayerQuest>().FirstOrDefault(pq => pq.QuestId == q.QuestId);
+				var quest = player.QuestList.FirstOrDefault(pq => pq.QuestId == q.QuestId);
 				if (quest == null)
 					continue;
 				if (quest.VisibleGoals.OfType<DataQuestJsonGoal.GenericDataQuestGoal>().Any(g => g.Goal is EndGoal end && end.Target == this))

@@ -36,22 +36,19 @@ namespace DOL.GS.PacketHandler.Client.v168
 			PlayerQuest quest = null;
 
 			int index = 0;
-			lock (client.Player.QuestList)
+			foreach (var q in client.Player.QuestList)
 			{
-				foreach (var q in client.Player.QuestList)
+				// ignore completed quests
+				if (q.Status == eQuestStatus.Done)
+					continue;
+
+				if (index == questIndex)
 				{
-					// ignore completed quests
-					if (q.Status == eQuestStatus.Done)
-						continue;
-
-					if (index == questIndex)
-					{
-						quest = q;
-						break;
-					}
-
-					index++;
+					quest = q;
+					break;
 				}
+
+				index++;
 			}
 
 			quest?.AbortQuest();

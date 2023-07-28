@@ -12580,11 +12580,8 @@ namespace DOL.GS
 				GameServer.Database.SaveObject(DBCharacter);
 				Inventory.SaveIntoDatabase(InternalID);
 				var questsToSave = new List<PlayerQuest>();
-				lock (QuestList)
-				{
-					questsToSave.AddRange(QuestList);
-					questsToSave.AddRange(QuestListFinished);
-				}
+				questsToSave.AddRange(QuestList);
+				questsToSave.AddRange(QuestListFinished);
 				foreach (var quest in questsToSave)
 						quest.SaveIntoDatabase();
 
@@ -13246,17 +13243,25 @@ namespace DOL.GS
 		/// <summary>
 		/// Gets the questlist of this player
 		/// </summary>
-		public virtual List<PlayerQuest> QuestList
+		public IReadOnlyList<PlayerQuest> QuestList
 		{
-			get { return m_questList; }
+			get
+			{
+				lock (m_questList)
+					return m_questList.ToList();
+			}
 		}
 
 		/// <summary>
 		/// Gets the finished quests of this player
 		/// </summary>
-		public virtual List<PlayerQuest> QuestListFinished
+		public IReadOnlyList<PlayerQuest> QuestListFinished
 		{
-			get { return m_questListFinished; }
+			get
+			{
+				lock(m_questListFinished)
+					return m_questListFinished.ToList();
+			}
 		}
 
 		/// <summary>
@@ -13265,10 +13270,9 @@ namespace DOL.GS
 		/// <param name="quest"></param>
 		public void AddFinishedQuest(PlayerQuest quest)
 		{
+			RemoveQuest(quest);
 			lock (m_questListFinished)
-			{
 				m_questListFinished.Add(quest);
-			}
 		}
 
 		/// <summary>
@@ -13279,7 +13283,7 @@ namespace DOL.GS
 		/// <returns>true if added, false if player is already doing the quest!</returns>
 		public bool AddQuest(PlayerQuest quest)
 		{
-			lock (QuestList)
+			lock (m_questList)
 			{
 				if (IsDoingQuest(quest.Quest) != null)
 					return false;
@@ -13291,6 +13295,19 @@ namespace DOL.GS
 			return true;
 		}
 
+		public bool RemoveQuest(PlayerQuest quest)
+		{
+			lock (m_questList)
+				return m_questList.Remove(quest);
+			Out.SendQuestListUpdate();
+		}
+
+		public bool RemoveQuestFinished(PlayerQuest quest)
+		{
+			lock (m_questListFinished)
+				return m_questListFinished.Remove(quest);
+		}
+
 		/// <summary>
 		/// Checks if a player has done a specific quest type
 		/// This is used for scripted quests
@@ -13299,7 +13316,7 @@ namespace DOL.GS
 		/// <returns>the number of times the player did this quest</returns>
 		public int HasFinishedQuest(DataQuestJson quest)
 		{
-			lock (QuestListFinished)
+			lock (m_questListFinished)
 				return QuestListFinished.Count(q => q.Quest == quest);
 		}
 
@@ -13311,7 +13328,7 @@ namespace DOL.GS
 		/// <returns>the quest if player is doing the quest or null if not</returns>
 		public PlayerQuest IsDoingQuest(DataQuestJson quest)
 		{
-			lock (QuestList)
+			lock (m_questList)
 				return m_questList.Find(q => q.Quest == quest);
 		}
 		#endregion
@@ -13323,11 +13340,8 @@ namespace DOL.GS
 			base.Notify(e, sender, args);
 
 			// events will only fire for currently active quests.
-			var quests = new List<PlayerQuest>(QuestList.Count);
-			lock (QuestList)
-				quests.AddRange(QuestList);
 			// player forwards every single notify message to all active quests
-			foreach (var q in quests)
+			foreach (var q in QuestList)
 				q.Notify(e, sender, args);
 
 			if (Task != null)
